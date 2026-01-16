@@ -1,3 +1,25 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: ClimbingWith
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/climbingWith?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: p@ssword
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  # TODO: [PRODUCTION] 환경변수로 변경 필요
+  secret: your-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
+  expiration: 3600000  # 1시간
