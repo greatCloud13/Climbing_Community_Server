@@ -21,6 +21,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private String email;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maneged_gym_id")
     private Gym gym;
@@ -31,10 +34,10 @@ public class User {
     private String nickname;
 
     @Builder
-    public User(String username, String password, Gym gym, String nickname){
+    public User(String username, String email, String password, String nickname){
         this.username = username;
         this.password = password;
-        this.gym = gym;
+        this.email = email;
         this.role = Role.MEMBER;
         this.nickname = nickname;
     }
