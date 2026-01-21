@@ -6,6 +6,7 @@ import com.project.greatcloud13.ClimbingWith.dto.SignUpRequest;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.security.JwtTokenProvider;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -61,8 +62,18 @@ public class AuthService {
         String username = authentication.getName();
         String token = jwtTokenProvider.generateToken(username);
 
-        return new LoginResponse(token, username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        return new LoginResponse(token, username, user.getRole().toString(), user.getNickname());
     }
 
+    @Transactional
+    public void withdraw(LoginRequest request){
 
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        user.deactivate(passwordEncoder.encode(request.getPassword()));
+    }
 }

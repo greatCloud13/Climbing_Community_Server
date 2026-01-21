@@ -1,5 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.entity;
 
+import com.project.greatcloud13.ClimbingWith.dto.LoginRequest;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +34,8 @@ public class User {
 
     private String nickname;
 
+    private boolean isActive;
+
     @Builder
     public User(String username, String email, String password, String nickname){
         this.username = username;
@@ -40,6 +43,17 @@ public class User {
         this.email = email;
         this.role = Role.MEMBER;
         this.nickname = nickname;
+        this.isActive = true;
+    }
+
+    public void deactivate(String password){
+
+        if(!this.password.equals(password)){
+            throw new IllegalArgumentException("잘못된 계정 정보 입니다.");
+        }
+        this.isActive = false;
+
+
     }
 }
 

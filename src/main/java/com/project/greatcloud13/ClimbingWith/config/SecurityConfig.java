@@ -77,7 +77,7 @@ public class SecurityConfig {
         // 허용할 출처
         // TODO: [PRODUCTION] 배포 시 실제 프론트엔드 도메인으로 변경 필요함
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173" // Vite 개발 서버
+                "http://localhost:60869" // flutter 포트
         ));
 
         // 허용할 HTTP 메소드

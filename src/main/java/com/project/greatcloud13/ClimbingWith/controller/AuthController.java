@@ -23,14 +23,21 @@ public class AuthController {
     public ResponseEntity<AuthResponse> signup(@RequestBody SignUpRequest request){
         authService.signup(request);
 
-        AuthResponse result = new AuthResponse("가입이 완료되었습니다.");
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(new AuthResponse("가입이 완료되었습니다."));
     }
 
+    @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
         LoginResponse result = authService.login(request);
 
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<AuthResponse> withdraw(@RequestBody LoginRequest request){
+        authService.withdraw(request);
+
+        return ResponseEntity.ok(new AuthResponse("탈퇴가 완료되었습니다."));
     }
 
 }
