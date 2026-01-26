@@ -2,6 +2,7 @@ package com.project.greatcloud13.ClimbingWith.controller;
 
 import com.project.greatcloud13.ClimbingWith.dto.GymCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDTO;
+import com.project.greatcloud13.ClimbingWith.dto.GymDetailDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.service.GymManagementService;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,22 @@ public class GymController {
         Page<GymDTO> mapResult =  result.map(GymDTO::from);
 
         return ResponseEntity.ok(mapResult);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GymDetailDTO> getGymDetail(@PathVariable Long id){
+
+        GymDetailDTO result = gymManagementService.getGymDetail(id);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<GymDTO> updateGym(@PathVariable Long id, @RequestBody GymCreateDTO request){
+
+        Gym result = gymManagementService.updateGym(id, request);
+
+        return ResponseEntity.ok(GymDTO.from(result));
     }
 
 }
