@@ -1,11 +1,15 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.SectorCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.SectorDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SectorUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
+import com.project.greatcloud13.ClimbingWith.entity.Setting;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
+import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import com.project.greatcloud13.ClimbingWith.repository.SectorRepository;
+import com.project.greatcloud13.ClimbingWith.repository.WallSettingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,7 @@ public class SectorManagementService {
 
     private final SectorRepository sectorRepository;
     private final GymRepository gymRepository;
+    private final WallSettingRepository settingRepository;
 
     @Transactional
     public Sector createSector(SectorCreateDTO request){
@@ -37,10 +42,14 @@ public class SectorManagementService {
     }
 
     @Transactional(readOnly = true)
-    public Sector getSectorDetail(Long id){
+    public SectorDetailDTO getSectorDetail(Long id){
 
-        return sectorRepository.findById(id)
+        Sector sector = sectorRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("섹터를 찾을 수 없습니다."));
+
+        List<Setting> settingList = settingRepository.findAllBySector(sector);
+
+        return SectorDetailDTO.from(sector, settingList);
     }
 
     @Transactional

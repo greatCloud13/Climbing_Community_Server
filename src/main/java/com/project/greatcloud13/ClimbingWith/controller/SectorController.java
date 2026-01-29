@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
 import com.project.greatcloud13.ClimbingWith.dto.SectorCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.SectorDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SectorUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
 import com.project.greatcloud13.ClimbingWith.service.SectorManagementService;
@@ -39,11 +40,11 @@ public class SectorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Sector> getSectorDetail(@PathVariable Long id){
+    public ResponseEntity<SectorDetailDTO> getSectorDetail(@PathVariable Long id){
 
-        Sector sector = sectorManagementService.getSectorDetail(id);
+        SectorDetailDTO result = sectorManagementService.getSectorDetail(id);
 
-        return ResponseEntity.ok(sector);
+        return ResponseEntity.ok(result);
     }
 
 
