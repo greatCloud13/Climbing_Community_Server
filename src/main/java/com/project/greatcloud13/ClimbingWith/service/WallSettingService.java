@@ -1,11 +1,14 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.SettingCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.SettingDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SettingUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
+import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
 import com.project.greatcloud13.ClimbingWith.entity.Setting;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
+import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import com.project.greatcloud13.ClimbingWith.repository.SectorRepository;
 import com.project.greatcloud13.ClimbingWith.repository.WallSettingRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,6 +25,7 @@ public class WallSettingService {
     private final GymRepository gymRepository;
     private final SectorRepository sectorRepository;
     private final WallSettingRepository settingRepository;
+    private final ProblemRepository problemRepository;
 
     @Transactional
     public Setting createSetting(SettingCreateDTO request){
@@ -40,6 +44,16 @@ public class WallSettingService {
                 .build();
 
         return settingRepository.save(setting);
+    }
+
+    @Transactional
+    public SettingDetailDTO getSettingDetail(Long SettingId){
+        Setting setting = settingRepository.findById(SettingId)
+                .orElseThrow(()-> new EntityNotFoundException("세팅을 찾을 수 없습니다."));
+
+        List<Problem> problemList = problemRepository.findAllBySetting(setting);
+
+        return SettingDetailDTO.from(setting, problemList);
     }
 
     @Transactional
