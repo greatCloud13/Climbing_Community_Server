@@ -26,8 +26,8 @@ public class SectorController {
     }
 
     @GetMapping("/list/{gymId}")
-    public ResponseEntity<List<Sector>> getSectorList(@PathVariable Long GymId){
-        List<Sector> list = sectorManagementService.findAllSectorByGym(GymId);
+    public ResponseEntity<List<Sector>> getSectorList(@PathVariable Long gymId){
+        List<Sector> list = sectorManagementService.findAllSectorByGym(gymId);
 
         return ResponseEntity.ok(list);
     }
