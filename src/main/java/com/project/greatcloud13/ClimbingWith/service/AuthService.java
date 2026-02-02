@@ -65,7 +65,7 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        return new LoginResponse(token, username, user.getRole().toString(), user.getNickname());
+        return new LoginResponse(token, username, user.getRole().toString(), user.getRole()==Role.GYM_MANAGER ? user.getGym().getId() : null , user.getNickname());
     }
 
     @Transactional

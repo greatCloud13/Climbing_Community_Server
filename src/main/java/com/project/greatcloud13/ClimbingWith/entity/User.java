@@ -26,7 +26,7 @@ public class User {
     private String email;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "maneged_gym_id")
+    @JoinColumn(name = "managed_gym_id")
     private Gym gym;
 
     @Enumerated(EnumType.STRING)
