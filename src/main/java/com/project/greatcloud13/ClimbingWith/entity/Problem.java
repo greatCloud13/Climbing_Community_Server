@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@Table(name = "problem")
 @NoArgsConstructor
+@Table(name = "problem")
 public class Problem {
 
     @Id
@@ -21,7 +21,7 @@ public class Problem {
     private String title;
 
     @Enumerated(EnumType.STRING)
-    private problemType problemType;
+    private ProblemType problemType;
 
     @ManyToOne
     @JoinColumn(name = "gym_level")
@@ -36,3 +36,4 @@ public class Problem {
         LEAD;
     }
 }
+
