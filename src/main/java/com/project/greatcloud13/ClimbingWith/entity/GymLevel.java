@@ -1,8 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
@@ -25,4 +24,21 @@ public class GymLevel {
     private String colorCode;
 
     private String description;
+
+    @Builder
+    public GymLevel(Gym gym, String levelName, Integer displayOrder, String colorCode, String description){
+        this.gym = gym;
+        this.levelName = levelName;
+        this.displayOrder = displayOrder;
+        this.colorCode = colorCode;
+        this.description = description;
+    }
+
+    public void updateGymLevel(String levelName, Integer displayOrder, String colorCode, String description){
+        this.levelName = levelName;
+        this.displayOrder = displayOrder;
+        this.colorCode = colorCode;
+        this.description = description;
+    }
+
 }
