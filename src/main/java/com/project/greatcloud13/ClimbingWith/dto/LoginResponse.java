@@ -14,5 +14,7 @@ public class LoginResponse {
 
     private String role;
 
+    private Long managedGymId;
+
     private String nickname;
 }
