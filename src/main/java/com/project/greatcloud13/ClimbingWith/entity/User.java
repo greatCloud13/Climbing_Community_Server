@@ -52,8 +52,26 @@ public class User {
             throw new IllegalArgumentException("잘못된 계정 정보 입니다.");
         }
         this.isActive = false;
+    }
 
+    public void activate(String password){
+
+        if(!this.password.equals(password)){
+            throw new IllegalArgumentException("잘못된 계정 정보 입니다.");
+        }
+        this.isActive = true;
 
     }
+
+    public void assignGymManager(Gym gym){
+        this.gym = gym;
+        this.role = Role.GYM_MANAGER;
+    }
+
+    public void unassignGym() {
+        this.gym = null;
+        this.role = Role.MEMBER;
+    }
+
 }
 

@@ -1,0 +1,30 @@
+package com.project.greatcloud13.ClimbingWith.dto;
+
+import com.project.greatcloud13.ClimbingWith.entity.User;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class UserDetailDTO {
+    private String username;
+
+    private String email;
+
+    private String role;
+
+    private String gymName;
+
+    private String nickname;
+
+    public static UserDetailDTO from(User user){
+        return UserDetailDTO.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .role(user.getRole().toString())
+                .gymName(user.getGym().getGymName() != null ? user.getGym().getGymName() : null)
+                .nickname(user.getNickname())
+                .build();
+
+    }
+}
