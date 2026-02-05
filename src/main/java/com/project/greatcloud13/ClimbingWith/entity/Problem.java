@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,9 +32,21 @@ public class Problem {
 
     private String description;
 
-    enum problemType{
-        BOULDER,
-        LEAD;
+    @Builder
+    public Problem(Setting setting, String title, ProblemType problemType, GymLevel gymLevel, String description){
+        this.setting = setting;
+        this.title = title;
+        this.problemType = problemType;
+        this.gymLevel = gymLevel;
+        this.description = description;
     }
+
+    public void update(String title, ProblemType problemType, GymLevel gymLevel, String description){
+        this.title = title;
+        this.problemType = problemType;
+        this.gymLevel = gymLevel;
+        this.description = description;
+    }
+
 }
 
