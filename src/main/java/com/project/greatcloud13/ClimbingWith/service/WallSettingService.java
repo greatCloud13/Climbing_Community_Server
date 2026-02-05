@@ -66,4 +66,9 @@ public class WallSettingService {
         return setting;
     }
 
+    @Transactional
+    public void deleteSetting(Long id){
+        problemRepository.deleteById(id);
+    }
+
 }

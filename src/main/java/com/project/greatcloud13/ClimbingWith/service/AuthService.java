@@ -3,6 +3,7 @@ package com.project.greatcloud13.ClimbingWith.service;
 import com.project.greatcloud13.ClimbingWith.dto.LoginRequest;
 import com.project.greatcloud13.ClimbingWith.dto.LoginResponse;
 import com.project.greatcloud13.ClimbingWith.dto.SignUpRequest;
+import com.project.greatcloud13.ClimbingWith.entity.Role;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.security.JwtTokenProvider;

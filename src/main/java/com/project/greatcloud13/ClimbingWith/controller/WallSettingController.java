@@ -38,4 +38,11 @@ public class WallSettingController {
         return ResponseEntity.ok(result);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Boolean> deleteSetting(@PathVariable Long id){
+        wallSettingService.deleteSetting(id);
+
+        return ResponseEntity.ok(true);
+    }
+
 }
