@@ -22,17 +22,6 @@ public class GymController {
     @PostMapping
     public ResponseEntity<GymDTO> createGym(@RequestBody GymCreateDTO request){
 
-        System.out.println("=== 받은 요청 ===");
-        System.out.println("Raw request: " + request);
-        System.out.println("gymName: " + request.getGymName());
-        System.out.println("address: " + request.getAddress());
-        System.out.println("type: " + request.getType());
-        System.out.println("openAt: " + request.getOpenAt());
-        System.out.println("closeAt: " + request.getCloseAt());
-        System.out.println("weekendOpenAt: " + request.getWeekendOpenAt());
-        System.out.println("weekendCloseAt: " + request.getWeekendCloseAt());
-        System.out.println("memo: " + request.getMemo());
-
         GymDTO result = GymDTO.from(gymManagementService.createGym(request));
 
         return ResponseEntity.ok(result);
