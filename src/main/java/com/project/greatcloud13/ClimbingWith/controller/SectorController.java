@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
 import com.project.greatcloud13.ClimbingWith.dto.SectorCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.SectorDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SectorDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SectorUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
@@ -19,22 +20,22 @@ public class SectorController {
     private final SectorManagementService sectorManagementService;
 
     @PostMapping
-    public ResponseEntity<Sector> createSector(SectorCreateDTO request){
-        Sector result = sectorManagementService.createSector(request);
+    public ResponseEntity<SectorDTO> createSector(SectorCreateDTO request){
+        SectorDTO result = sectorManagementService.createSector(request);
 
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/list/{gymId}")
-    public ResponseEntity<List<Sector>> getSectorList(@PathVariable Long gymId){
-        List<Sector> list = sectorManagementService.findAllSectorByGym(gymId);
+    public ResponseEntity<List<SectorDTO>> getSectorList(@PathVariable Long gymId){
+        List<SectorDTO> list = sectorManagementService.findAllSectorByGym(gymId);
 
         return ResponseEntity.ok(list);
     }
 
     @PutMapping("/{sectorId}")
-    public ResponseEntity<Sector> updateSector(@PathVariable Long sectorId, @RequestBody SectorUpdateDTO request){
-        Sector sector = sectorManagementService.updateSector(sectorId, request);
+    public ResponseEntity<SectorDTO> updateSector(@PathVariable Long sectorId, @RequestBody SectorUpdateDTO request){
+        SectorDTO sector = sectorManagementService.updateSector(sectorId, request);
 
         return ResponseEntity.ok(sector);
     }

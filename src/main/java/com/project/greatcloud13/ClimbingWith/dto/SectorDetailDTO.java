@@ -29,7 +29,7 @@ public class SectorDetailDTO {
                 .id(sector.getId())
                 .gymName(sector.getGym().getGymName())
                 .settingDate(sector.getSettingDate() != null ? sector.getSettingDate().toString() : null)
-                .nextSettingDate(sector.getNextSettingDate().toString())
+                .nextSettingDate(sector.getNextSettingDate() != null ? sector.getNextSettingDate().toString() : null)
                 .settingList(settingList)
                 .build();
 

@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.SectorCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.SectorDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SectorDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SectorUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
@@ -26,7 +27,7 @@ public class SectorManagementService {
     private final WallSettingRepository settingRepository;
 
     @Transactional
-    public Sector createSector(SectorCreateDTO request){
+    public SectorDTO createSector(SectorCreateDTO request){
 
         Gym gym = gymRepository.findById(request.getGymId())
                 .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
@@ -38,7 +39,7 @@ public class SectorManagementService {
                 .nextSettingDate(null)
                 .build();
 
-        return sectorRepository.save(sector);
+        return SectorDTO.from(sectorRepository.save(sector));
     }
 
     @Transactional(readOnly = true)
@@ -53,22 +54,22 @@ public class SectorManagementService {
     }
 
     @Transactional
-    public Sector updateSector(Long id, SectorUpdateDTO request){
+    public SectorDTO updateSector(Long id, SectorUpdateDTO request){
 
         Sector sector = sectorRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("섹터를 찾을 수 없습니다."));
 
         sector.update(request.getSectorName(), request.getSettingDate(), request.getNextSettingDate());
 
-        return sector;
+        return SectorDTO.from(sector);
     }
 
     @Transactional(readOnly = true)
-    public List<Sector> findAllSectorByGym(Long gymId){
+    public List<SectorDTO> findAllSectorByGym(Long gymId){
 
         Gym gym = gymRepository.findById(gymId)
                 .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다"));
 
-        return sectorRepository.findAllByGym(gym);
+        return sectorRepository.findAllByGym(gym).stream().map(SectorDTO :: from).toList();
     }
 }
