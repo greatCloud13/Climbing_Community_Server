@@ -1,9 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
-import com.project.greatcloud13.ClimbingWith.dto.SectorCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SectorDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SectorDetailDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SectorUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
 import com.project.greatcloud13.ClimbingWith.entity.Setting;
@@ -43,12 +40,12 @@ public class SectorManagementService {
     }
 
     @Transactional(readOnly = true)
-    public SectorDetailDTO getSectorDetail(Long id){
+    public SectorDetailDTO  getSectorDetail(Long id){
 
         Sector sector = sectorRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("섹터를 찾을 수 없습니다."));
 
-        List<Setting> settingList = settingRepository.findAllBySector(sector);
+        List<SettingDTO> settingList = settingRepository.findAllBySector(sector).stream().map(SettingDTO :: from).toList();
 
         return SectorDetailDTO.from(sector, settingList);
     }

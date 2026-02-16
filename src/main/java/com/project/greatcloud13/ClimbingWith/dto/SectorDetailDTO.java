@@ -22,9 +22,9 @@ public class SectorDetailDTO {
 
     private String nextSettingDate;
 
-    private List<Setting> settingList;
+    private List<SettingDTO> settingList;
 
-    public static SectorDetailDTO from(Sector sector, List<Setting> settingList){
+    public static SectorDetailDTO from(Sector sector, List<SettingDTO> settingList){
         return SectorDetailDTO.builder()
                 .id(sector.getId())
                 .gymName(sector.getGym().getGymName())
