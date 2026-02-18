@@ -27,6 +27,7 @@ public class GymLevelService {
 
         GymLevel gymLevel = GymLevel.builder()
                 .gym(gym)
+                .displayOrder(request.getDisplayOrder())
                 .levelName(request.getLevelName())
                 .colorCode(request.getColorCode())
                 .description(request.getDescription())
