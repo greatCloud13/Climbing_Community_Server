@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.ProblemCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.ProblemDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
 import com.project.greatcloud13.ClimbingWith.entity.Problem;
@@ -25,7 +26,7 @@ public class ProblemService {
     private final WallSettingRepository settingRepository;
 
     @Transactional
-    public Problem createProblem(ProblemCreateDTO request){
+    public ProblemDTO createProblem(ProblemCreateDTO request){
         Setting setting = settingRepository.findById(request.getSettingId())
                 .orElseThrow(()->new EntityNotFoundException("세팅을 찾을 수 없습니다."));
 
@@ -40,23 +41,24 @@ public class ProblemService {
                 .description(request.getDescription())
                 .build();
 
-        return problemRepository.save(problem);
+        return ProblemDTO.from(problemRepository.save(problem));
     }
 
     @Transactional(readOnly = true)
-    public Problem getProblem(Long id){
+    public ProblemDTO getProblem(Long id){
 
-        return problemRepository.findById(id)
-                .orElseThrow(()->new EntityNotFoundException("문제를 찾을 수 없습니다."));
+        return ProblemDTO.from(problemRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException("문제를 찾을 수 없습니다.")));
     }
 
     @Transactional(readOnly = true)
-    public List<Problem> getProblemListBySetting(Long settingId){
-        return problemRepository.findAllBySettingId(settingId);
+    public List<ProblemDTO> getProblemListBySetting(Long settingId){
+
+        return problemRepository.findAllBySettingId(settingId).stream().map(ProblemDTO :: from).toList();
     }
 
     @Transactional
-    public Problem updateProblem(Long id, ProblemUpdateDTO request){
+    public ProblemDTO updateProblem(Long id, ProblemUpdateDTO request){
         Problem problem = problemRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("문제를 찾을 수 없습니다."));
 
@@ -65,7 +67,7 @@ public class ProblemService {
 
         problem.update(request.getTitle(), request.getProblemType(), gymLevel, request.getDescription());
 
-        return problem;
+        return ProblemDTO.from(problem);
     }
 
     @Transactional

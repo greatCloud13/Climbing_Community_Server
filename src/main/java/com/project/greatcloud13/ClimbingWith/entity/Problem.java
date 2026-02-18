@@ -32,6 +32,8 @@ public class Problem {
 
     private String description;
 
+    private Float evaluation;
+
     @Builder
     public Problem(Setting setting, String title, ProblemType problemType, GymLevel gymLevel, String description){
         this.setting = setting;
@@ -46,6 +48,10 @@ public class Problem {
         this.problemType = problemType;
         this.gymLevel = gymLevel;
         this.description = description;
+    }
+
+    public void updateEvaluation(Float evaluation){
+        this.evaluation = evaluation;
     }
 
 }

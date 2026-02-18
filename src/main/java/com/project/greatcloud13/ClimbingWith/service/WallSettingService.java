@@ -1,5 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
+import com.project.greatcloud13.ClimbingWith.dto.ProblemDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SettingCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SettingDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SettingUpdateDTO;
@@ -51,7 +52,7 @@ public class WallSettingService {
         Setting setting = settingRepository.findById(SettingId)
                 .orElseThrow(()-> new EntityNotFoundException("세팅을 찾을 수 없습니다."));
 
-        List<Problem> problemList = problemRepository.findAllBySetting(setting);
+        List<ProblemDTO> problemList = problemRepository.findAllBySetting(setting).stream().map(ProblemDTO :: from).toList();
 
         return SettingDetailDTO.from(setting, problemList);
     }

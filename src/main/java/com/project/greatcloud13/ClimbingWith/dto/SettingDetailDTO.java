@@ -25,10 +25,10 @@ public class SettingDetailDTO {
 
     private boolean isActive;
 
-    private List<Problem> problemList;
+    private List<ProblemDTO> problemList;
 
 
-    public static SettingDetailDTO from(Setting setting, List<Problem> problemList){
+    public static SettingDetailDTO from(Setting setting, List<ProblemDTO> problemList){
         return SettingDetailDTO.builder()
                 .id(setting.getId())
                 .sectorName(setting.getSector().getSectorName())
