@@ -24,6 +24,8 @@ public class SectorDetailDTO {
 
     private List<SettingDTO> settingList;
 
+    private boolean availability;
+
     public static SectorDetailDTO from(Sector sector, List<SettingDTO> settingList){
         return SectorDetailDTO.builder()
                 .id(sector.getId())
@@ -31,8 +33,8 @@ public class SectorDetailDTO {
                 .settingDate(sector.getSettingDate() != null ? sector.getSettingDate().toString() : null)
                 .nextSettingDate(sector.getNextSettingDate() != null ? sector.getNextSettingDate().toString() : null)
                 .settingList(settingList)
+                .availability(sector.isAvailability())
                 .build();
-
     }
 
 }

@@ -30,17 +30,29 @@ public class Sector {
     @Column(name = "next_setting_date")
     private LocalDate nextSettingDate;
 
+    @Column(name = "availability")
+    private boolean availability;
+
     @Builder
     public Sector(Gym gym, String sectorName, LocalDate settingDate, LocalDate nextSettingDate) {
         this.gym = gym;
         this.sectorName = sectorName;
         this.settingDate = settingDate;
         this.nextSettingDate = nextSettingDate;
+        this.availability = true;
     }
 
     public void update(String sectorName, LocalDate settingDate, LocalDate nextSettingDate){
         this.sectorName = sectorName;
         this.settingDate = settingDate;
         this.nextSettingDate = nextSettingDate;
+    }
+
+    public void disable(){
+        this.availability = false;
+    }
+
+    public void enable(){
+        this.availability = true;
     }
 }

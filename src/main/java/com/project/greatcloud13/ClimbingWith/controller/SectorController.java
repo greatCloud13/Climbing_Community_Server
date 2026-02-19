@@ -48,6 +48,18 @@ public class SectorController {
         return ResponseEntity.ok(result);
     }
 
+    @PutMapping("/enable/{id}")
+    public ResponseEntity<SectorDTO> enableSector(@PathVariable Long id){
+        SectorDTO result = sectorManagementService.enableSector(id);
 
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/disable/{id}")
+    public ResponseEntity<SectorDTO> disableSector(@PathVariable Long id){
+        SectorDTO result = sectorManagementService.disableSector(id);
+
+        return ResponseEntity.ok(result);
+    }
 
 }

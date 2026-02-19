@@ -69,4 +69,26 @@ public class SectorManagementService {
 
         return sectorRepository.findAllByGym(gym).stream().map(SectorDTO :: from).toList();
     }
+
+    @Transactional
+    public SectorDTO disableSector(Long id){
+
+        Sector sector = sectorRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("섹터를 찾을 수 없습니다."));
+
+        sector.disable();
+
+        return SectorDTO.from(sector);
+    }
+
+    @Transactional
+    public SectorDTO enableSector(Long id){
+
+        Sector sector = sectorRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("섹터를 찾을 수 없습니다."));
+
+        sector.enable();
+
+        return SectorDTO.from(sector);
+    }
 }

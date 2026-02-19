@@ -18,6 +18,8 @@ public class SectorDTO {
 
     private String nextSettingDate;
 
+    private boolean availability;
+
     public static SectorDTO from(Sector sector){
         return SectorDTO.builder()
                 .id(sector.getId())
@@ -25,6 +27,7 @@ public class SectorDTO {
                 .sectorName(sector.getSectorName())
                 .settingDate(sector.getSettingDate() != null ? sector.getSettingDate().toString() : null )
                 .nextSettingDate(sector.getNextSettingDate() != null ? sector.getNextSettingDate().toString() : null)
+                .availability(sector.isAvailability())
                 .build();
     }
 
