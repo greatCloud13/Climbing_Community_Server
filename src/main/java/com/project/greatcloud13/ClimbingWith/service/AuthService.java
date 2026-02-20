@@ -75,6 +75,10 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        user.deactivate(passwordEncoder.encode(request.getPassword()));
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new IllegalArgumentException("잘못된 계정 정보입니다");
+        }
+
+        user.deactivate();
     }
 }
