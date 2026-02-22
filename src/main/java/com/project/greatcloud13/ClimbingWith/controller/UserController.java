@@ -7,8 +7,7 @@ import com.project.greatcloud13.ClimbingWith.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -17,31 +16,36 @@ public class UserController {
 
     private final UserService userService;
 
-    public ResponseEntity<Page<UserDTO>> getAllUserPage(int size, int page){
+    @GetMapping("/size/{size}/page/{page}")
+    public ResponseEntity<Page<UserDTO>> getAllUserPage(@PathVariable int size, @PathVariable int page){
         Page<UserDTO> result = userService.getUserList(page, size);
 
         return ResponseEntity.ok(result);
     }
 
-    public ResponseEntity<Page<UserDTO>> searchUser(String keyword, SearchTag tag, int page){
+    @GetMapping("/keyword/{keyword}/searchTag/{tag}/page/{page}")
+    public ResponseEntity<Page<UserDTO>> searchUser(@PathVariable String keyword, @PathVariable SearchTag tag, @PathVariable int page){
         Page<UserDTO> result = userService.searchUser(keyword, tag, page);
 
         return ResponseEntity.ok(result);
     }
 
-    public ResponseEntity<UserDetailDTO> getUserDetail(String username){
+    @GetMapping("/username/{username}")
+    public ResponseEntity<UserDetailDTO> getUserDetail(@PathVariable String username){
         UserDetailDTO result = userService.getUserDetail(username);
 
         return ResponseEntity.ok(result);
     }
 
-    public ResponseEntity<UserDetailDTO> assignGymManager(Long gymId, String username){
-        UserDetailDTO result = userService.assignGymManager(gymId, username);
+    @PutMapping("/assign/{gymId}")
+    public ResponseEntity<UserDetailDTO> assignGymManager(@PathVariable Long gymId, @RequestBody Long id){
+        UserDetailDTO result = userService.assignGymManager(gymId, id);
 
         return ResponseEntity.ok(result);
     }
 
-    public ResponseEntity<UserDetailDTO> unassignGymManager(String username){
+    @PutMapping("/unassign/{username}")
+    public ResponseEntity<UserDetailDTO> unassignGymManager(@PathVariable String username){
         UserDetailDTO result = userService.unassignGymManager(username);
 
         return ResponseEntity.ok(result);

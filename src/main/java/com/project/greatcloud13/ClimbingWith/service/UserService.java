@@ -60,11 +60,11 @@ public class UserService {
     }
 
     @Transactional
-    public UserDetailDTO assignGymManager(Long gymId, String username){
+    public UserDetailDTO assignGymManager(Long gymId, Long id){
         Gym gym = gymRepository.findById(gymId)
                 .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
 
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         user.assignGymManager(gym);

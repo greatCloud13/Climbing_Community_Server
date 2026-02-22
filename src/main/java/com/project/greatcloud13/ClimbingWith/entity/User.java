@@ -1,10 +1,11 @@
 package com.project.greatcloud13.ClimbingWith.entity;
 
-import com.project.greatcloud13.ClimbingWith.dto.LoginRequest;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -46,11 +47,14 @@ public class User {
         this.isActive = true;
     }
 
-    public void deactivate(String password){
-
-        if(!this.password.equals(password)){
-            throw new IllegalArgumentException("잘못된 계정 정보 입니다.");
+    public void checkPassword(String password, PasswordEncoder passwordEncoder){
+        if(!passwordEncoder.matches(passwordEncoder.encode(password), this.password)){
+            throw new AccessDeniedException("계정 정보가 올바르지 않습니다");
         }
+    }
+
+    public void deactivate(){
+
         this.isActive = false;
     }
 
@@ -60,7 +64,6 @@ public class User {
             throw new IllegalArgumentException("잘못된 계정 정보 입니다.");
         }
         this.isActive = true;
-
     }
 
     public void assignGymManager(Gym gym){

@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 @Builder
 public class UserDetailDTO {
+    private Long id;
+
     private String username;
 
     private String email;
@@ -19,10 +21,11 @@ public class UserDetailDTO {
 
     public static UserDetailDTO from(User user){
         return UserDetailDTO.builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole().toString())
-                .gymName(user.getGym().getGymName() != null ? user.getGym().getGymName() : null)
+                .gymName(user.getGym() != null ? user.getGym().getGymName() : null)
                 .nickname(user.getNickname())
                 .build();
 

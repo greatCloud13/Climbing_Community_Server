@@ -22,10 +22,11 @@ public class UserDTO {
 
     public static UserDTO from(User user){
         return UserDTO.builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole().toString())
-                .gymName(user.getGym().getGymName() != null ? user.getGym().getGymName() : null)
+                .gymName(user.getGym() != null ? user.getGym().getGymName() : null)
                 .nickname(user.getNickname())
                 .build();
 
