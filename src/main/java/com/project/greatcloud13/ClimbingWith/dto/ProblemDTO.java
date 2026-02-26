@@ -16,7 +16,7 @@ public class ProblemDTO {
 
     private String problemType;
 
-    private String gymLeve;
+    private String gymLevel;
 
     private Integer clearUserCount;
 
@@ -30,7 +30,7 @@ public class ProblemDTO {
                 .settingId(problem.getSetting().getId())
                 .title(problem.getTitle())
                 .problemType(problem.getProblemType().toString())
-                .gymLeve(problem.getGymLevel().getLevelName())
+                .gymLevel(problem.getGymLevel().getLevelName())
                 .clearUserCount(problem.getClearUserCount())
                 .description(problem.getDescription())
                 .evaluation(problem.getEvaluation())

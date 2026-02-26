@@ -1,9 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
-import com.project.greatcloud13.ClimbingWith.dto.SectorDetailDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SettingCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SettingDetailDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SettingUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.Setting;
 import com.project.greatcloud13.ClimbingWith.service.WallSettingService;
 import lombok.RequiredArgsConstructor;
@@ -25,15 +22,15 @@ public class WallSettingController {
     }
 
     @PostMapping
-    public ResponseEntity<Setting> createSetting(@RequestBody SettingCreateDTO request) {
-        Setting result = wallSettingService.createSetting(request);
+    public ResponseEntity<SettingDTO> createSetting(@RequestBody SettingCreateDTO request) {
+        SettingDTO result = wallSettingService.createSetting(request);
 
         return ResponseEntity.ok(result);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Setting> updateSetting(@PathVariable Long id, @RequestBody SettingUpdateDTO request){
-        Setting result = wallSettingService.updateSetting(id, request);
+    public ResponseEntity<SettingDTO> updateSetting(@PathVariable Long id, @RequestBody SettingUpdateDTO request){
+        SettingDTO result = wallSettingService.updateSetting(id, request);
 
         return ResponseEntity.ok(result);
     }

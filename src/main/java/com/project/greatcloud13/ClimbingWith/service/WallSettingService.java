@@ -1,9 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
-import com.project.greatcloud13.ClimbingWith.dto.ProblemDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SettingCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SettingDetailDTO;
-import com.project.greatcloud13.ClimbingWith.dto.SettingUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +27,7 @@ public class WallSettingService {
     private final ProblemRepository problemRepository;
 
     @Transactional
-    public Setting createSetting(SettingCreateDTO request){
+    public SettingDTO createSetting(SettingCreateDTO request){
         Gym gym = gymRepository.findById(request.getGymId())
                 .orElseThrow(()-> new EntityNotFoundException("암장을 찾을 수 없습니다."));
 
@@ -44,7 +42,7 @@ public class WallSettingService {
                 .endDate(null)
                 .build();
 
-        return settingRepository.save(setting);
+        return SettingDTO.from(settingRepository.save(setting));
     }
 
     @Transactional
@@ -58,18 +56,28 @@ public class WallSettingService {
     }
 
     @Transactional
-    public Setting updateSetting(Long settingId, SettingUpdateDTO request){
+    public SettingDTO updateSetting(Long settingId, SettingUpdateDTO request){
         Setting setting = settingRepository.findById(settingId)
                 .orElseThrow(()->new EntityNotFoundException("세팅정보를 찾을 수 없습니다."));
 
+        settingRepository.findTop2ByGymOrderByIdDesc(setting.getGym())
+                .stream()
+                .skip(1)
+                .findFirst()
+                .ifPresent(Setting::inActive);
+
         setting.update(request.getSettingDate(), request.getStartDate(), request.getEndDate());
 
-        return setting;
+        return SettingDTO.from(setting);
     }
 
     @Transactional
     public void deleteSetting(Long id){
-        problemRepository.deleteById(id);
+        Setting setting = settingRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException("세팅정보를 찾을 수 없습니다."));
+        settingRepository.deleteById(id);
+        Optional<Setting> pastSetting = settingRepository.findFirstByGymOrderByIdDesc(setting.getGym());
+        pastSetting.ifPresent(Setting::active);
     }
 
 }

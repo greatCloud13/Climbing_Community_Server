@@ -50,4 +50,12 @@ public class Setting {
         this.endDate = endDate;
     }
 
+    public void active(){
+        isActive = true;
+    }
+
+    public void inActive(){
+        isActive = false;
+    }
+
 }

@@ -10,9 +10,9 @@ public class SettingDTO {
 
     private Long id;
 
-    private String sectorName;
+    private String sector;
 
-    private String gymName;
+    private String gym;
 
     private String settingDate;
 
@@ -25,8 +25,8 @@ public class SettingDTO {
     public static SettingDTO from(Setting setting){
         return SettingDTO.builder()
                 .id(setting.getId())
-                .sectorName(setting.getSector().getSectorName())
-                .gymName(setting.getGym().getGymName())
+                .sector(setting.getSector().getSectorName())
+                .gym(setting.getGym().getGymName())
                 .settingDate(setting.getSettingDate() != null ? setting.getSettingDate().toString() : null)
                 .startDate(setting.getStartDate() != null ?setting.getSettingDate().toString() : null)
                 .endDate(setting.getEndDate() != null ? setting.getEndDate().toString() : null)

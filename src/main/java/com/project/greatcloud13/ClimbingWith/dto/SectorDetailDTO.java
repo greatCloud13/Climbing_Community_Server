@@ -27,6 +27,7 @@ public class SectorDetailDTO {
     public static SectorDetailDTO from(Sector sector, List<SettingDTO> settingList){
         return SectorDetailDTO.builder()
                 .id(sector.getId())
+                .sectorName(sector.getSectorName())
                 .gymName(sector.getGym().getGymName())
                 .settingDate(sector.getSettingDate() != null ? sector.getSettingDate().toString() : null)
                 .nextSettingDate(sector.getNextSettingDate() != null ? sector.getNextSettingDate().toString() : null)
