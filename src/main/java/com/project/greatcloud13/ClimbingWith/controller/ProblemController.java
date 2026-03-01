@@ -20,7 +20,7 @@ public class ProblemController {
     private final ProblemService problemService;
 
     @PostMapping
-    public ResponseEntity<ProblemDTO> createProblem(ProblemCreateDTO request){
+    public ResponseEntity<ProblemDTO> createProblem(@RequestBody ProblemCreateDTO request){
         ProblemDTO result = problemService.createProblem(request);
 
         return ResponseEntity.ok(result);
