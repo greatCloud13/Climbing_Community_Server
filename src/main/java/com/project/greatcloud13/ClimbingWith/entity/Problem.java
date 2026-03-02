@@ -40,6 +40,8 @@ public class Problem {
         this.title = title;
         this.problemType = problemType;
         this.gymLevel = gymLevel;
+        this.clearUserCount = 0;
+        this.evaluation = 3F;
         this.description = description;
     }
 
