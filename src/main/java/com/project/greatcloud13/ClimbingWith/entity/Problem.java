@@ -19,6 +19,8 @@ public class Problem {
     @JoinColumn(name = "setting_id")
     private Setting setting;
 
+    private Gym gym;
+
     private String title;
 
     @Enumerated(EnumType.STRING)
@@ -35,8 +37,9 @@ public class Problem {
     private Float evaluation;
 
     @Builder
-    public Problem(Setting setting, String title, ProblemType problemType, GymLevel gymLevel, String description){
+    public Problem(Setting setting, Gym gym, String title, ProblemType problemType, GymLevel gymLevel, String description){
         this.setting = setting;
+        this.gym = gym;
         this.title = title;
         this.problemType = problemType;
         this.gymLevel = gymLevel;

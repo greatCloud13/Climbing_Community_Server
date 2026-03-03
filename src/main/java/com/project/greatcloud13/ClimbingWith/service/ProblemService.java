@@ -35,6 +35,7 @@ public class ProblemService {
 
         Problem problem = Problem.builder()
                 .setting(setting)
+                .gym(setting.getGym())
                 .title(request.getTitle())
                 .problemType(request.getProblemType())
                 .gymLevel(gymLevel)
