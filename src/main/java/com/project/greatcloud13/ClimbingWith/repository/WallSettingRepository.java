@@ -15,4 +15,6 @@ public interface WallSettingRepository extends JpaRepository<Setting, Long> {
     Optional<Setting> findFirstByGymOrderByIdDesc(Gym gym);
 
     List<Setting> findTop2ByGymOrderByIdDesc(Gym gym);
+
+    List<Setting> findAllByGymAndIsActive(Gym gym,boolean isActive);
 }

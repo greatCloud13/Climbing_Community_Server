@@ -3,14 +3,19 @@ package com.project.greatcloud13.ClimbingWith.service;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
 import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.entity.Setting;
 import com.project.greatcloud13.ClimbingWith.repository.GymLevelRepository;
+import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import com.project.greatcloud13.ClimbingWith.repository.WallSettingRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +28,7 @@ public class ProblemService {
 
     private final ProblemRepository problemRepository;
     private final GymLevelRepository gymLevelRepository;
+    private final GymRepository gymRepository;
     private final WallSettingRepository settingRepository;
 
     @Transactional
@@ -50,6 +56,23 @@ public class ProblemService {
 
         return ProblemDTO.from(problemRepository.findById(id)
                 .orElseThrow(()->new EntityNotFoundException("문제를 찾을 수 없습니다.")));
+    }
+
+    public Page<ProblemDTO> getProblemPageByGym(Long id, int page){
+        Gym gym = gymRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+
+        List<Setting> settingList = settingRepository.findAllByGymAndIsActive(gym,true);
+
+        if(settingList.isEmpty()){
+            throw new EntityNotFoundException("활성화된 세팅이 없습니다.");
+        }
+
+        Pageable pageable = PageRequest.of(page, 10);
+
+        Page<Problem> problemPage = problemRepository.findAllBySettingIn(settingList, pageable);
+
+        return problemPage.map(ProblemDTO::from);
     }
 
     @Transactional(readOnly = true)

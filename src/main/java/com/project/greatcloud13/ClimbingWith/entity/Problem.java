@@ -19,6 +19,8 @@ public class Problem {
     @JoinColumn(name = "setting_id")
     private Setting setting;
 
+    @ManyToOne
+    @JoinColumn(name = "gym_id")
     private Gym gym;
 
     private String title;

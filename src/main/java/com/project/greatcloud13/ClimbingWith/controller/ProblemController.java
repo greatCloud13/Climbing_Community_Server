@@ -7,6 +7,7 @@ import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.service.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,13 @@ public class ProblemController {
     @GetMapping("/setting/{id}")
     public ResponseEntity<List<ProblemDTO>> getProblemListBySettingId(@PathVariable Long id){
         List<ProblemDTO> result = problemService.getProblemListBySetting(id);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("gym/{id}/page/{page}")
+    public ResponseEntity<Page<ProblemDTO>> getProblemListByProblemDTO(@PathVariable Long id, @PathVariable int page){
+        Page<ProblemDTO> result = problemService.getProblemPageByGym(id, page);
 
         return ResponseEntity.ok(result);
     }
