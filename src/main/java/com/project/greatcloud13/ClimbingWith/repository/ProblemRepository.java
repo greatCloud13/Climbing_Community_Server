@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.repository;
 
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
+import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
 import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.entity.Setting;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,8 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
     List<Problem> findAllBySetting(Setting setting);
 
     List<Problem> findAllBySettingId(Long settingId);
+
+    List<Problem> findAllByGymLevel(GymLevel gymLevel);
 
     Page<Problem> findAllBySettingIn(List<Setting> settings, Pageable pageable);
 }

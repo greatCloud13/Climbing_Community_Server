@@ -34,8 +34,15 @@ public class ProblemController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/gymLevel/{id}")
+    public ResponseEntity<List<ProblemDTO>> getProblemListByGymLevelId(@PathVariable Long id){
+        List<ProblemDTO> result = problemService.getProblemByGymLevel(id);
+
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("gym/{id}/page/{page}")
-    public ResponseEntity<Page<ProblemDTO>> getProblemListByProblemDTO(@PathVariable Long id, @PathVariable int page){
+    public ResponseEntity<Page<ProblemDTO>> getProblemListByGymId(@PathVariable Long id, @PathVariable int page){
         Page<ProblemDTO> result = problemService.getProblemPageByGym(id, page);
 
         return ResponseEntity.ok(result);

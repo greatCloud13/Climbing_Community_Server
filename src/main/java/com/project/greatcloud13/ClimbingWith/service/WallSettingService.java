@@ -45,6 +45,17 @@ public class WallSettingService {
         return SettingDTO.from(settingRepository.save(setting));
     }
 
+    @Transactional(readOnly = true)
+    public List<SettingDTO> getActiveSettingListByGymId(Long gymId){
+
+        Gym gym = gymRepository.findById(gymId)
+                .orElseThrow(()-> new EntityNotFoundException("암장을 찾을 수 없습니다."));
+
+        List<Setting> activeSettingList = settingRepository.findAllByGymAndIsActive(gym, true);
+
+        return activeSettingList.stream().map(SettingDTO :: from).toList();
+    }
+
     @Transactional
     public SettingDetailDTO getSettingDetail(Long SettingId){
         Setting setting = settingRepository.findById(SettingId)

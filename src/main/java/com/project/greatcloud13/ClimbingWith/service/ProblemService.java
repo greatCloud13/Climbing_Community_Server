@@ -58,6 +58,16 @@ public class ProblemService {
                 .orElseThrow(()->new EntityNotFoundException("문제를 찾을 수 없습니다.")));
     }
 
+    @Transactional(readOnly = true)
+    public List<ProblemDTO> getProblemByGymLevel(Long id){
+        GymLevel gymLevel = gymLevelRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException("해당하는 레벨을 찾을 수 없습니다."));
+
+        List<Problem> problemDTOList = problemRepository.findAllByGymLevel(gymLevel);
+
+        return problemDTOList.stream().map(ProblemDTO :: from).toList();
+    }
+
     public Page<ProblemDTO> getProblemPageByGym(Long id, int page){
         Gym gym = gymRepository.findById(id)
                 .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));

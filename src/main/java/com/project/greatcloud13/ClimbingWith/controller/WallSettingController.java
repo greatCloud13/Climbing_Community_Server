@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/setting")
@@ -17,6 +19,13 @@ public class WallSettingController {
     @GetMapping("/{id}")
     public ResponseEntity<SettingDetailDTO> getSectorDetail(@PathVariable Long id){
         SettingDetailDTO result = wallSettingService.getSettingDetail(id);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/gym/{id}")
+    public ResponseEntity<List<SettingDTO>> getActiveSettingListByGymId(@PathVariable Long id){
+        List<SettingDTO> result = wallSettingService.getActiveSettingListByGymId(id);
 
         return ResponseEntity.ok(result);
     }
