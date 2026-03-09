@@ -17,4 +17,6 @@ public interface WallSettingRepository extends JpaRepository<Setting, Long> {
     List<Setting> findTop2ByGymOrderByIdDesc(Gym gym);
 
     List<Setting> findAllByGymAndIsActive(Gym gym,boolean isActive);
+
+    Optional<Setting> findTopBySectorAndIsActiveOrderBySettingDateDesc(Sector sector, boolean isActive);
 }

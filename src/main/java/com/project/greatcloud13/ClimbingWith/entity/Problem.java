@@ -57,6 +57,14 @@ public class Problem {
         this.description = description;
     }
 
+    public void addClearUserCount(){
+        clearUserCount++;
+    }
+
+    public void subClearUserCount(){
+        clearUserCount--;
+    }
+
     public void updateEvaluation(Float evaluation){
         this.evaluation = evaluation;
     }
