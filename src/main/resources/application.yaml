@@ -23,3 +23,6 @@ jwt:
   # TODO: [PRODUCTION] 환경변수로 변경 필요
   secret: your-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
   expiration: 3600000  # 1시간
+
+file:
+  upload-dir: C:/upload_files/
