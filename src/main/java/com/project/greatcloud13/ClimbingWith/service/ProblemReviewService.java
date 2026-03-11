@@ -27,9 +27,9 @@ public class ProblemReviewService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ProblemReviewDTO createReview(ProblemReviewCreateDTO request){
+    public ProblemReviewDTO createReview(Long userId, ProblemReviewCreateDTO request){
 
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다"));
 
         Problem problem = problemRepository.findById(request.getProblemId())
@@ -70,10 +70,16 @@ public class ProblemReviewService {
     }
 
     @Transactional
-    public ProblemReviewDTO updateReview(Long id, ProblemReviewUpdateDTO request){
+    public ProblemReviewDTO updateReview(Long id, Long userId, ProblemReviewUpdateDTO request){
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         ProblemReview problemReview = problemReviewRepository.findById(id)
                 .orElseThrow(()->new EntityNotFoundException("리뷰를 찾을 수 없습니다"));
+
+        if(!user.equals(problemReview.getUser())){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
 
         problemReview.update(request.getProblemHint(), request.getEvaluation());
 

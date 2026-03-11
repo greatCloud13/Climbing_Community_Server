@@ -7,8 +7,6 @@ public class ProblemReviewCreateDTO {
 
     private Long problemId;
 
-    private Long userId;
-
     private String problemHint;
 
     private Integer evaluation;

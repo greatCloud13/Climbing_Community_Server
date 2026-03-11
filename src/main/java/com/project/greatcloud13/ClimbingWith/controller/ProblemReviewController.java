@@ -3,10 +3,12 @@ package com.project.greatcloud13.ClimbingWith.controller;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemReviewCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemReviewDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemReviewUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import com.project.greatcloud13.ClimbingWith.service.ProblemReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,9 +19,9 @@ public class ProblemReviewController {
     private final ProblemReviewService problemReviewService;
 
     @PostMapping
-    public ResponseEntity<ProblemReviewDTO> createProblemReview(@RequestBody ProblemReviewCreateDTO request){
+    public ResponseEntity<ProblemReviewDTO> createProblemReview(@RequestBody ProblemReviewCreateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        ProblemReviewDTO result = problemReviewService.createReview(request);
+        ProblemReviewDTO result = problemReviewService.createReview(userDetails.getUserId(), request);
 
         return ResponseEntity.ok(result);
     }
@@ -40,8 +42,8 @@ public class ProblemReviewController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProblemReviewDTO> updateProblemReview(@PathVariable Long id, @RequestBody ProblemReviewUpdateDTO request){
-        ProblemReviewDTO result = problemReviewService.updateReview(id, request);
+    public ResponseEntity<ProblemReviewDTO> updateProblemReview(@PathVariable Long id, @RequestBody ProblemReviewUpdateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
+        ProblemReviewDTO result = problemReviewService.updateReview(id, userDetails.getUserId(), request);
 
         return ResponseEntity.ok(result);
     }
