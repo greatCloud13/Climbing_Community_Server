@@ -6,11 +6,14 @@ import com.project.greatcloud13.ClimbingWith.dto.ClearRecordResponseDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ClearRecordUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.repository.*;
+import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +29,8 @@ public class ClearRecordService {
 
 
     @Transactional
-    public ClearRecordResponseDTO createClearRecord(ClearRecordCreateDTO clearRecordCreateDTO){
-        User user = userRepository.findById(clearRecordCreateDTO.getUserId())
+    public ClearRecordResponseDTO createClearRecord(Long userId, ClearRecordCreateDTO clearRecordCreateDTO){
+        User user = userRepository.findById(userId)
                 .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
         Problem problem = problemRepository.findById(clearRecordCreateDTO.getProblemId())
@@ -48,6 +51,7 @@ public class ClearRecordService {
     }
 
     public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserId(Long userId, int page, int size){
+
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
@@ -86,11 +90,18 @@ public class ClearRecordService {
     }
 
     @Transactional
-    public ClearRecordResponseDTO updateClearRecord(Long clearRecordId, ClearRecordUpdateDTO clearRecordUpdateDTO){
+    public ClearRecordResponseDTO updateClearRecord(Long userId, Long clearRecordId, ClearRecordUpdateDTO clearRecordUpdateDTO){
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        
         ClearRecord clearRecord = clearRecordRepository.findById(clearRecordId)
                 .orElseThrow(()-> new EntityNotFoundException("기록을 찾을 수 없습니다"));
 
+        if(user.getRole()!=Role.ADMIN && !clearRecord.getUser().equals(user)){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+        
         if(clearRecord.getId().equals(clearRecordUpdateDTO.getProblemId())){
             Problem problem = problemRepository.findById(clearRecordUpdateDTO.getProblemId())
                     .orElseThrow(()-> new EntityNotFoundException("문제를 찾을 수 없습니다."));
@@ -103,9 +114,15 @@ public class ClearRecordService {
     }
 
     @Transactional
-    public void deleteClearRecord(Long id){
+    public void deleteClearRecord(Long userId, Long id){
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         ClearRecord clearRecord = clearRecordRepository.findById(id)
                 .orElseThrow(()->new EntityNotFoundException("기록을 찾을 수 없습니다."));
+
+        if(user.getRole()!=Role.ADMIN && !clearRecord.getUser().equals(user)){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
 
         clearRecord.getProblem().subClearUserCount();
 

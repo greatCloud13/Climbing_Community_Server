@@ -7,8 +7,6 @@ import java.time.LocalDate;
 @Data
 public class ClearRecordCreateDTO {
 
-    private Long userId;
-
     private Long settingId;
 
     private Long problemId;

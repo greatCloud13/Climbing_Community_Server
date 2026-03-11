@@ -1,15 +1,14 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
-import com.project.greatcloud13.ClimbingWith.dto.ClearRecordCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.ClearRecordResponseDTO;
-import com.project.greatcloud13.ClimbingWith.dto.ClearRecordSummaryDTO;
-import com.project.greatcloud13.ClimbingWith.dto.ClearRecordUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.ClearRecord;
+import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import com.project.greatcloud13.ClimbingWith.service.ClearRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,8 +23,8 @@ public class ClearRecordController {
             description = "새로운 완등기록을 작성합니다."
     )
     @PostMapping
-    public ResponseEntity<ClearRecordResponseDTO> createClearRecord(@RequestBody ClearRecordCreateDTO request){
-        ClearRecordResponseDTO result = clearRecordService.createClearRecord(request);
+    public ResponseEntity<ClearRecordResponseDTO> createClearRecord(@RequestBody ClearRecordCreateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
+        ClearRecordResponseDTO result = clearRecordService.createClearRecord(userDetails.getUserId(), request);
 
         return ResponseEntity.ok(result);
     }
@@ -71,8 +70,8 @@ public class ClearRecordController {
             description = "기존의 완등기록을 갱신합니다."
     )
     @PutMapping("/{id}")
-    public ResponseEntity<ClearRecordResponseDTO> updateClearRecord(@PathVariable Long id, @RequestBody ClearRecordUpdateDTO request){
-        ClearRecordResponseDTO result = clearRecordService.updateClearRecord(id, request);
+    public ResponseEntity<ClearRecordResponseDTO> updateClearRecord(@PathVariable Long id, @RequestBody ClearRecordUpdateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
+        ClearRecordResponseDTO result = clearRecordService.updateClearRecord(userDetails.getUserId(), id, request);
 
         return ResponseEntity.ok(result);
     }
@@ -82,8 +81,8 @@ public class ClearRecordController {
             description = "ID에 해당하는 완등 기록을 영구적으로 삭제합니다."
     )
     @PutMapping
-    public ResponseEntity<Boolean> deleteRecord(Long id){
-        clearRecordService.deleteClearRecord(id);
+    public ResponseEntity<Boolean> deleteRecord(Long userId, Long id){
+        clearRecordService.deleteClearRecord(userId, id);
 
         return ResponseEntity.ok(true);
     }
