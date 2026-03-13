@@ -28,6 +28,12 @@ public class ClearRecordService {
     private final WallSettingRepository settingRepository;
 
 
+    /**
+     * 완등 기록 작성
+     * @param userId 사용자 ID
+     * @param clearRecordCreateDTO clearRecordCreateDTO
+     * @return ClearRecordResponseDTO 
+     */
     @Transactional
     public ClearRecordResponseDTO createClearRecord(Long userId, ClearRecordCreateDTO clearRecordCreateDTO){
         User user = userRepository.findById(userId)
@@ -50,6 +56,13 @@ public class ClearRecordService {
         return ClearRecordResponseDTO.from(clearRecord);
     }
 
+    /**
+     * 사용자 ID 기준 완등 기록 요약
+     * @param userId 사용자 ID
+     * @param page page
+     * @param size size
+     * @return Page<ClearRecordSummaryDTO>
+     */
     public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserId(Long userId, int page, int size){
 
         User user = userRepository.findById(userId)
@@ -62,6 +75,14 @@ public class ClearRecordService {
         return clearRecord.map(ClearRecordSummaryDTO :: from);
     }
 
+
+    /**
+     * 문제 ID 기준 완등 기록 요약(영상 URL이 있는 기록만)
+     * @param problemId 문제 ID
+     * @param page page
+     * @param size size
+     * @return Page<ClearRecordSummaryDTO>
+     */
     @Transactional
     public Page<ClearRecordSummaryDTO> getClearRecordSummaryByProblemExistVideoUrl(Long problemId, int page, int size){
         Problem problem = problemRepository.findById(problemId)
@@ -74,6 +95,13 @@ public class ClearRecordService {
         return clearRecordPage.map(ClearRecordSummaryDTO:: from);
     }
 
+    /**
+     * 섹터 ID 기준 완등 기록 요약(영상 URL이 있는 기록만)
+     * @param sectorId 섹터 ID
+     * @param page page
+     * @param size size
+     * @return Page<ClearRecordSummaryDTO>
+     */
     @Transactional
     public Page<ClearRecordSummaryDTO> getClearRecordSummaryBySectorExistVideoUrl(Long sectorId, int page, int size){
         Sector sector = sectorRepository.findById(sectorId)
@@ -89,6 +117,13 @@ public class ClearRecordService {
         return clearRecordPage.map(ClearRecordSummaryDTO :: from);
     }
 
+    /**
+     * 완등 기록 업데이트
+     * @param userId 사용자 ID
+     * @param clearRecordId 완등 기록 ID
+     * @param clearRecordUpdateDTO 완등 기록 Update 정보
+     * @return ClearRecordResponseDTO
+     */
     @Transactional
     public ClearRecordResponseDTO updateClearRecord(Long userId, Long clearRecordId, ClearRecordUpdateDTO clearRecordUpdateDTO){
 
@@ -113,11 +148,16 @@ public class ClearRecordService {
         return ClearRecordResponseDTO.from(clearRecord);
     }
 
+    /**
+     * 완등 기록 영구삭제
+     * @param userId 사용자 ID
+     * @param id 완등 기록 ID
+     */
     @Transactional
-    public void deleteClearRecord(Long userId, Long id){
+    public void deleteClearRecord(Long userId, Long clearRecordId){
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        ClearRecord clearRecord = clearRecordRepository.findById(id)
+        ClearRecord clearRecord = clearRecordRepository.findById(clearRecordId)
                 .orElseThrow(()->new EntityNotFoundException("기록을 찾을 수 없습니다."));
 
         if(user.getRole()!=Role.ADMIN && !clearRecord.getUser().equals(user)){
