@@ -26,6 +26,7 @@ public class ClearRecordService {
     private final ProblemRepository problemRepository;
     private final SectorRepository sectorRepository;
     private final WallSettingRepository settingRepository;
+    private final GymRepository gymRepository;
 
 
     /**
@@ -57,7 +58,7 @@ public class ClearRecordService {
     }
 
     /**
-     * 사용자 ID 기준 완등 기록 요약
+     * 사용자 ID 기준 완등 기록 요약 조회
      * @param userId 사용자 ID
      * @param page page
      * @param size size
@@ -75,6 +76,51 @@ public class ClearRecordService {
         return clearRecord.map(ClearRecordSummaryDTO :: from);
     }
 
+    /**
+     * 사용자 ID와 암장 ID를 이용하여 완등 기록 요약 조회(완등일자기준 내림차순)
+     * @param userId 사용자 ID
+     * @param gymId 암장 ID
+     * @param page page
+     * @param size size
+     * @return Page<ClearRecordSummaryDTO>
+     */
+    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserIdAndGym(Long userId, Long gymId, int page, int size){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        Gym gym = gymRepository.findById(gymId)
+                .orElseThrow(()-> new EntityNotFoundException("암장을 찾을 수 없습니다."));
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ClearRecord> clearRecordPage = clearRecordRepository.findAllByUserAndGymOrderByClearDateDesc(user, gym, pageable);
+
+        return clearRecordPage.map(ClearRecordSummaryDTO :: from);
+    }
+
+    /**
+     * 사용자 ID와 세팅 ID를 이용하여 완등 기록 요약 조회
+     * @param userId 사용자 ID
+     * @param settingId 세팅 ID
+     * @param page page
+     * @param size size
+     * @return Page<ClearRecordSummaryDTO>
+     */
+    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserIdAndSettingId(Long userId, Long settingId, int page, int size){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        Setting setting = settingRepository.findById(settingId)
+                .orElseThrow(()-> new EntityNotFoundException("세팅을 찾을 수 없습니다."));
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ClearRecord> clearRecordPage = clearRecordRepository.findAllByUserAndSettingOrderByClearDateDesc(user, setting, pageable);
+
+        return clearRecordPage.map(ClearRecordSummaryDTO :: from);
+    }
 
     /**
      * 문제 ID 기준 완등 기록 요약(영상 URL이 있는 기록만)
@@ -151,7 +197,7 @@ public class ClearRecordService {
     /**
      * 완등 기록 영구삭제
      * @param userId 사용자 ID
-     * @param id 완등 기록 ID
+     * @param clearRecordId 완등 기록 ID
      */
     @Transactional
     public void deleteClearRecord(Long userId, Long clearRecordId){
