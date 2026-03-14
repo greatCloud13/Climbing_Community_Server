@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "setting_record")
+@Table(name = "clear_record")
 public class ClearRecord {
 
     @Id
