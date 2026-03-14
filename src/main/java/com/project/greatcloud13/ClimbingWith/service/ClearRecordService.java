@@ -1,9 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
-import com.project.greatcloud13.ClimbingWith.dto.ClearRecordCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.ClearRecordSummaryDTO;
-import com.project.greatcloud13.ClimbingWith.dto.ClearRecordResponseDTO;
-import com.project.greatcloud13.ClimbingWith.dto.ClearRecordUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.repository.*;
 import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
@@ -27,6 +24,7 @@ public class ClearRecordService {
     private final SectorRepository sectorRepository;
     private final WallSettingRepository settingRepository;
     private final GymRepository gymRepository;
+    private final ClearRecordRepositoryCustom clearRecordRepositoryCustom;
 
 
     /**
@@ -193,6 +191,20 @@ public class ClearRecordService {
         }
         return ClearRecordResponseDTO.from(clearRecord);
     }
+
+
+    public ClearRecordStatisticsResponse getClearRecordStatistics(Long userId, Long gymId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        Gym gym = gymRepository.findById(gymId)
+                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+
+        ClearRecordStatistics statistics = clearRecordRepositoryCustom.getStatistics(user, gym);
+
+        return ClearRecordStatisticsResponse.from(statistics);
+    }
+
 
     /**
      * 완등 기록 영구삭제

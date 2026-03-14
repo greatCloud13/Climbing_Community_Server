@@ -8,17 +8,29 @@ import lombok.Data;
 @Builder
 public class ClearRecordSummaryDTO {
 
+    private Long clearRecordId;
+
     private String username;
+
+    private String problemName;
+
+    private String level;
+
+    private String gymName;
 
     private String sectorName;
 
-    private String settingPeriod;
+    private String clearDate;
 
     public static ClearRecordSummaryDTO from(ClearRecord clearRecord){
         return ClearRecordSummaryDTO.builder()
+                .clearRecordId(clearRecord.getId())
                 .username(clearRecord.getUser().getUsername())
+                .problemName(clearRecord.getProblem().getTitle())
+                .level(clearRecord.getProblem().getGymLevel().getLevelName())
+                .gymName(clearRecord.getGym().getGymName())
                 .sectorName(clearRecord.getSetting().getSector().getSectorName())
-                .settingPeriod(clearRecord.getSetting().getStartDate().toString() + " ~ " + clearRecord.getSetting().getEndDate().toString())
+                .clearDate(clearRecord.getClearDate().toString())
                 .build();
 
     }

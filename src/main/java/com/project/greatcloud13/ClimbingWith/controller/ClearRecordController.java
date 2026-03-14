@@ -101,6 +101,18 @@ public class ClearRecordController {
     }
 
     @Operation(
+            summary = "암장별 완등 기록 통계 조회",
+            description = "암장 ID와 사용자 ID를 통해 완등 기록 통계를 조회합니다."
+    )
+    @GetMapping("/stats/user/{userId}/gym/{gymId}")
+    public ResponseEntity<ClearRecordStatisticsResponse> getClearRecordStatistics(
+            @PathVariable Long userId, @PathVariable Long gymId){
+        ClearRecordStatisticsResponse result = clearRecordService.getClearRecordStatistics(userId, gymId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(
             summary = "완등 기록 삭제",
             description = "ID에 해당하는 완등 기록을 영구적으로 삭제합니다."
     )
