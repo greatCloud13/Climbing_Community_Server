@@ -47,13 +47,13 @@ public class ClearRecord {
     }
 
     @Builder
-    public ClearRecord(User user, Gym gym, Setting setting, Problem problem, String videoUrl){
+    public ClearRecord(User user, Gym gym, Setting setting, Problem problem, String videoUrl, LocalDate clearDate){
         this.user = user;
         this.gym = gym;
         this.setting = setting;
         this.problem = problem;
         this.videoUrl = videoUrl;
-        this.clearDate = LocalDate.now();
+        this.clearDate = clearDate;
     }
 
 }

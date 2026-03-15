@@ -47,6 +47,7 @@ public class ClearRecordService {
                 .setting(problem.getSetting())
                 .problem(problem)
                 .videoUrl(clearRecordCreateDTO.getVideoUrl())
+                .clearDate(clearRecordCreateDTO.getClearDate())
                 .build();
 
         problem.addClearUserCount();
