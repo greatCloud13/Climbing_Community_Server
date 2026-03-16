@@ -35,6 +35,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+/*==================테스트 코드 작성 규칙===========================
+1. 테스트 대상 Class 내부 메소드 외의 의존성은 Mock 주입을 통해 동작 정의
+2. 테스트에 사용되는 중복되는 파라미터 및 Entity는 클래스 영역에 정의
+3. 테스트 코드 작성 양식은 [Given], [When], [Then] 양식으로 작성
+    3.1 [Given] 테스트에 필요한 파라미터, Mock 동작 정의
+    3.2 [When] 테스트에 대한 상황을 정의
+    3.3 [Then] 동작 이후 결과를 검증
+    3.4 상황과 동시에 동작 결과가 발생하는 경우 [When & Then]을 통해 정의
+4. verify를 통한 메소드의 동작 여부 또한 검증
+ */
+
 @ExtendWith(MockitoExtension.class)
 public class ClearRecordServiceTest {
 
