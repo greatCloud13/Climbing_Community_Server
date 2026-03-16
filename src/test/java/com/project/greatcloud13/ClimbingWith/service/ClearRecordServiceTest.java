@@ -11,6 +11,7 @@ import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.util.TestFixture;
 import jakarta.persistence.EntityNotFoundException;
 import org.aspectj.util.Reflection;
+import org.hibernate.annotations.SQLJoinTableRestriction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -52,6 +54,7 @@ public class ClearRecordServiceTest {
     private Setting mockSetting1;
     private Problem mockProblem1;
     private User mockUser1;
+    private User invalidUser1;
     private GymLevel mockGymLevel1;
 //    ===============================================================
 
@@ -70,9 +73,10 @@ public class ClearRecordServiceTest {
     Long userId = 500L;
     String UserName = "테스트 사용자1";
 
+    Long invalidUserId = 999L;
+
     LocalDate date = LocalDate.now();
     String videoUrl = "https://s3.aws.com/video/climbing.mp4";
-    Long invalidUserId = 999L;
     Long invalidProblemId = 999L;
 
 //    ===============================================================
@@ -102,6 +106,9 @@ public class ClearRecordServiceTest {
         mockUser1 = User.builder().username("tester1").build();
         ReflectionTestUtils.setField(mockUser1, "id", userId);
 
+//      invalidUser
+        invalidUser1 = User.builder().username("invalidUser").build();
+        ReflectionTestUtils.setField(invalidUser1, "id", invalidUserId);
 
     }
 
@@ -173,4 +180,63 @@ public class ClearRecordServiceTest {
     }
     }
 
+    @Nested
+    @DisplayName("getClearRecordSummaryByUserId() 메서드 테스트")
+    class GetClearRecordSummaryByUserIdTest{
+
+        @Test
+        @DisplayName("완등 기록 조회 성공")
+        void getClearRecordSummaryByUserId_Success(){
+//          [Given]
+            int page = 0;
+            int size = 5;
+
+            Pageable pageable = PageRequest.of(page, size);
+
+            Page<ClearRecord> mockClearRecord = TestFixture.createMockPage(()->ClearRecord.builder()
+                    .user(mockUser1)
+                    .gym(mockGym1)
+                    .setting(mockSetting1)
+                    .problem(mockProblem1)
+                    .videoUrl(videoUrl)
+                    .clearDate(LocalDate.now())
+                    .build(), 5);
+
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
+            given(clearRecordRepository.findAllByUserOrderByClearDateDesc(mockUser1, pageable)).willReturn(mockClearRecord);
+
+//          [When]
+            Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, page, size);
+
+//          [Then]
+//          요청한 size와 page 크기, 요청한 사용자의 정보가 일치하는지 검증,
+            assertThat(result.getSize()).isEqualTo(size);
+            assertThat(result.getPageable().getPageNumber()).isEqualTo(page);
+            assertThat(result.getContent().getFirst().getUsername()).isEqualTo(mockUser1.getUsername());
+
+            verify(clearRecordRepository, times(1)).findAllByUserOrderByClearDateDesc(mockUser1, pageable);
+
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 사용자 ID 요청시 예외 발생")
+        void getClearRecordSummaryByUserId_Success_UserNotFound(){
+//          [Given]
+            int page = 0;
+            int size = 10;
+
+//          사용자를 찾을 수 없는 상황
+            given(userRepository.findById(invalidUserId)).willReturn(Optional.empty());
+
+//          [When & Then]
+            assertThatThrownBy(()-> clearRecordService.getClearRecordSummaryByUserId(invalidUserId, page, size))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("사용자를 찾을 수 없습니다.");
+
+//          조회 메소드가 실행되었는지 검증
+            verify(clearRecordRepository, times(0)).findAllByUserOrderByClearDateDesc(any(), any());
+
+        }
+
+    }
 }
