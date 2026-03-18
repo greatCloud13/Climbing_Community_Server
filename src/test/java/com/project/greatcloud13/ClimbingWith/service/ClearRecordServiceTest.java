@@ -509,7 +509,7 @@ public class ClearRecordServiceTest {
                             .problem(mockProblem1)
                             .videoUrl(videoUrl)
                             .clearDate(LocalDate.now())
-                            .build(), 10);
+                            .build(), 5);
 
             given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem1));
             given(clearRecordRepository.findAllByProblemAndVideoUrlIsNotNull(mockProblem1, pageable)).willReturn(clearRecordMockPage);
