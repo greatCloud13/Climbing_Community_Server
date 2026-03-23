@@ -2,10 +2,12 @@ package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
+import com.project.greatcloud13.ClimbingWith.dto.PostUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -95,23 +99,30 @@ public class PostServiceTest {
         ReflectionTestUtils.setField(mockGym1, "id", gymId1);
         mockGym2=Gym.builder().gymName(gymName2).build();
         ReflectionTestUtils.setField(mockGym2, "id", gymId2);
+
 //      User Mock Entity Build
         mockUser1=User.builder().username(testUsername1).build();
         ReflectionTestUtils.setField(mockUser1, "id", testUserId1);
         ReflectionTestUtils.setField(mockUser1, "role", Role.MEMBER);
+
         mockAdminUser=User.builder().username(testAdminUsername).build();
         ReflectionTestUtils.setField(mockAdminUser, "id", adminUserId);
         ReflectionTestUtils.setField(mockAdminUser, "role", Role.ADMIN);
+
         mockManagerUser1=User.builder().username(testManagerUsername1).build();
         ReflectionTestUtils.setField(mockManagerUser1, "id", testManagerId1);
         ReflectionTestUtils.setField(mockManagerUser1, "gym", mockGym1);
         ReflectionTestUtils.setField(mockManagerUser1, "role", Role.GYM_MANAGER);
+
         mockManagerUser2=User.builder().username(testManagerUsername2).build();
         ReflectionTestUtils.setField(mockManagerUser2, "id", testManagerId2);
         ReflectionTestUtils.setField(mockManagerUser2, "gym", mockGym2);
         ReflectionTestUtils.setField(mockManagerUser2, "role", Role.GYM_MANAGER);
+
+//      Post Mock Entity Build
         mockPost = Post.builder().title(postName1).content(postContent1).build();
         ReflectionTestUtils.setField(mockPost, "id", testPostId);
+        ReflectionTestUtils.setField(mockPost, "writer", mockManagerUser1);
 
 
 
@@ -178,4 +189,142 @@ public class PostServiceTest {
 
     }
 
+    @Nested
+    @DisplayName("updatePost() 기능 테스트")
+    class UpdatePostTest{
+
+        @Test
+        @DisplayName("게시글 업데이트 성공")
+        void updatePost_Success(){
+//          [Given]
+            PostUpdateDTO request = new PostUpdateDTO();
+            request.setTitle("수정된 제목");
+            request.setContent("수정된 내용");
+            request.setPostType(PostType.PROMOTION);
+
+            given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
+            given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
+//          [When]
+            PostResponseDTO result = postService.updatePost(testManagerId1, testPostId, request);
+
+//          [Then]
+            assertThat(result.getTitle()).isEqualTo(request.getTitle());
+            assertThat(result.getContent()).isEqualTo(request.getContent());
+            assertThat(result.getPostType()).isEqualTo(request.getPostType().toString());
+
+            verify(postRepository, times(1)).save(any());
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 사용자 ID 요청시 예외 발생")
+        void updatePost_UserNotFound(){
+//          [Given]
+            PostUpdateDTO request = new PostUpdateDTO();
+            request.setTitle("수정된 제목");
+            request.setContent("수정된 내용");
+            request.setPostType(PostType.PROMOTION);
+
+            given(userRepository.findById(invalidUserId)).willReturn(Optional.empty());
+//          [When & When]
+            assertThatThrownBy(()-> postService.updatePost(invalidUserId, testPostId, request))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("존재하지 않는 사용자 입니다");
+
+            verify(postRepository, times(0)).save(any());
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 게시글 ID 요청시 예외 발생")
+        void updatePost_PostNotFound(){
+//          [Given]
+            PostUpdateDTO request = new PostUpdateDTO();
+            request.setTitle("수정된 제목");
+            request.setContent("수정된 내용");
+            request.setPostType(PostType.PROMOTION);
+
+            given(postRepository.findById(invalidPostId)).willReturn(Optional.empty());
+//          [When & Then]
+            assertThatThrownBy(()->postService.updatePost(testManagerId1, invalidPostId, request))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("게시글을 찾을 수 없습니다.");
+
+            verify(postRepository, times(0)).save(any());
+        }
+
+        @Test
+        @DisplayName("실패: 사용자가 매니저가 아닌 경우 예외 발생")
+        void updatePost_IllegalAccess(){
+//          [Given]
+            PostUpdateDTO request = new PostUpdateDTO();
+            request.setTitle("수정된 제목");
+            request.setContent("수정된 내용");
+            request.setPostType(PostType.PROMOTION);
+
+            given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
+            given(userRepository.findById(testUserId1)).willReturn(Optional.of(mockUser1));
+//          [When & Then]
+            assertThatThrownBy(()->postService.updatePost(testUserId1, testPostId, request))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("잘못된 접근입니다.");
+
+            verify(postRepository, times(0)).save(any());
+        }
+
+        @Test
+        @DisplayName("실패: 작성자가 아닌 다른 사용자가 요청을 한 경우 예외 발생")
+        void updatePost_AnotherManager(){
+//          [Given]
+            PostUpdateDTO request = new PostUpdateDTO();
+            request.setTitle("수정된 제목");
+            request.setContent("수정된 내용");
+            request.setPostType(PostType.PROMOTION);
+
+            given(userRepository.findById(testManagerId2)).willReturn(Optional.of(mockManagerUser2));
+            given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
+//          [When & Then]
+            assertThatThrownBy(()->postService.updatePost(testManagerId2, testPostId, request))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("작성자만 게시글을 수정할 수 있습니다.");
+
+            verify(postRepository, times(0)).save(any());
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @DisplayName("실패: 제목이 비어있는 경우 예외 발생")
+        void updatePost_NullTitle(String invalidTitle){
+//          [Given]
+            PostUpdateDTO request = new PostUpdateDTO();
+            request.setTitle(invalidTitle);
+            request.setContent("수정된 내용");
+            request.setPostType(PostType.PROMOTION);
+
+            given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
+//          [When & Then]
+            assertThatThrownBy(()->postService.updatePost(testUserId1, testPostId, request))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("제목이 유효하지 않습니다.");
+
+            verify(postRepository, times(0)).save(any());
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @DisplayName("실패: 내용이 비어있는 경우 예외 발생")
+        void update_NullContent(String invalidContent){
+//          [Given]
+            PostUpdateDTO request = new PostUpdateDTO();
+            request.setTitle("수정된 제목");
+            request.setContent(invalidContent);
+            request.setPostType(PostType.PROMOTION);
+
+            given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
+//          [When & Then]
+            assertThatThrownBy(()->postService.updatePost(testManagerId1, testPostId, request))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("내용이 유효하지 않습니다");
+
+            verify(postRepository, times(0)).save(any());
+        }
+    }
 }

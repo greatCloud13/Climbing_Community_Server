@@ -2,6 +2,7 @@ package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
+import com.project.greatcloud13.ClimbingWith.dto.PostUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Post;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
@@ -42,5 +43,10 @@ public class PostService {
         postRepository.save(post);
 
         return PostResponseDTO.from(post);
+    }
+
+    @Transactional
+    public PostResponseDTO updatePost(Long userId, Long postId, PostUpdateDTO request){
+        return null;
     }
 }
