@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. db 컨테이너
+  # 1. db Container
   db:
     image: mysql:8.0
     container_name: climbingwith-db
@@ -10,6 +10,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: p@ssword
       MYSQL_DATABASE: climbingWith
+    networks:
+      - climbing-network
     volumes:
       - ./db_data:/var/lib/mysql
 
@@ -25,3 +27,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/climbingWith?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: p@ssword
+    networks:
+      - climbing-network
+
+networks:
+  climbing-network:
+    driver: bridge
