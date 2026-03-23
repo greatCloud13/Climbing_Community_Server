@@ -57,6 +57,7 @@ public class PostServiceTest {
     private User mockAdminUser;
     private User mockManagerUser1;
     private User mockManagerUser2;
+    private Post mockPost;
 //    ===============================================================
 //    ==================== Mock Object parameter ====================
 
@@ -65,6 +66,7 @@ public class PostServiceTest {
     String gymName2 = "테스트 암장2";
     Long gymId2 = 2L;
 
+    Long testPostId = 601L;
     String postName1 = "테스트 게시글 이름 1";
     String postName2 = "테스트 게시글 이름2";
     String postContent1 = "테스트 게시글 내용1";
@@ -77,6 +79,7 @@ public class PostServiceTest {
     Long testManagerId1 = 502L;
     String testManagerUsername2 = "테스트 암장 2 매니저";
     Long testManagerId2 = 503L;
+
 
     Long invalidPostId = 999L;
     Long invalidUserId = 998L;
@@ -107,6 +110,8 @@ public class PostServiceTest {
         ReflectionTestUtils.setField(mockManagerUser2, "id", testManagerId2);
         ReflectionTestUtils.setField(mockManagerUser2, "gym", mockGym2);
         ReflectionTestUtils.setField(mockManagerUser2, "role", Role.GYM_MANAGER);
+        mockPost = Post.builder().title(postName1).content(postContent1).build();
+        ReflectionTestUtils.setField(mockPost, "id", testPostId);
 
 
 
@@ -120,8 +125,10 @@ public class PostServiceTest {
         @DisplayName("게시글 작성 성공")
         void createPost_Success(){
             //[Given] 테스트 환경 셋업
-            PostType postType = PostType.NOTICE;
             PostCreateDTO requestDTO = new PostCreateDTO();
+            requestDTO.setTitle(postName1);
+            requestDTO.setPostType(PostType.NOTICE);
+            requestDTO.setContent(postContent1);
 
             given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
 
@@ -132,7 +139,7 @@ public class PostServiceTest {
             assertThat(response).isNotNull();
             assertThat(response.getWriter()).isEqualTo(mockManagerUser1.getUsername());
             assertThat(response.getTitle()).isEqualTo(postName1);
-            assertThat(response.getPostType()).isEqualTo(postType);
+            assertThat(response.getPostType()).isEqualTo(PostType.NOTICE.toString());
             assertThat(response.getContent()).isEqualTo(postContent1);
             assertThat(response.getGymName()).isEqualTo(mockManagerUser1.getGym().getGymName());
 
@@ -158,11 +165,12 @@ public class PostServiceTest {
         @DisplayName("실패: 요청자가 Admin, GymManager가 아닌 경우")
         void createPost_illegalAccess(){
 //          [Given] 테스트 환경 셋업
+            PostCreateDTO requestDTO = new PostCreateDTO();
             given(userRepository.findById(testUserId1)).willReturn(Optional.of(mockUser1));
 
 //          [When & Then]
-            assertThatThrownBy(()->postService.createPost(testUserId1, any()))
-                    .isInstanceOf(IllegalIdentifierException.class)
+            assertThatThrownBy(()->postService.createPost(testUserId1, requestDTO))
+                    .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("잘못된 접근 입니다.");
 
             verify(postRepository, times(0)).save(any());
