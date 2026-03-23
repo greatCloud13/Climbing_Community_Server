@@ -76,5 +76,9 @@ public class User {
         this.role = Role.MEMBER;
     }
 
+    public Boolean isManager(){
+        return !this.role.equals(Role.MEMBER);
+     }
+
 }
 
