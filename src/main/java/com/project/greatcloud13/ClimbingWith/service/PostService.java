@@ -9,6 +9,7 @@ import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,20 @@ public class PostService {
 
     @Transactional
     public PostResponseDTO updatePost(Long userId, Long postId, PostUpdateDTO request){
-        return null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("존재하지 않는 사용자 입니다."));
+
+        if(!user.isManager()){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(()->new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+
+
+        post.validateWriter(userId);
+        post.updatePost(request, LocalDateTime.now());
+
+        return PostResponseDTO.from(post);
     }
 }
