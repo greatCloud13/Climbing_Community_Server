@@ -260,7 +260,6 @@ public class PostServiceTest {
             request.setContent("수정된 내용");
             request.setPostType(PostType.PROMOTION);
 
-            given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
             given(userRepository.findById(testUserId1)).willReturn(Optional.of(mockUser1));
 //          [When & Then]
             assertThatThrownBy(()->postService.updatePost(testUserId1, testPostId, request))
@@ -300,8 +299,9 @@ public class PostServiceTest {
             request.setPostType(PostType.PROMOTION);
 
             given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
+            given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
 //          [When & Then]
-            assertThatThrownBy(()->postService.updatePost(testUserId1, testPostId, request))
+            assertThatThrownBy(()->postService.updatePost(testManagerId1, testPostId, request))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("제목이 유효하지 않습니다.");
 
