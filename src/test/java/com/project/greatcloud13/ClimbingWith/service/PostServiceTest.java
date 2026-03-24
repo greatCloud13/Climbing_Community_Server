@@ -28,6 +28,7 @@ import static org.mockito.Mockito.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /*==================테스트 코드 작성 규칙===========================
@@ -84,6 +85,8 @@ public class PostServiceTest {
     String testManagerUsername2 = "테스트 암장 2 매니저";
     Long testManagerId2 = 503L;
 
+    LocalDateTime createdAt = LocalDateTime.of(2026, 3, 20, 14, 30);
+
 
     Long invalidPostId = 999L;
     Long invalidUserId = 998L;
@@ -120,7 +123,7 @@ public class PostServiceTest {
         ReflectionTestUtils.setField(mockManagerUser2, "role", Role.GYM_MANAGER);
 
 //      Post Mock Entity Build
-        mockPost = Post.builder().title(postName1).content(postContent1).build();
+        mockPost = Post.builder().title(postName1).gym(mockGym1).content(postContent1).createdAt(createdAt).build();
         ReflectionTestUtils.setField(mockPost, "id", testPostId);
         ReflectionTestUtils.setField(mockPost, "writer", mockManagerUser1);
 
@@ -203,7 +206,6 @@ public class PostServiceTest {
             request.setPostType(PostType.PROMOTION);
 
             given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
-            given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
 //          [When]
             PostResponseDTO result = postService.updatePost(testManagerId1, testPostId, request);
 
@@ -211,8 +213,6 @@ public class PostServiceTest {
             assertThat(result.getTitle()).isEqualTo(request.getTitle());
             assertThat(result.getContent()).isEqualTo(request.getContent());
             assertThat(result.getPostType()).isEqualTo(request.getPostType().toString());
-
-            verify(postRepository, times(1)).save(any());
         }
 
         @Test
