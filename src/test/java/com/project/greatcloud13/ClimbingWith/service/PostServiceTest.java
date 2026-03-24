@@ -228,7 +228,7 @@ public class PostServiceTest {
 //          [When & When]
             assertThatThrownBy(()-> postService.updatePost(invalidUserId, testPostId, request))
                     .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("존재하지 않는 사용자 입니다");
+                    .hasMessage("존재하지 않는 사용자 입니다.");
 
             verify(postRepository, times(0)).save(any());
         }
