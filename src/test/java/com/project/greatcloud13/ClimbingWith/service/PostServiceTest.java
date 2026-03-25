@@ -206,6 +206,7 @@ public class PostServiceTest {
             request.setPostType(PostType.PROMOTION);
 
             given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
+            given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
 //          [When]
             PostResponseDTO result = postService.updatePost(testManagerId1, testPostId, request);
 
@@ -242,6 +243,7 @@ public class PostServiceTest {
             request.setContent("수정된 내용");
             request.setPostType(PostType.PROMOTION);
 
+            given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
             given(postRepository.findById(invalidPostId)).willReturn(Optional.empty());
 //          [When & Then]
             assertThatThrownBy(()->postService.updatePost(testManagerId1, invalidPostId, request))
@@ -319,10 +321,11 @@ public class PostServiceTest {
             request.setPostType(PostType.PROMOTION);
 
             given(userRepository.findById(testManagerId1)).willReturn(Optional.of(mockManagerUser1));
+            given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
 //          [When & Then]
             assertThatThrownBy(()->postService.updatePost(testManagerId1, testPostId, request))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("내용이 유효하지 않습니다");
+                    .hasMessage("내용이 유효하지 않습니다.");
 
             verify(postRepository, times(0)).save(any());
         }
