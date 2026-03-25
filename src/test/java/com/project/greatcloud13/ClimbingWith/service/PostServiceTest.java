@@ -134,7 +134,7 @@ public class PostServiceTest {
         ReflectionTestUtils.setField(mockManagerUser2, "role", Role.GYM_MANAGER);
 
 //      Post Mock Entity Build
-        mockPost = Post.builder().title(postName1).gym(mockGym1).content(postContent1).createdAt(createdAt).build();
+        mockPost = Post.builder().title(postName1).gym(mockGym1).content(postContent1).postType(PostType.PROMOTION).createdAt(createdAt).build();
         ReflectionTestUtils.setField(mockPost, "id", testPostId);
         ReflectionTestUtils.setField(mockPost, "writer", mockManagerUser1);
 
@@ -254,6 +254,7 @@ public class PostServiceTest {
             Page<Post> mockPage = new PageImpl<>(postList, pageable, postList.size());
 
             given(postRepository.findAllByGym(mockGym1, pageable)).willReturn(mockPage);
+            given(gymRepository.findById(gymId1)).willReturn(Optional.of(mockGym1));
 //          [When]
             Page<PostSummaryDTO> result = postService.getAllByGym(gymId1, pageable);
 
@@ -275,11 +276,12 @@ public class PostServiceTest {
             // 2. Mock 객체는 필터링된 결과(5개)만 반환하도록 설정
             Page<Post> pageResult = new PageImpl<>(filteredPosts, pageable, filteredPosts.size());
 
+            given(gymRepository.findById(gymId1)).willReturn(Optional.of(mockGym1));
             given(postRepository.findAllByGymAndPostType(eq(mockGym1), eq(PostType.PROMOTION), eq(pageable)))
                     .willReturn(pageResult);
 
             // [When]
-            Page<PostSummaryDTO> result = postService.getAllByGymWithPostType(gymId1, PostType.PROMOTION);
+            Page<PostSummaryDTO> result = postService.getAllByGymWithPostType(gymId1, PostType.PROMOTION, pageable);
 
             // [Then]
             verify(postRepository, times(1)).findAllByGymAndPostType(mockGym1, PostType.PROMOTION, pageable);
