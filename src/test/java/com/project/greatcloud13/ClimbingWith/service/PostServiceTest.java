@@ -253,12 +253,12 @@ public class PostServiceTest {
 
             Page<Post> mockPage = new PageImpl<>(postList, pageable, postList.size());
 
-            given(postRepository.findAllByGym(mockGym1)).willReturn(mockPage);
+            given(postRepository.findAllByGym(mockGym1, pageable)).willReturn(mockPage);
 //          [When]
-            Page<PostSummaryDTO> result = postService.getAllByGym(gymId1);
+            Page<PostSummaryDTO> result = postService.getAllByGym(gymId1, pageable);
 
 //          [Then]
-            verify(postRepository, times(1)).findAllByGym(any());
+            verify(postRepository, times(1)).findAllByGym(any(), any());
 
         }
 
@@ -266,7 +266,6 @@ public class PostServiceTest {
         @DisplayName("요청한 암장의 해당하는 요청한 태그의 게시글 페이지 조회")
         void getPostPage_WithTagPostsPage_Success() {
             // [given]
-            // 1. 실제로 해당 조건에 맞는 데이터만 리스트로 만듭니다.
             List<Post> filteredPosts = new ArrayList<>();
             for (long i = 0L; i < 5; i++) {
                 filteredPosts.add(PostFixture.createPost(i, "암장1 게시글", "내용1", PostType.PROMOTION, mockGym1, mockManagerUser1, LocalDateTime.now()));
@@ -276,14 +275,14 @@ public class PostServiceTest {
             // 2. Mock 객체는 필터링된 결과(5개)만 반환하도록 설정
             Page<Post> pageResult = new PageImpl<>(filteredPosts, pageable, filteredPosts.size());
 
-            given(postRepository.findAllByGymAndPostType(eq(mockGym1), eq(PostType.PROMOTION)))
+            given(postRepository.findAllByGymAndPostType(eq(mockGym1), eq(PostType.PROMOTION), eq(pageable)))
                     .willReturn(pageResult);
 
             // [When]
             Page<PostSummaryDTO> result = postService.getAllByGymWithPostType(gymId1, PostType.PROMOTION);
 
             // [Then]
-            verify(postRepository, times(1)).findAllByGymAndPostType(mockGym1, PostType.PROMOTION);
+            verify(postRepository, times(1)).findAllByGymAndPostType(mockGym1, PostType.PROMOTION, pageable);
         }
 
     }
