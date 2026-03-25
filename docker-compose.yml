@@ -14,6 +14,11 @@ services:
       - climbing-network
     volumes:
       - ./db_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 5s
+      retries: 10
+      interval: 5s
 
   # 2. spring boot app Container
   app:
@@ -21,14 +26,15 @@ services:
     container_name: climbingwith-app
     ports:
       - "8080:8080"
-    depends_on:
-      - db
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/climbingWith?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: p@ssword
     networks:
       - climbing-network
+    depends_on:
+      db:
+        condition: service_healthy # DB의 healthcheck가 통과될 때까지 대기
 
 networks:
   climbing-network:
