@@ -9,6 +9,7 @@ import lombok.Data;
 @Builder
 public class PostResponseDTO {
 
+    private Long id;
     private String title;
     private String gymName;
     private String writer;
@@ -19,6 +20,7 @@ public class PostResponseDTO {
 
     public static PostResponseDTO from(Post post){
         return PostResponseDTO.builder()
+                .id(post.getId())
                 .title(post.getTitle())
                 .gymName(post.getGym().getGymName())
                 .writer(post.getWriter().getUsername())

@@ -1,12 +1,15 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
+import com.project.greatcloud13.ClimbingWith.PostFixture;
 import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
+import com.project.greatcloud13.ClimbingWith.dto.PostSummaryDTO;
 import com.project.greatcloud13.ClimbingWith.dto.PostUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
+import com.project.greatcloud13.ClimbingWith.util.TestFixture;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.boot.model.naming.IllegalIdentifierException;
@@ -20,15 +23,21 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /*==================테스트 코드 작성 규칙===========================
@@ -63,6 +72,8 @@ public class PostServiceTest {
     private User mockManagerUser1;
     private User mockManagerUser2;
     private Post mockPost;
+    private Post mockPost2;
+    private Post mockPost3;
 //    ===============================================================
 //    ==================== Mock Object parameter ====================
 
@@ -127,7 +138,13 @@ public class PostServiceTest {
         ReflectionTestUtils.setField(mockPost, "id", testPostId);
         ReflectionTestUtils.setField(mockPost, "writer", mockManagerUser1);
 
+        mockPost2 = Post.builder().title("테스트 포스트2").gym(mockGym1).content("테스트 포스트2").createdAt(createdAt).build();
+        ReflectionTestUtils.setField(mockPost2, "id", 212L);
+        ReflectionTestUtils.setField(mockPost2, "writer", mockManagerUser1);
 
+        mockPost3 = Post.builder().title("테스트 포스트3").gym(mockGym1).content("테스트 포스트3").createdAt(createdAt).build();
+        ReflectionTestUtils.setField(mockPost3, "id", 213L);
+        ReflectionTestUtils.setField(mockPost3, "writer", mockManagerUser1);
 
     }
 
@@ -191,6 +208,86 @@ public class PostServiceTest {
         }
 
     }
+
+    @Nested
+    @DisplayName("getPost() 기능 테스트")
+    class GetPostTest{
+
+        @Test
+        @DisplayName("게시글 단일 조회 성공")
+        void getPostById_Success(){
+//          [given]
+
+            given(postRepository.findById(testPostId)).willReturn(Optional.of(mockPost));
+//          [When]
+
+            PostResponseDTO result = postService.getPostById(testPostId);
+//          [Then]
+            assertThat(result.getId()).isEqualTo(testPostId);
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 게시글 ID 요청시 예외 발생")
+        void getPost_PostNotFound(){
+//          [given]
+
+            given(postRepository.findById(invalidPostId)).willReturn(Optional.empty());
+//          [When & Then]
+            assertThatThrownBy(()->postService.getPostById(invalidPostId))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("게시글을 찾을 수 없습니다.");
+        }
+    }
+
+    @Nested
+    @DisplayName("getPostPage() 기능 테스트")
+    class GetPostPageTest{
+
+        @Test
+        @DisplayName("요청한 암장 게시글 페이지 Repository를 통해 조회")
+        void getPostPage_Success(){
+//          [given]
+
+            List<Post> postList = List.of(mockPost, mockPost2, mockPost3);
+            Pageable pageable = PageRequest.of(0, 10);
+
+            Page<Post> mockPage = new PageImpl<>(postList, pageable, postList.size());
+
+            given(postRepository.findAllByGym(mockGym1)).willReturn(mockPage);
+//          [When]
+            Page<PostSummaryDTO> result = postService.getAllByGym(gymId1);
+
+//          [Then]
+            verify(postRepository, times(1)).findAllByGym(any());
+
+        }
+
+        @Test
+        @DisplayName("요청한 암장의 해당하는 요청한 태그의 게시글 페이지 조회")
+        void getPostPage_WithTagPostsPage_Success() {
+            // [given]
+            // 1. 실제로 해당 조건에 맞는 데이터만 리스트로 만듭니다.
+            List<Post> filteredPosts = new ArrayList<>();
+            for (long i = 0L; i < 5; i++) {
+                filteredPosts.add(PostFixture.createPost(i, "암장1 게시글", "내용1", PostType.PROMOTION, mockGym1, mockManagerUser1, LocalDateTime.now()));
+            }
+
+            Pageable pageable = PageRequest.of(0, 5);
+            // 2. Mock 객체는 필터링된 결과(5개)만 반환하도록 설정
+            Page<Post> pageResult = new PageImpl<>(filteredPosts, pageable, filteredPosts.size());
+
+            given(postRepository.findAllByGymAndPostType(eq(mockGym1), eq(PostType.PROMOTION)))
+                    .willReturn(pageResult);
+
+            // [When]
+            Page<PostSummaryDTO> result = postService.getAllByGymWithPostType(gymId1, PostType.PROMOTION);
+
+            // [Then]
+            verify(postRepository, times(1)).findAllByGymAndPostType(mockGym1, PostType.PROMOTION);
+        }
+
+    }
+
 
     @Nested
     @DisplayName("updatePost() 기능 테스트")

@@ -2,14 +2,17 @@ package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
+import com.project.greatcloud13.ClimbingWith.dto.PostSummaryDTO;
 import com.project.greatcloud13.ClimbingWith.dto.PostUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Post;
+import com.project.greatcloud13.ClimbingWith.entity.PostType;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.boot.model.naming.IllegalIdentifierException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,4 +67,20 @@ public class PostService {
 
         return PostResponseDTO.from(post);
     }
+
+    @Transactional(readOnly = true)
+    public PostResponseDTO getPostById(Long postId){
+        return null;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostSummaryDTO> getAllByGym(Long gymId){
+        return null;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostSummaryDTO> getAllByGymWithPostType(Long gymId, PostType postType){
+        return null;
+    }
+
 }
