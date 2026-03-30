@@ -1,5 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.common;
 
+import com.project.greatcloud13.ClimbingWith.exception.BusinessException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,18 +12,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResult<?>> handleIllegalArgument(IllegalArgumentException e){
-        log.warn("handleIllegalArgument: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResult.fail("BAD_REQUEST", e.getMessage()));
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ApiResult<?>> handleEntityNotFound(EntityNotFoundException e){
-        log.warn("handleEntityNotFound: {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResult.fail("NOT_FOUND", e.getMessage()));
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResult<?>> BusinessException(BusinessException e){
+        log.warn("BusinessException: {}", e.getMessage());
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ApiResult.fail(errorCode.getCode(), e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
