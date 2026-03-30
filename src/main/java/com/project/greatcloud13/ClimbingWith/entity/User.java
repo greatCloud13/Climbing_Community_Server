@@ -78,7 +78,11 @@ public class User {
 
     public Boolean isManager(){
         return !this.role.equals(Role.MEMBER);
-     }
+    }
+
+    public Boolean gymValidate(Gym gym){
+        return this.gym.equals(gym)||this.role.equals(Role.ADMIN);
+    }
 
 }
 
