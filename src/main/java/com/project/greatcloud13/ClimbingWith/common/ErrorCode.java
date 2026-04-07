@@ -25,7 +25,8 @@ public enum ErrorCode {
     SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "세팅을 찾을 수 없습니다."),
 
     //  ====================================COMMON ERROR CODE=================================
-    AccessDenied(HttpStatus.FORBIDDEN, "S001", "접근 권한이 없습니다."),
+    NOT_IMPLEMENTED(HttpStatus.NOT_IMPLEMENTED, "C001", "준비중인 기능입니다."),
+    AccessDenied(HttpStatus.FORBIDDEN, "C002", "접근 권한이 없습니다."),
 
 
     ;
