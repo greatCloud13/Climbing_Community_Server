@@ -4,8 +4,13 @@ import com.project.greatcloud13.ClimbingWith.dto.GymCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDetailDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
+import com.project.greatcloud13.ClimbingWith.entity.User;
+import com.project.greatcloud13.ClimbingWith.exception.common.AccessDeniedException;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.SectorRepository;
+import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,9 +29,17 @@ public class GymManagementService {
 
     private final GymRepository gymRepository;
     private final SectorRepository sectorRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public Gym createGym(GymCreateDTO request){
+    public Gym createGym(GymCreateDTO request, Long userId){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        if(user.isAdmin()){
+            throw new AccessDeniedException();
+        }
 
         Gym gym = Gym.builder()
                 .gymName(request.getGymName())
@@ -50,10 +63,17 @@ public class GymManagementService {
     }
 
     @Transactional
-    public Gym updateGym(Long id, GymCreateDTO request){
+    public Gym updateGym(Long id, GymCreateDTO request, Long userId){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        if(user.isAdmin()){
+            throw new AccessDeniedException();
+        }
 
         Gym gym = gymRepository.findById(id)
-                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+                .orElseThrow(GymNotFoundException::new);
 
         gym.updateGym(request);
 
@@ -64,7 +84,7 @@ public class GymManagementService {
     public GymDetailDTO getGymDetail(Long id){
 
         Gym gym = gymRepository.findById(id)
-                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+                .orElseThrow(GymNotFoundException::new);
 
         List<Sector>sectorList = sectorRepository.findAllByGym(gym);
 

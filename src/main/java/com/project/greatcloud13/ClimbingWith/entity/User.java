@@ -80,6 +80,10 @@ public class User {
         return !this.role.equals(Role.MEMBER);
     }
 
+    public Boolean isAdmin(){
+        return this.role.equals(Role.ADMIN);
+    }
+
     public Boolean gymValidate(Gym gym){
         return this.gym.equals(gym)||this.role.equals(Role.ADMIN);
     }

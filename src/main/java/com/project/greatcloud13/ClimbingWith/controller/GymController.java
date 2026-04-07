@@ -4,11 +4,13 @@ import com.project.greatcloud13.ClimbingWith.dto.GymCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDetailDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
+import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import com.project.greatcloud13.ClimbingWith.service.GymManagementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,15 +22,15 @@ public class GymController {
     private final GymManagementService gymManagementService;
 
     @PostMapping
-    public ResponseEntity<GymDTO> createGym(@RequestBody GymCreateDTO request){
+    public ResponseEntity<GymDTO> createGym(@RequestBody GymCreateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        GymDTO result = GymDTO.from(gymManagementService.createGym(request));
+        GymDTO result = GymDTO.from(gymManagementService.createGym(request, userDetails.getUserId()));
 
         return ResponseEntity.ok(result);
     }
 
     @GetMapping
-    public ResponseEntity<Page<GymDTO>> getGymList(@RequestParam int page, @RequestParam int size ){
+    public ResponseEntity<Page<GymDTO>> getGymList(@RequestParam int page, @RequestParam int size){
 
         Page<Gym> result = gymManagementService.findAll(page, size);
 
@@ -46,9 +48,9 @@ public class GymController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GymDTO> updateGym(@PathVariable Long id, @RequestBody GymCreateDTO request){
+    public ResponseEntity<GymDTO> updateGym(@PathVariable Long id, @RequestBody GymCreateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        Gym result = gymManagementService.updateGym(id, request);
+        Gym result = gymManagementService.updateGym(id, request, userDetails.getUserId());
 
         return ResponseEntity.ok(GymDTO.from(result));
     }
