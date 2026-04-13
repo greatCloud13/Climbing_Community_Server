@@ -75,7 +75,7 @@ public class SectorManagementService {
      *
      * @param id 조회를 시도하는 섹터 ID
      * @return 요청한 ID의 섹터 상세정보
-     * @exception SectorNotFoundException 조회하려는 섹터가 없을 경우
+     * @throws SectorNotFoundException 조회하려는 섹터가 없을 경우
      */
     @Transactional(readOnly = true)
     public SectorDetailDTO  getSectorDetail(Long id){
@@ -101,8 +101,8 @@ public class SectorManagementService {
      * @param userId 갱신을 시도하는 사용자 ID
      * @return 갱신된 Sector DTO
      * @throws UserNotFoundException 유저가 없는 경우
-     * @exception SectorNotFoundException 암장이 없는 경우
-     * @exception GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
+     * @throws SectorNotFoundException 암장이 없는 경우
+     * @throws GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
      */
     @Transactional
     public SectorDTO updateSector(Long id, SectorUpdateDTO request, Long userId){
