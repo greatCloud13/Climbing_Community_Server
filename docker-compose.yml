@@ -20,6 +20,25 @@ services:
       retries: 10
       interval: 5s
 
+  vector:
+    image: redis/redis-stack
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - ./vector_data:/data
+    environment:
+      - REDIS_ARGS=--save 60 1
+    networks:
+      - climbing-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+
+
   # 2. spring boot app Container
   app:
     build: .
@@ -35,6 +54,8 @@ services:
     depends_on:
       db:
         condition: service_healthy # DB의 healthcheck가 통과될 때까지 대기
+      vector:
+        condition: service_healthy
 
 networks:
   climbing-network:
