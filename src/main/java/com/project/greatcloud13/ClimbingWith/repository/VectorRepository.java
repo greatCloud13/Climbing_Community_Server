@@ -11,6 +11,6 @@ public interface VectorRepository {
 
     void saveAll(List<Embedding> embeddings, List<TextSegment> textSegment);
 
-    List<String> search(String query, int maxResults);
+    List<TextSegment> search(String query, int maxResults);
 
 }

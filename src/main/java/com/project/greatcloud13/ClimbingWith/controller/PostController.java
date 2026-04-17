@@ -1,12 +1,10 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
-import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostSummaryDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.PostType;
 import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import com.project.greatcloud13.ClimbingWith.service.PostService;
+import com.project.greatcloud13.ClimbingWith.service.VectorService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -16,12 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/post")
 public class PostController {
 
     private final PostService postService;
+    private final VectorService vectorService;
 
     @Operation(
             summary = "신규 게시글 작성",
@@ -77,6 +78,13 @@ public class PostController {
     @GetMapping("/gym/{gymId}/posttype/{postType}")
     public ResponseEntity<Page<PostSummaryDTO>> getAllByGymWIthPostType(@PathVariable Long gymId, @PathVariable PostType postType, Pageable pageable){
         Page<PostSummaryDTO> result = postService.getAllByGymWithPostType(gymId, postType, pageable);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/searchAll")
+    public ResponseEntity<List<PostSummaryDTO>> getPostSearchByRAG(@RequestParam String query, @RequestParam int count){
+        List<PostSummaryDTO> result = vectorService.postSearchAndGetSummary(query, count);
 
         return ResponseEntity.ok(result);
     }
