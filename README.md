@@ -7,23 +7,9 @@
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 [![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3-orange.svg)](https://www.rabbitmq.com/)
 
-
-##  목차
-
-- [프로젝트 소개](#-프로젝트-소개)
-- [핵심 성과](#-핵심-성과)
-- [기술 스택](#-기술-스택)
-- [아키텍처](#-아키텍처)
-- [주요 기능](#-주요-기능)
-- [성능 개선](#-성능-개선)
-- [실행 방법](#-실행-방법)
-- [API 문서](#-api-문서)
-
----
-
 ##  프로젝트 소개
 
-클라이밍 문제 리뷰&평가 커뮤니티 서비스 Climbing With의 서버입니다.
+클라이밍 문제 리뷰&평가 커뮤니티 서비스 Climbing With 서버입니다.
 ---
 
 ##  기술 스택
