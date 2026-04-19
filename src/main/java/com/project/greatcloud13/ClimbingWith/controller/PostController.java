@@ -1,5 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
+import com.project.greatcloud13.ClimbingWith.common.SearchTag;
 import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.PostType;
 import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
@@ -82,10 +83,23 @@ public class PostController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/searchAll")
-    public ResponseEntity<List<PostSummaryDTO>> getPostSearchByRAG(@RequestParam String query, @RequestParam int count){
-        List<PostSummaryDTO> result = vectorService.postSearchAndGetSummary(query, count);
+    @GetMapping("/search")
+    public ResponseEntity<List<PostSummaryDTO>> getPostSearchByRAG(@ModelAttribute PostSearchRequest request){
+
+
+        if(request.getGymId() != null && request.getPostType() != null){
+            List<PostSummaryDTO> result = vectorService.postSearchByPostTypeWithGym(request.getQuery(), request.getGymId(), request.getPostType(), request.getCount());
+            return ResponseEntity.ok(result);
+        } else if(request.getGymId() != null){
+            List<PostSummaryDTO> result = vectorService.postSearchWithGym(request.getQuery(), request.getCount(), request.getGymId());
+            return ResponseEntity.ok(result);
+        } else if(request.getPostType() != null){
+            List<PostSummaryDTO> result = vectorService.postSearchByPostType(request.getQuery(), request.getPostType(),request.getCount());
+            return ResponseEntity.ok(result);
+        }
+        List<PostSummaryDTO> result = vectorService.postSearch(request.getQuery(), request.getCount());
 
         return ResponseEntity.ok(result);
     }
+
 }
