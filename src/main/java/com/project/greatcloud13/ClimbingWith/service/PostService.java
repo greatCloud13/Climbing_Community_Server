@@ -60,7 +60,7 @@ public class PostService {
         postRepository.save(post);
 
 //      RabbitMQ 메시지 전달
-        PostMessage message = new PostMessage(post.getId(), post.getContent());
+        PostMessage message = PostMessage.from(post);
         rabbitTemplate.convertAndSend(
                 "post.embedding.exchange",
                 "post.embedding.key",

@@ -42,7 +42,7 @@ public class DataMigrationService {
 
         try(Stream<Post> postStream =postRepository.streamAllBy()){
             postStream.forEach(post -> {
-                PostMessage message = new PostMessage(post.getId(), post.getContent());
+                PostMessage message = PostMessage.from(post);
                 vectorService.createPostEmbedding(message);
             });
         } catch (Exception e) {
