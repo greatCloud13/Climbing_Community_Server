@@ -55,16 +55,16 @@ public class VectorService {
 
 //      4. 게시글 ID 메타 데이터 추가
 //      검색 결과를 통해 원본 게시글 찾아야 하니 ID를 꼬리표로 추가
-        segments.forEach(seg -> seg.metadata().put("postId", message.getPostId()));
+        injectedSegments.forEach(seg -> seg.metadata().put("postId", message.getPostId()));
 
 //      4. 메타 데이터 게시글 타입 추가
-        segments.forEach(seg -> seg.metadata().put("postType", message.getPostType().name()));
+        injectedSegments.forEach(seg -> seg.metadata().put("postType", message.getPostType().name()));
 
 //      5. 메타데이터 암장 이름 추가
-        segments.forEach(seg -> seg.metadata().put("gymName", message.getGymName()));
+        injectedSegments.forEach(seg -> seg.metadata().put("gymName", message.getGymName()));
 
 //      6. 임베딩 생성 및 Redisearch 저장
-        List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
+        List<Embedding> embeddings = embeddingModel.embedAll(injectedSegments).content();
         vectorRepository.saveAll(embeddings, segments);
 
     }
