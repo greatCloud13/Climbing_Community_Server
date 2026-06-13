@@ -35,7 +35,7 @@ public class GymDTO {
                 .gymType(gym.getGymType().toString())
                 .gymName(gym.getGymName())
                 .address(gym.getAddress())
-                .openAt(gym.getGymName()==null ? null : gym.getOpenAt().toString())
+                .openAt(gym.getOpenAt()==null ? null : gym.getOpenAt().toString())
                 .closeAt(gym.getCloseAt()==null ? null : gym.getCloseAt().toString())
                 .weekendOpenAt(gym.getWeekend_open_at()==null ? null : gym.getWeekend_open_at().toString())
                 .weekendCloseAt(gym.getWeekend_close_at()==null ? null : gym.getWeekend_close_at().toString())

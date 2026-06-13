@@ -37,7 +37,7 @@ public class GymManagementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        if(user.isAdmin()){
+        if(!user.isAdmin()){
             throw new AccessDeniedException();
         }
 
@@ -68,7 +68,7 @@ public class GymManagementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        if(user.isAdmin()){
+        if(!user.isAdmin()){
             throw new AccessDeniedException();
         }
 
