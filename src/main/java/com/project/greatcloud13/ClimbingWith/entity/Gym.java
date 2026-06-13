@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.entity;
 
 import com.project.greatcloud13.ClimbingWith.dto.GymCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.GymUpdateDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,6 +62,16 @@ public class Gym {
     public void updateGym(GymCreateDTO updateDTO){
         this.gymName =updateDTO.getGymName();
         this.gymType = updateDTO.getType();
+        this.address = updateDTO.getAddress();
+        this.openAt = updateDTO.getOpenAt();
+        this.closeAt = updateDTO.getCloseAt();
+        this.weekend_open_at = updateDTO.getWeekendOpenAt();
+        this.weekend_close_at = updateDTO.getWeekendCloseAt();
+        this.memo = updateDTO.getMemo();
+    }
+
+    public void updateGym(GymUpdateDTO updateDTO){
+        this.gymName = updateDTO.getGymName();
         this.address = updateDTO.getAddress();
         this.openAt = updateDTO.getOpenAt();
         this.closeAt = updateDTO.getCloseAt();
