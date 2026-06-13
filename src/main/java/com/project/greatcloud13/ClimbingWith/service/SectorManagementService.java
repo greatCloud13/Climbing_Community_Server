@@ -1,7 +1,5 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
-import com.project.greatcloud13.ClimbingWith.exception.BusinessException;
-import com.project.greatcloud13.ClimbingWith.common.ErrorCode;
 import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
@@ -11,7 +9,6 @@ import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.sector.SectorNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.*;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SectorManagementService {
 
     private final SectorRepository sectorRepository;
@@ -42,21 +40,17 @@ public class SectorManagementService {
      * @throws GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
      */
     @Transactional
-    public SectorDTO createSector(SectorCreateDTO request, Long userId){
-
-//      1. 데이터 존재 여부 검증
+    public SectorDTO createSector(SectorCreateDTO request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Gym gym = gymRepository.findById(request.getGymId())
                 .orElseThrow(GymNotFoundException::new);
 
-//      2. 권한 검증
-        if(!user.gymValidate(gym)){
+        if (!user.gymValidate(gym)) {
             throw new GymAccessDeniedException();
         }
 
-//      3. 도메인 객체 생성 및 저장
         Sector sector = Sector.builder()
                 .gym(gym)
                 .sectorName(request.getSectorName())
@@ -67,7 +61,6 @@ public class SectorManagementService {
         return SectorDTO.from(sectorRepository.save(sector));
     }
 
-
     /**
      * 섹터의 상세정보를 조회합니다
      * [Business Rule]
@@ -77,14 +70,13 @@ public class SectorManagementService {
      * @return 요청한 ID의 섹터 상세정보
      * @exception SectorNotFoundException 조회하려는 섹터가 없을 경우
      */
-    @Transactional(readOnly = true)
-    public SectorDetailDTO  getSectorDetail(Long id){
-
-
+    public SectorDetailDTO getSectorDetail(Long id) {
         Sector sector = sectorRepository.findById(id)
                 .orElseThrow(SectorNotFoundException::new);
 
-        List<SettingDTO> settingList = settingRepository.findAllBySector(sector).stream().map(SettingDTO :: from).toList();
+        List<SettingDTO> settingList = settingRepository.findAllBySector(sector).stream()
+                .map(SettingDTO::from)
+                .toList();
 
         return SectorDetailDTO.from(sector, settingList);
     }
@@ -105,15 +97,14 @@ public class SectorManagementService {
      * @exception GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
      */
     @Transactional
-    public SectorDTO updateSector(Long id, SectorUpdateDTO request, Long userId){
-
+    public SectorDTO updateSector(Long id, SectorUpdateDTO request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Sector sector = sectorRepository.findById(id)
                 .orElseThrow(SectorNotFoundException::new);
 
-        if(!user.gymValidate(sector.getGym())){
+        if (!user.gymValidate(sector.getGym())) {
             throw new GymAccessDeniedException();
         }
 
@@ -131,12 +122,12 @@ public class SectorManagementService {
      * @return 해당하는 암장의 섹터 리스트
      * @throws GymNotFoundException 암장이 없는 경우
      */
-    @Transactional(readOnly = true)
-    public List<SectorDTO> findAllSectorByGym(Long gymId){
-
+    public List<SectorDTO> findAllSectorByGym(Long gymId) {
         Gym gym = gymRepository.findById(gymId)
                 .orElseThrow(GymNotFoundException::new);
 
-        return sectorRepository.findAllByGym(gym).stream().map(SectorDTO :: from).toList();
+        return sectorRepository.findAllByGym(gym).stream()
+                .map(SectorDTO::from)
+                .toList();
     }
 }
