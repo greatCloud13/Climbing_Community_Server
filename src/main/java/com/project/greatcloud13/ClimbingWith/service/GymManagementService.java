@@ -1,7 +1,9 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.GymCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.GymDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDetailDTO;
+import com.project.greatcloud13.ClimbingWith.dto.GymUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
 import com.project.greatcloud13.ClimbingWith.entity.User;
@@ -11,7 +13,6 @@ import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundExceptio
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.SectorRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,12 +33,11 @@ public class GymManagementService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Gym createGym(GymCreateDTO request, Long userId){
-
+    public GymDTO createGym(GymCreateDTO request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        if(!user.isAdmin()){
+        if (!user.isAdmin()) {
             throw new AccessDeniedException();
         }
 
@@ -52,23 +52,20 @@ public class GymManagementService {
                 .memo(request.getMemo())
                 .build();
 
-        return gymRepository.save(gym);
+        return GymDTO.from(gymRepository.save(gym));
     }
 
-    @Transactional(readOnly = true)
-    public Page<Gym> findAll(int page, int size){
-        Pageable pageable = PageRequest.of(page, size,
-                Sort.by("createdAt").descending());
-        return gymRepository.findAll(pageable);
+    public Page<GymDTO> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return gymRepository.findAll(pageable).map(GymDTO::from);
     }
 
     @Transactional
-    public Gym updateGym(Long id, GymCreateDTO request, Long userId){
-
+    public GymDTO updateGym(Long id, GymUpdateDTO request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
-        if(!user.isAdmin()){
+        if (!user.isAdmin()) {
             throw new AccessDeniedException();
         }
 
@@ -77,18 +74,15 @@ public class GymManagementService {
 
         gym.updateGym(request);
 
-        return gym;
+        return GymDTO.from(gym);
     }
 
-    @Transactional(readOnly = true)
-    public GymDetailDTO getGymDetail(Long id){
-
+    public GymDetailDTO getGymDetail(Long id) {
         Gym gym = gymRepository.findById(id)
                 .orElseThrow(GymNotFoundException::new);
 
-        List<Sector>sectorList = sectorRepository.findAllByGym(gym);
+        List<Sector> sectorList = sectorRepository.findAllByGym(gym);
 
         return GymDetailDTO.from(gym, sectorList);
     }
-
 }

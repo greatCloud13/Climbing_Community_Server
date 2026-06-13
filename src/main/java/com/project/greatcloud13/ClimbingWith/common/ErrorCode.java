@@ -17,6 +17,10 @@ public enum ErrorCode {
     ACCESS_DENIED_SECTOR(HttpStatus.FORBIDDEN, "S002", "섹터에 대한 권한이 없습니다."),
 
 
+//  ====================================GYM LEVEL ERROR CODE=================================
+    GYM_LEVEL_NOT_FOUND(HttpStatus.NOT_FOUND, "GL001", "레벨을 찾을 수 없습니다."),
+    ACCESS_DENIED_GYM_LEVEL(HttpStatus.FORBIDDEN, "GL002", "레벨에 대한 권한이 없습니다."),
+
 //  ====================================USER ERROR CODE=================================
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다."),
 
