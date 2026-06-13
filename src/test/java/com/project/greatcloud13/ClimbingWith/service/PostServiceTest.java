@@ -1,6 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
-import com.project.greatcloud13.ClimbingWith.PostFixture;
+import com.project.greatcloud13.ClimbingWith.util.EntityFixture;
 import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
 import com.project.greatcloud13.ClimbingWith.dto.PostSummaryDTO;
@@ -269,7 +269,7 @@ public class PostServiceTest {
             // [given]
             List<Post> filteredPosts = new ArrayList<>();
             for (long i = 0L; i < 5; i++) {
-                filteredPosts.add(PostFixture.createPost(i, "암장1 게시글", "내용1", PostType.PROMOTION, mockGym1, mockManagerUser1, LocalDateTime.now()));
+                filteredPosts.add(EntityFixture.createPost(i, "암장1 게시글", "내용1", PostType.PROMOTION, mockGym1, mockManagerUser1, LocalDateTime.now()));
             }
 
             Pageable pageable = PageRequest.of(0, 5);
