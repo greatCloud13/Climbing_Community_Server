@@ -48,7 +48,7 @@ public class User {
     }
 
     public void checkPassword(String password, PasswordEncoder passwordEncoder){
-        if(!passwordEncoder.matches(passwordEncoder.encode(password), this.password)){
+        if(!passwordEncoder.matches(password, this.password)){
             throw new AccessDeniedException("계정 정보가 올바르지 않습니다");
         }
     }
