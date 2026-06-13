@@ -94,7 +94,7 @@ public class WallSettingService {
      * @return 요청한 ID에 해당하는 세팅 상세정보
      * @throws SettingNotFoundException 세팅이 없는 경우
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public SettingDetailDTO getSettingDetail(Long SettingId){
         Setting setting = settingRepository.findById(SettingId)
                 .orElseThrow(SettingNotFoundException::new);
@@ -166,8 +166,9 @@ public class WallSettingService {
             throw new GymAccessDeniedException();
         }
 
+        Gym gym = setting.getGym();
         settingRepository.deleteById(id);
-        Optional<Setting> pastSetting = settingRepository.findFirstByGymOrderByIdDesc(setting.getGym());
+        Optional<Setting> pastSetting = settingRepository.findFirstByGymOrderByIdDesc(gym);
         pastSetting.ifPresent(Setting::active);
     }
 
