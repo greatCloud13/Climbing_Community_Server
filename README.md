@@ -1,12 +1,3 @@
-#  도서 리뷰 플랫폼
-
-> Redis 캐싱과 RabbitMQ 비동기 처리를 활용한 고성능 도서 검색/리뷰 서비스
-
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
-[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3-orange.svg)](https://www.rabbitmq.com/)
-
 ##  프로젝트 소개
 
 클라이밍 문제 리뷰&평가 커뮤니티 서비스 Climbing With 서버입니다.
