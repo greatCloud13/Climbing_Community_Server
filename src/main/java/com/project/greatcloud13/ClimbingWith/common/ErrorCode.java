@@ -28,6 +28,10 @@ public enum ErrorCode {
 //  ====================================SETTING ERROR CODE=================================
     SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "세팅을 찾을 수 없습니다."),
 
+//  ====================================CLEAR RECORD ERROR CODE=================================
+    CLEAR_RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "CR001", "완등 기록을 찾을 수 없습니다."),
+    ACCESS_DENIED_CLEAR_RECORD(HttpStatus.FORBIDDEN, "CR002", "완등 기록에 대한 권한이 없습니다."),
+
 //  ====================================PROBLEM ERROR CODE=================================
     PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "문제를 찾을 수 없습니다."),
 
