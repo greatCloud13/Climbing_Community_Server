@@ -7,6 +7,8 @@ import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
 import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.entity.Setting;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.setting.SettingNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymLevelRepository;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
@@ -70,12 +72,12 @@ public class ProblemService {
 
     public Page<ProblemDTO> getProblemPageByGym(Long id, int page){
         Gym gym = gymRepository.findById(id)
-                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+                .orElseThrow(GymNotFoundException::new);
 
         List<Setting> settingList = settingRepository.findAllByGymAndIsActive(gym,true);
 
         if(settingList.isEmpty()){
-            throw new EntityNotFoundException("활성화된 세팅이 없습니다.");
+            throw new SettingNotFoundException();
         }
 
         Pageable pageable = PageRequest.of(page, 10);
