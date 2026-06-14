@@ -182,12 +182,12 @@ public class ClearRecordService {
             throw new IllegalArgumentException("잘못된 접근입니다.");
         }
         
-        if(!clearRecord.getId().equals(clearRecordUpdateDTO.getProblemId())){
+        if(!clearRecord.getProblem().getId().equals(clearRecordUpdateDTO.getProblemId())){
             Problem problem = problemRepository.findById(clearRecordUpdateDTO.getProblemId())
                     .orElseThrow(()-> new EntityNotFoundException("문제를 찾을 수 없습니다."));
             clearRecord.updateProblem(problem);
         }
-        if(!clearRecord.getVideoUrl().equals(clearRecordUpdateDTO.getVideoUrl())){
+        if(!clearRecordUpdateDTO.getVideoUrl().equals(clearRecord.getVideoUrl())){
             clearRecord.updateVideoUrl(clearRecordUpdateDTO.getVideoUrl());
         }
         return ClearRecordResponseDTO.from(clearRecord);
