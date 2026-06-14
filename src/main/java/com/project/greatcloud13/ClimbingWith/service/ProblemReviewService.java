@@ -6,10 +6,13 @@ import com.project.greatcloud13.ClimbingWith.dto.ProblemReviewUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.entity.ProblemReview;
 import com.project.greatcloud13.ClimbingWith.entity.User;
+import com.project.greatcloud13.ClimbingWith.exception.problem.ProblemNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.review.ProblemReviewNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.review.ReviewAccessDeniedException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import com.project.greatcloud13.ClimbingWith.repository.ProblemReviewRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProblemReviewService {
 
     private final ProblemReviewRepository problemReviewRepository;
@@ -27,13 +31,12 @@ public class ProblemReviewService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ProblemReviewDTO createReview(Long userId, ProblemReviewCreateDTO request){
-
+    public ProblemReviewDTO createReview(Long userId, ProblemReviewCreateDTO request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(UserNotFoundException::new);
 
         Problem problem = problemRepository.findById(request.getProblemId())
-                .orElseThrow(()->new EntityNotFoundException("문제를 찾을 수 없습니다"));
+                .orElseThrow(ProblemNotFoundException::new);
 
         ProblemReview problemReview = ProblemReview.builder()
                 .problem(problem)
@@ -49,32 +52,30 @@ public class ProblemReviewService {
         return result;
     }
 
-    @Transactional(readOnly = true)
-    public ProblemReviewDTO getReview(Long id){
+    public ProblemReviewDTO getReview(Long id) {
         ProblemReview problemReview = problemReviewRepository.findById(id)
-                .orElseThrow(()->new EntityNotFoundException("리뷰를 찾을 수 없습니다"));
+                .orElseThrow(ProblemReviewNotFoundException::new);
 
         return ProblemReviewDTO.from(problemReview);
     }
 
-    @Transactional(readOnly = true)
-    public Page<ProblemReviewDTO> getReviewByProblemId(int page, Long problemId){
+    public Page<ProblemReviewDTO> getReviewByProblemId(int page, Long problemId) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("createdAt").descending());
 
-        Pageable pageable = PageRequest.of(page,10, Sort.by("createdAt").descending());
-
-        return problemReviewRepository.findAllByProblemId(problemId, pageable).map(ProblemReviewDTO::from);
+        return problemReviewRepository.findAllByProblemId(problemId, pageable)
+                .map(ProblemReviewDTO::from);
     }
 
     @Transactional
-    public ProblemReviewDTO updateReview(Long id, Long userId, ProblemReviewUpdateDTO request){
+    public ProblemReviewDTO updateReview(Long id, Long userId, ProblemReviewUpdateDTO request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         ProblemReview problemReview = problemReviewRepository.findById(id)
-                .orElseThrow(()->new EntityNotFoundException("리뷰를 찾을 수 없습니다"));
+                .orElseThrow(ProblemReviewNotFoundException::new);
 
-        if(!user.equals(problemReview.getUser())){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
+        if (!user.equals(problemReview.getUser())) {
+            throw new ReviewAccessDeniedException();
         }
 
         problemReview.update(request.getProblemHint(), request.getEvaluation());
@@ -85,15 +86,15 @@ public class ProblemReviewService {
     }
 
     @Transactional
-    public void deleteReview(Long id, Long userId){
+    public void deleteReview(Long id, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         ProblemReview problemReview = problemReviewRepository.findById(id)
-                .orElseThrow(()->new EntityNotFoundException("리뷰를 찾을 수 없습니다"));
+                .orElseThrow(ProblemReviewNotFoundException::new);
 
-        if(!user.equals(problemReview.getUser())){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
+        if (!user.equals(problemReview.getUser())) {
+            throw new ReviewAccessDeniedException();
         }
 
         problemReviewRepository.deleteById(id);
@@ -105,5 +106,4 @@ public class ProblemReviewService {
         Long total = problemReviewRepository.sumEvaluationByProblemId(problem.getId());
         problem.updateEvaluation((float) total / count);
     }
-
 }
