@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
 import com.project.greatcloud13.ClimbingWith.common.SearchTag;
+import com.project.greatcloud13.ClimbingWith.dto.AssignGymManagerDTO;
 import com.project.greatcloud13.ClimbingWith.dto.UserDTO;
 import com.project.greatcloud13.ClimbingWith.dto.UserDetailDTO;
 import com.project.greatcloud13.ClimbingWith.service.UserService;
@@ -38,8 +39,8 @@ public class UserController {
     }
 
     @PutMapping("/assign/{gymId}")
-    public ResponseEntity<UserDetailDTO> assignGymManager(@PathVariable Long gymId, @RequestBody Long id){
-        UserDetailDTO result = userService.assignGymManager(gymId, id);
+    public ResponseEntity<UserDetailDTO> assignGymManager(@PathVariable Long gymId, @RequestBody AssignGymManagerDTO request){
+        UserDetailDTO result = userService.assignGymManager(gymId, request.getUserId());
 
         return ResponseEntity.ok(result);
     }
