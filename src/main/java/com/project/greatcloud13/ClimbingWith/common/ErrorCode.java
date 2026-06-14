@@ -28,6 +28,13 @@ public enum ErrorCode {
 //  ====================================SETTING ERROR CODE=================================
     SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "세팅을 찾을 수 없습니다."),
 
+//  ====================================PROBLEM ERROR CODE=================================
+    PROBLEM_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "문제를 찾을 수 없습니다."),
+
+//  ====================================PROBLEM REVIEW ERROR CODE=================================
+    PROBLEM_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "PR001", "리뷰를 찾을 수 없습니다."),
+    ACCESS_DENIED_REVIEW(HttpStatus.FORBIDDEN, "PR002", "리뷰에 대한 권한이 없습니다."),
+
     //  ====================================COMMON ERROR CODE=================================
     AccessDenied(HttpStatus.FORBIDDEN, "S001", "접근 권한이 없습니다."),
 
