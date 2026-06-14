@@ -116,9 +116,9 @@ public class ClearRecordController {
             summary = "완등 기록 삭제",
             description = "ID에 해당하는 완등 기록을 영구적으로 삭제합니다."
     )
-    @DeleteMapping
-    public ResponseEntity<Boolean> deleteRecord(Long userId, Long id){
-        clearRecordService.deleteClearRecord(userId, id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Boolean> deleteRecord(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails){
+        clearRecordService.deleteClearRecord(userDetails.getUserId(), id);
 
         return ResponseEntity.ok(true);
     }
