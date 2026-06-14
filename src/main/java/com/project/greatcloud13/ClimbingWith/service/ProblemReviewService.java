@@ -44,11 +44,7 @@ public class ProblemReviewService {
 
         ProblemReviewDTO result = ProblemReviewDTO.from(problemReviewRepository.save(problemReview));
 
-        // 평점 재계산
-        Long totalEvaluation = problemReviewRepository.sumEvaluation();
-        Long count = problemReviewRepository.count();
-
-        problem.updateEvaluation((float) (totalEvaluation/count));
+        recalculateEvaluation(problem);
 
         return result;
     }
@@ -83,16 +79,31 @@ public class ProblemReviewService {
 
         problemReview.update(request.getProblemHint(), request.getEvaluation());
 
-        // 평점 재계산
-        Long totalEvaluation = problemReviewRepository.sumEvaluation();
-        Long count = problemReviewRepository.count();
-        problemReview.getProblem().updateEvaluation((float) (totalEvaluation/count));
+        recalculateEvaluation(problemReview.getProblem());
 
         return ProblemReviewDTO.from(problemReview);
     }
 
-    public void deleteReview(Long id){
+    @Transactional
+    public void deleteReview(Long id, Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        ProblemReview problemReview = problemReviewRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException("리뷰를 찾을 수 없습니다"));
+
+        if(!user.equals(problemReview.getUser())){
+            throw new IllegalArgumentException("잘못된 접근입니다.");
+        }
+
         problemReviewRepository.deleteById(id);
+    }
+
+    private void recalculateEvaluation(Problem problem) {
+        long count = problemReviewRepository.countByProblemId(problem.getId());
+        if (count == 0) return;
+        Long total = problemReviewRepository.sumEvaluationByProblemId(problem.getId());
+        problem.updateEvaluation((float) total / count);
     }
 
 }

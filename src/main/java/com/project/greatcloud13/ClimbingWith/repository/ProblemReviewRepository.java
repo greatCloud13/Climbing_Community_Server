@@ -10,9 +10,9 @@ public interface ProblemReviewRepository extends JpaRepository<ProblemReview, Lo
 
     Page<ProblemReview> findAllByProblemId(Long ProblemId, Pageable pageable);
 
-    @Query("""
-            SELECT SUM(p.evaluation) FROM ProblemReview p
-            """)
-    Long sumEvaluation();
+    long countByProblemId(Long problemId);
+
+    @Query("SELECT SUM(p.evaluation) FROM ProblemReview p WHERE p.problem.id = :problemId")
+    Long sumEvaluationByProblemId(Long problemId);
 
 }

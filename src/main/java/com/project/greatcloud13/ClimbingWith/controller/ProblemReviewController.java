@@ -49,8 +49,8 @@ public class ProblemReviewController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> deleteProblemReview(@PathVariable Long id){
-        problemReviewService.deleteReview(id);
+    public ResponseEntity<Boolean> deleteProblemReview(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails){
+        problemReviewService.deleteReview(id, userDetails.getUserId());
 
         return ResponseEntity.ok(true);
     }
