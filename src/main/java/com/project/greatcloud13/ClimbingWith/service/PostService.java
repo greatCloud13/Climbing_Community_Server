@@ -41,7 +41,6 @@ public class PostService {
         Post post = Post.builder()
                 .user(user)
                 .gym(user.getGym())
-                .user(user)
                 .title(requestDTO.getTitle())
                 .postType(requestDTO.getPostType())
                 .content(requestDTO.getContent())
