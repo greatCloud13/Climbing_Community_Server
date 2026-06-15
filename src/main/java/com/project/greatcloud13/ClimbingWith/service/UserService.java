@@ -42,9 +42,9 @@ public class UserService {
         Pageable pageable = PageRequest.of(page, 100);
 
         Page<User> userList = switch (searchTag){
-            case USERNAME -> userList = userRepository.findAllByUsername(keyword, pageable);
-            case EMAIL -> userList = userRepository.findAllByEmail(keyword, pageable);
-            case NICKNAME -> userList = userRepository.findAllByNickname(keyword, pageable);
+            case USERNAME -> userRepository.findAllByUsername(keyword, pageable);
+            case EMAIL -> userRepository.findAllByEmail(keyword, pageable);
+            case NICKNAME -> userRepository.findAllByNickname(keyword, pageable);
         };
 
         return userList.map(UserDTO::from);

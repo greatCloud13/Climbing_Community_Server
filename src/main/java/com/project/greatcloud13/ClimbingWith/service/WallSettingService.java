@@ -8,9 +8,7 @@ import com.project.greatcloud13.ClimbingWith.exception.sector.SectorNotFoundExce
 import com.project.greatcloud13.ClimbingWith.exception.setting.SettingNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.*;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.boot.model.process.internal.UserTypeResolution;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +17,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class WallSettingService {
 
     private final GymRepository gymRepository;
@@ -43,14 +42,14 @@ public class WallSettingService {
      * @throws GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
      */
     @Transactional
-    public SettingDTO createSetting(Long sectorId, Long userId){
+    public SettingDTO createSetting(Long sectorId, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Sector sector = sectorRepository.findById(sectorId)
                 .orElseThrow(SectorNotFoundException::new);
 
-        if(!user.gymValidate(sector.getGym())){
+        if (!user.gymValidate(sector.getGym())) {
             throw new GymAccessDeniedException();
         }
 
@@ -74,15 +73,13 @@ public class WallSettingService {
      * @return 현재 활성화된 SettingList
      * @throws GymNotFoundException 암장이 없는 경우
      */
-    @Transactional(readOnly = true)
-    public List<SettingDTO> getActiveSettingListByGymId(Long gymId){
-
+    public List<SettingDTO> getActiveSettingListByGymId(Long gymId) {
         Gym gym = gymRepository.findById(gymId)
                 .orElseThrow(GymNotFoundException::new);
 
-        List<Setting> activeSettingList = settingRepository.findAllByGymAndIsActive(gym, true);
-
-        return activeSettingList.stream().map(SettingDTO :: from).toList();
+        return settingRepository.findAllByGymAndIsActive(gym, true).stream()
+                .map(SettingDTO::from)
+                .toList();
     }
 
     /**
@@ -90,16 +87,17 @@ public class WallSettingService {
      * [Business Rule]
      * 1. 조회하는 세팅이 존재해야 합니다.
      *
-     * @param SettingId 조회하는 세팅 ID
+     * @param settingId 조회하는 세팅 ID
      * @return 요청한 ID에 해당하는 세팅 상세정보
      * @throws SettingNotFoundException 세팅이 없는 경우
      */
-    @Transactional(readOnly = true)
-    public SettingDetailDTO getSettingDetail(Long SettingId){
-        Setting setting = settingRepository.findById(SettingId)
+    public SettingDetailDTO getSettingDetail(Long settingId) {
+        Setting setting = settingRepository.findById(settingId)
                 .orElseThrow(SettingNotFoundException::new);
 
-        List<ProblemDTO> problemList = problemRepository.findAllBySetting(setting).stream().map(ProblemDTO :: from).toList();
+        List<ProblemDTO> problemList = problemRepository.findAllBySetting(setting).stream()
+                .map(ProblemDTO::from)
+                .toList();
 
         return SettingDetailDTO.from(setting, problemList);
     }
@@ -120,17 +118,18 @@ public class WallSettingService {
      * @throws GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
      */
     @Transactional
-    public SettingDTO updateSetting(Long settingId, SettingUpdateDTO request, Long userId){
+    public SettingDTO updateSetting(Long settingId, SettingUpdateDTO request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Setting setting = settingRepository.findById(settingId)
                 .orElseThrow(SettingNotFoundException::new);
 
-        if(!user.gymValidate(setting.getGym())){
+        if (!user.gymValidate(setting.getGym())) {
             throw new GymAccessDeniedException();
         }
 
+        // 새 세팅 등록 시 직전 세팅을 비활성화하여 최신 세팅만 active 상태를 유지
         settingRepository.findTop2ByGymOrderByIdDesc(setting.getGym())
                 .stream()
                 .skip(1)
@@ -155,21 +154,19 @@ public class WallSettingService {
      * @throws GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
      */
     @Transactional
-    public void deleteSetting(Long id, Long userId){
+    public void deleteSetting(Long id, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Setting setting = settingRepository.findById(id)
                 .orElseThrow(SettingNotFoundException::new);
 
-        if(!user.gymValidate(setting.getGym())){
+        if (!user.gymValidate(setting.getGym())) {
             throw new GymAccessDeniedException();
         }
 
         Gym gym = setting.getGym();
         settingRepository.deleteById(id);
-        Optional<Setting> pastSetting = settingRepository.findFirstByGymOrderByIdDesc(gym);
-        pastSetting.ifPresent(Setting::active);
+        settingRepository.findFirstByGymOrderByIdDesc(gym).ifPresent(Setting::active);
     }
-
 }
