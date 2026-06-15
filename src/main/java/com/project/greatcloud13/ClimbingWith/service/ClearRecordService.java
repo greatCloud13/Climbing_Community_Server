@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.*;
+import java.util.Objects;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.repository.*;
 import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
@@ -182,12 +183,12 @@ public class ClearRecordService {
             throw new IllegalArgumentException("잘못된 접근입니다.");
         }
         
-        if(!clearRecord.getId().equals(clearRecordUpdateDTO.getProblemId())){
+        if(!clearRecord.getProblem().getId().equals(clearRecordUpdateDTO.getProblemId())){
             Problem problem = problemRepository.findById(clearRecordUpdateDTO.getProblemId())
                     .orElseThrow(()-> new EntityNotFoundException("문제를 찾을 수 없습니다."));
             clearRecord.updateProblem(problem);
         }
-        if(!clearRecord.getVideoUrl().equals(clearRecordUpdateDTO.getVideoUrl())){
+        if(!Objects.equals(clearRecordUpdateDTO.getVideoUrl(), clearRecord.getVideoUrl())){
             clearRecord.updateVideoUrl(clearRecordUpdateDTO.getVideoUrl());
         }
         return ClearRecordResponseDTO.from(clearRecord);
