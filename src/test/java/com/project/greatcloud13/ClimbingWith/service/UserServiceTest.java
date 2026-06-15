@@ -6,8 +6,9 @@ import com.project.greatcloud13.ClimbingWith.dto.UserDetailDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Role;
 import com.project.greatcloud13.ClimbingWith.entity.User;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
-import jakarta.persistence.EntityNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.util.TestFixture;
 import org.junit.jupiter.api.BeforeEach;
@@ -188,7 +189,7 @@ public class UserServiceTest {
 
             // [When & Then]
             assertThatThrownBy(() -> userService.getUserDetail("unknown"))
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .isInstanceOf(UserNotFoundException.class);
         }
     }
 
@@ -208,7 +209,6 @@ public class UserServiceTest {
 
             // [Then]
             assertThat(result.getUsername()).isEqualTo(username);
-            // 역할이 GYM_MANAGER로 변경되었는지 확인
             assertThat(mockUser.getRole()).isEqualTo(Role.GYM_MANAGER);
             assertThat(mockUser.getGym()).isEqualTo(mockGym);
         }
@@ -221,7 +221,7 @@ public class UserServiceTest {
 
             // [When & Then]
             assertThatThrownBy(() -> userService.assignGymManager(invalidId, userId))
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .isInstanceOf(GymNotFoundException.class);
         }
 
         @Test
@@ -233,7 +233,7 @@ public class UserServiceTest {
 
             // [When & Then]
             assertThatThrownBy(() -> userService.assignGymManager(gymId, invalidId))
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .isInstanceOf(UserNotFoundException.class);
         }
     }
 
@@ -252,7 +252,6 @@ public class UserServiceTest {
 
             // [Then]
             assertThat(result.getUsername()).isEqualTo(managerUsername);
-            // 역할이 MEMBER로 변경되었는지 확인
             assertThat(mockManager.getRole()).isEqualTo(Role.MEMBER);
             assertThat(mockManager.getGym()).isNull();
         }
@@ -265,7 +264,7 @@ public class UserServiceTest {
 
             // [When & Then]
             assertThatThrownBy(() -> userService.unassignGymManager("unknown"))
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .isInstanceOf(UserNotFoundException.class);
         }
     }
 }
