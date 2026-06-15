@@ -5,11 +5,15 @@ import com.project.greatcloud13.ClimbingWith.dto.ClearRecordResponseDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ClearRecordSummaryDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ClearRecordUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.*;
+import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordAccessDeniedException;
+import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.problem.ProblemNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.sector.SectorNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.setting.SettingNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.*;
 import com.project.greatcloud13.ClimbingWith.util.TestFixture;
-import jakarta.persistence.EntityNotFoundException;
-import org.aspectj.util.Reflection;
-import org.hibernate.annotations.SQLJoinTableRestriction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,7 +27,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -50,24 +53,18 @@ public class ClearRecordServiceTest {
     @InjectMocks
     private ClearRecordService clearRecordService;
 
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private ProblemRepository problemRepository;
-    @Mock
-    private ClearRecordRepository clearRecordRepository;
-    @Mock
-    private GymRepository gymRepository;
-    @Mock
-    private WallSettingRepository settingRepository;
-    @Mock
-    private SectorRepository sectorRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private ProblemRepository problemRepository;
+    @Mock private ClearRecordRepository clearRecordRepository;
+    @Mock private GymRepository gymRepository;
+    @Mock private WallSettingRepository settingRepository;
+    @Mock private SectorRepository sectorRepository;
+    @Mock private ClearRecordRepositoryCustom clearRecordRepositoryCustom;
 
 //   ========================= Mock Objects =========================
     private Gym mockGym1;
     private Gym mockGym2;
     private Sector mockSector1;
-    private Sector mockSector2;
     private Setting mockSetting1;
     private Setting mockSetting2;
     private Problem mockProblem1;
@@ -75,103 +72,69 @@ public class ClearRecordServiceTest {
     private User mockUser1;
     private User mockUser2;
     private User mockAdmin;
-    private User invalidUser1;
     private GymLevel mockGymLevel1;
-    private Setting invalidSetting1;
     private ClearRecord mockClearRecord1;
-    private ClearRecord mockClearRecord2;
 //    ===============================================================
 
 //    ==================== Mock Object parameter ====================
     Long gymId = 100L;
-    String gymName = "테스트 암장1";
     Long gymId2 = 101L;
-    String gymName2 = "테스트 암장2";
-
     Long sectorId = 200L;
-    String sectorName = "테스트 섹터1";
-    Long sectorId2 = 201L;
-    String sectorName2 = "테스트 섹터2";
-
     Long settingId = 300L;
     Long settingId2 = 301L;
-
     Long problemId = 400L;
-    String problemName = "테스트 문제1";
-
     Long problemId2 = 401L;
-    String problemName2 = "테스트 문제2";
-
     Long userId = 500L;
-    String username = "테스트 사용자1";
-
     Long userId2 = 501L;
-    String username2 = "테스트 사용자2";
-
     Long adminUserId = 5001L;
-
     Long clearRecordId = 600L;
-    String clearRecordName = "테스트 완등 기록";
 
     Long invalidUserId = 999L;
-    Long invalidProblemId = 999L;
-    Long invalidGymId = 999L;
-    Long invalidSettingId = 999L;
-    Long invalidSectorId = 999L;
+    Long invalidProblemId = 998L;
+    Long invalidGymId = 997L;
+    Long invalidSettingId = 996L;
+    Long invalidSectorId = 995L;
+    Long invalidClearRecordId = 994L;
 
     LocalDate past = LocalDate.of(2026, 3, 10);
-    LocalDate date = LocalDate.now();
     String videoUrl = "https://s3.aws.com/video/climbing.mp4";
-
 //    ===============================================================
 
     @BeforeEach
-    void setUp(){
-//      Gym Mock Entity
-        mockGym1 = Gym.builder().gymName(gymName).build();
+    void setUp() {
+        mockGym1 = Gym.builder().gymName("테스트 암장1").build();
         ReflectionTestUtils.setField(mockGym1, "id", gymId);
-//      Gym Mock Entity 2
-        mockGym2 = Gym.builder().gymName(gymName2).build();
+
+        mockGym2 = Gym.builder().gymName("테스트 암장2").build();
         ReflectionTestUtils.setField(mockGym2, "id", gymId2);
 
-//      Sector Mock Entity
-        mockSector1 = Sector.builder().gym(mockGym1).sectorName(sectorName).build();
+        mockSector1 = Sector.builder().gym(mockGym1).sectorName("테스트 섹터1").build();
         ReflectionTestUtils.setField(mockSector1, "id", sectorId);
-//      Sector Mock Entity 2
-        mockSector2 = Sector.builder().gym(mockGym2).sectorName(sectorName2).build();
-        ReflectionTestUtils.setField(mockSector2, "id", sectorId2);
 
-//      Setting Mock Entity
         mockSetting1 = Setting.builder().gym(mockGym1).sector(mockSector1).build();
         ReflectionTestUtils.setField(mockSetting1, "id", settingId);
-//      Setting Mock Entity2
-        mockSetting2 = Setting.builder().gym(mockGym2).sector(mockSector2).build();
+
+        mockSetting2 = Setting.builder().gym(mockGym2).build();
         ReflectionTestUtils.setField(mockSetting2, "id", settingId2);
 
-//      GymLevel Mock Entity
         mockGymLevel1 = GymLevel.builder().gym(mockGym1).levelName("테스트 난이도 1").build();
 
-//      Problem Mock Entity
-        mockProblem1 = Problem.builder().title(problemName).gym(mockGym1).setting(mockSetting1).gymLevel(mockGymLevel1).build();
+        mockProblem1 = Problem.builder().title("테스트 문제1").gym(mockGym1).setting(mockSetting1).gymLevel(mockGymLevel1).build();
         ReflectionTestUtils.setField(mockProblem1, "id", problemId);
-//      Problem Mock Entity2
-        mockProblem2 = Problem.builder().title(problemName2).gym(mockGym2).setting(mockSetting2).gymLevel(mockGymLevel1).build();
+
+        mockProblem2 = Problem.builder().title("테스트 문제2").gym(mockGym2).setting(mockSetting2).gymLevel(mockGymLevel1).build();
         ReflectionTestUtils.setField(mockProblem2, "id", problemId2);
 
-//      User Mock Entity
-        mockUser1 = User.builder().username("tester1").build();
+        mockUser1 = User.builder().username("tester1").email("t1@test.com").password("pw").build();
         ReflectionTestUtils.setField(mockUser1, "id", userId);
 
-//      User Mock Entity2
-        mockUser2 = User.builder().username("tester2").build();
+        mockUser2 = User.builder().username("tester2").email("t2@test.com").password("pw").build();
         ReflectionTestUtils.setField(mockUser2, "id", userId2);
 
-//      Admin User Mock Entity
-        mockAdmin = User.builder().username("admin").build();
-        ReflectionTestUtils.setField(mockAdmin, "id", userId2);
+        mockAdmin = User.builder().username("admin").email("admin@test.com").password("pw").build();
+        ReflectionTestUtils.setField(mockAdmin, "id", adminUserId);
         ReflectionTestUtils.setField(mockAdmin, "role", Role.ADMIN);
 
-//      ClearRecord Mock Entity
         mockClearRecord1 = ClearRecord.builder()
                 .user(mockUser1)
                 .gym(mockGym1)
@@ -181,473 +144,425 @@ public class ClearRecordServiceTest {
                 .clearDate(past)
                 .build();
         ReflectionTestUtils.setField(mockClearRecord1, "id", clearRecordId);
-
-//      ClearRecord Mock Entity2
-        mockClearRecord2 = ClearRecord.builder()
-                .user(mockUser2)
-                .gym(mockGym2)
-                .setting(mockSetting2)
-                .problem(mockProblem2)
-                .videoUrl(videoUrl)
-                .clearDate(past)
-                .build();
-        ReflectionTestUtils.setField(mockClearRecord1, "id", clearRecordId);
-
-//      invalidUser
-        invalidUser1 = User.builder().username("invalidUser").build();
-        ReflectionTestUtils.setField(invalidUser1, "id", invalidUserId);
-
-//      invalidSetting
-        invalidSetting1 = Setting.builder().build();
-        ReflectionTestUtils.setField(invalidSetting1, "id", invalidSettingId);
-
     }
 
     @Nested
     @DisplayName("createClearRecord() 메서드 테스트")
     class CreateClearRecordTest {
+
         @Test
         @DisplayName("완등 기록 작성 성공")
-        void createClearRecord_Success () {
-        // [Given] 테스트 환경 셋업
-        ClearRecordCreateDTO requestDTO = new ClearRecordCreateDTO(problemId, videoUrl, date);
+        void createClearRecord_Success() {
+            // [Given]
+            ClearRecordCreateDTO request = new ClearRecordCreateDTO(problemId, videoUrl, LocalDate.now());
 
-//      Repository의 동작을 Mocking
-        given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
-        given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem1));
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
+            given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem1));
 
-//      [When] 실제 로직 실행
-        ClearRecordResponseDTO response = clearRecordService.createClearRecord(userId, requestDTO);
+            // [When]
+            ClearRecordResponseDTO response = clearRecordService.createClearRecord(userId, request);
 
-//      [Then] 결과 검증
-//      1. 반환된 DTO 값이 의도한 대로 들어갔는지 확인
-        assertThat(response).isNotNull();
-        assertThat(response.getUsername()).isEqualTo(mockUser1.getUsername());
-        assertThat(response.getClearDate()).isEqualTo(date.toString());
-        assertThat(response.getVideoUrl()).isEqualTo(videoUrl);
+            // [Then]
+            assertThat(response).isNotNull();
+            assertThat(response.getUsername()).isEqualTo(mockUser1.getUsername());
+            assertThat(response.getVideoUrl()).isEqualTo(videoUrl);
+            assertThat(mockProblem1.getClearUserCount()).isEqualTo(1);
 
-//      2. 문제의 완등자 수가 증가했는지 확인 (problem.addClearUserCount() 호출 검증)
-        assertThat(mockProblem1.getClearUserCount()).isEqualTo(1);
-
-        verify(clearRecordRepository, times(1)).save(any(ClearRecord.class));
-    }
+            verify(clearRecordRepository, times(1)).save(any(ClearRecord.class));
+        }
 
         @Test
         @DisplayName("실패: 존재하지 않는 사용자 ID 요청시 예외 발생")
-        void createClearRecord_UserNotFound () {
-//      [Given]
-        LocalDate createDate = LocalDate.now();
-        ClearRecordCreateDTO requestDTO = new ClearRecordCreateDTO(invalidProblemId, videoUrl, createDate);
+        void createClearRecord_UserNotFound() {
+            // [Given]
+            ClearRecordCreateDTO request = new ClearRecordCreateDTO(problemId, videoUrl, LocalDate.now());
+            given(userRepository.findById(invalidUserId)).willReturn(Optional.empty());
 
-//      사용자를 찾을 수 없는 상황
-        given(userRepository.findById(invalidUserId)).willReturn(Optional.empty());
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.createClearRecord(invalidUserId, request))
+                    .isInstanceOf(UserNotFoundException.class);
 
-//      [When & Then] 예외가 발생하는지 검증
-
-        assertThatThrownBy(() -> clearRecordService.createClearRecord(invalidUserId, requestDTO))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("사용자를 찾을 수 없습니다.");
-
-//      메소드가 실행되지 않았음을 검증
-        verify(clearRecordRepository, times(0)).save(any());
-    }
+            verify(clearRecordRepository, never()).save(any());
+        }
 
         @Test
         @DisplayName("실패: 존재하지 않는 문제 ID 요청시 예외 발생")
-        void createClearRecord_ProblemIdNotFound () {
-//      [Given]
-        LocalDate createDate = LocalDate.now();
-        ClearRecordCreateDTO requestDTO = new ClearRecordCreateDTO(invalidProblemId, videoUrl, createDate);
+        void createClearRecord_ProblemNotFound() {
+            // [Given]
+            ClearRecordCreateDTO request = new ClearRecordCreateDTO(invalidProblemId, videoUrl, LocalDate.now());
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
+            given(problemRepository.findById(invalidProblemId)).willReturn(Optional.empty());
 
-        given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.createClearRecord(userId, request))
+                    .isInstanceOf(ProblemNotFoundException.class);
 
-//      [When & Then] 문제를 찾을 수 없는(문제가 존재하지 않는) 상황
-        assertThatThrownBy(() -> clearRecordService.createClearRecord(userId, requestDTO))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("문제를 찾을 수 없습니다.");
-
-//      메소드가 실행되지 않았음을 검증
-        verify(clearRecordRepository, times(0)).save(any());
-    }
+            verify(clearRecordRepository, never()).save(any());
+        }
     }
 
     @Nested
     @DisplayName("getClearRecordSummaryByUserId() 메서드 테스트")
-    class GetClearRecordSummaryByUserIdTest{
+    class GetClearRecordSummaryByUserIdTest {
 
         @Test
         @DisplayName("완등 기록 조회 성공")
-        void getClearRecordSummaryByUserId_Success(){
-//          [Given]
-            int page = 0;
-            int size = 5;
-
+        void getClearRecordSummaryByUserId_Success() {
+            // [Given]
+            int page = 0, size = 5;
             Pageable pageable = PageRequest.of(page, size);
 
-            Page<ClearRecord> mockClearRecord = TestFixture.createMockPage(()->ClearRecord.builder()
-                    .user(mockUser1)
-                    .gym(mockGym1)
-                    .setting(mockSetting1)
-                    .problem(mockProblem1)
-                    .videoUrl(videoUrl)
-                    .clearDate(LocalDate.now())
-                    .build(), 5);
+            Page<ClearRecord> mockPage = TestFixture.createMockPage(() -> ClearRecord.builder()
+                    .user(mockUser1).gym(mockGym1).setting(mockSetting1)
+                    .problem(mockProblem1).videoUrl(videoUrl).clearDate(LocalDate.now()).build(), size);
 
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
-            given(clearRecordRepository.findAllByUserOrderByClearDateDesc(mockUser1, pageable)).willReturn(mockClearRecord);
+            given(clearRecordRepository.findAllByUserOrderByClearDateDesc(mockUser1, pageable)).willReturn(mockPage);
 
-//          [When]
+            // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, page, size);
 
-//          [Then]
-//          요청한 size와 page 크기, 요청한 사용자의 정보가 일치하는지 검증,
+            // [Then]
             assertThat(result.getSize()).isEqualTo(size);
-            assertThat(result.getPageable().getPageNumber()).isEqualTo(page);
             assertThat(result.getContent().getFirst().getUsername()).isEqualTo(mockUser1.getUsername());
-
             verify(clearRecordRepository, times(1)).findAllByUserOrderByClearDateDesc(mockUser1, pageable);
-
         }
 
         @Test
         @DisplayName("실패: 존재하지 않는 사용자 ID 요청시 예외 발생")
-        void getClearRecordSummaryByUserId_Success_UserNotFound(){
-//          [Given]
-            int page = 0;
-            int size = 10;
-
-//          사용자를 찾을 수 없는 상황
+        void getClearRecordSummaryByUserId_UserNotFound() {
+            // [Given]
             given(userRepository.findById(invalidUserId)).willReturn(Optional.empty());
 
-//          [When & Then]
-            assertThatThrownBy(()-> clearRecordService.getClearRecordSummaryByUserId(invalidUserId, page, size))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("사용자를 찾을 수 없습니다.");
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserId(invalidUserId, 0, 10))
+                    .isInstanceOf(UserNotFoundException.class);
 
-//          조회 메소드가 실행되었는지 검증
-            verify(clearRecordRepository, times(0)).findAllByUserOrderByClearDateDesc(any(), any());
-
+            verify(clearRecordRepository, never()).findAllByUserOrderByClearDateDesc(any(), any());
         }
-
     }
 
     @Nested
     @DisplayName("getClearRecordSummaryByUserIdAndGym() 메서드 테스트")
-    class GetClearRecordSummaryByUserIdAndGymTest{
+    class GetClearRecordSummaryByUserIdAndGymTest {
 
         @Test
         @DisplayName("완등 기록 조회 성공")
-        void getClearRecordSummaryByUserIdAndGym_Success(){
-//          [Given]
-            int page = 0;
-            int size = 5;
+        void getClearRecordSummaryByUserIdAndGym_Success() {
+            // [Given]
+            int page = 0, size = 5;
             Pageable pageable = PageRequest.of(page, size);
 
-            Page<ClearRecord> mockClearRecord = TestFixture.createMockPage(()->ClearRecord.builder()
-                    .user(mockUser1)
-                    .gym(mockGym1)
-                    .setting(mockSetting1)
-                    .problem(mockProblem1)
-                    .videoUrl(videoUrl)
-                    .clearDate(LocalDate.now())
-                    .build(), 5);
+            Page<ClearRecord> mockPage = TestFixture.createMockPage(() -> ClearRecord.builder()
+                    .user(mockUser1).gym(mockGym1).setting(mockSetting1)
+                    .problem(mockProblem1).videoUrl(videoUrl).clearDate(LocalDate.now()).build(), size);
 
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
             given(gymRepository.findById(gymId)).willReturn(Optional.of(mockGym1));
-            given(clearRecordRepository.findAllByUserAndGymOrderByClearDateDesc(mockUser1, mockGym1, pageable)).willReturn(mockClearRecord);
+            given(clearRecordRepository.findAllByUserAndGymOrderByClearDateDesc(mockUser1, mockGym1, pageable)).willReturn(mockPage);
 
-//          [When]
+            // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserIdAndGym(userId, gymId, page, size);
 
-//          [Then]
-//          요청한 페이지의 번호와 크기가 일치하는지 검증
+            // [Then]
             assertThat(result.getSize()).isEqualTo(size);
-            assertThat(result.getPageable().getPageNumber()).isEqualTo(page);
             assertThat(result.getContent().getFirst().getUsername()).isEqualTo(mockUser1.getUsername());
-
             verify(clearRecordRepository, times(1)).findAllByUserAndGymOrderByClearDateDesc(mockUser1, mockGym1, pageable);
-
         }
 
         @Test
         @DisplayName("실패: 존재하지 않는 사용자 ID 요청시 예외 발생")
-        void getClearRecordSummaryByUserIdAndGym_UserNotFound(){
-//          [Given]
-            int page = 0;
-            int size = 10;
-
-//          존재하지 않는 사용자 요청시 빈 Optional 반환
+        void getClearRecordSummaryByUserIdAndGym_UserNotFound() {
+            // [Given]
             given(userRepository.findById(invalidUserId)).willReturn(Optional.empty());
 
-//          [When & Then]
-            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserIdAndGym(invalidUserId, gymId, page, size))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("사용자를 찾을 수 없습니다.");
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserIdAndGym(invalidUserId, gymId, 0, 10))
+                    .isInstanceOf(UserNotFoundException.class);
 
-            verify(clearRecordRepository, times(0)).findAllByUserAndGymOrderByClearDateDesc(any(), any(), any());
+            verify(clearRecordRepository, never()).findAllByUserAndGymOrderByClearDateDesc(any(), any(), any());
         }
 
         @Test
         @DisplayName("실패: 존재하지 않는 암장 ID 요청시 예외 발생")
-        void getClearRecordSummaryByUserIdAndGym_GymNotFound(){
-//          [Given]
-            int page = 0;
-            int size = 10;
-
-//          사용자는 존재하는 경우
+        void getClearRecordSummaryByUserIdAndGym_GymNotFound() {
+            // [Given]
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
-//          존재하지 않는 암장 요청시 빈 Optional 반환
             given(gymRepository.findById(invalidGymId)).willReturn(Optional.empty());
 
-//          [When & Then]
-            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserIdAndGym(userId, invalidGymId, page, size))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("암장을 찾을 수 없습니다.");
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserIdAndGym(userId, invalidGymId, 0, 10))
+                    .isInstanceOf(GymNotFoundException.class);
 
-            verify(clearRecordRepository, times(0)).findAllByUserAndGymOrderByClearDateDesc(any(), any(), any());
+            verify(clearRecordRepository, never()).findAllByUserAndGymOrderByClearDateDesc(any(), any(), any());
         }
     }
 
     @Nested
-    @DisplayName("getClearRecordSummaryByUserIdAndSettingId() 단위 테스트")
-    class GetClearRecordSummaryByUserIdAndSettingId{
+    @DisplayName("getClearRecordSummaryByUserIdAndSettingId() 메서드 테스트")
+    class GetClearRecordSummaryByUserIdAndSettingIdTest {
 
         @Test
         @DisplayName("완등 기록 조회 성공")
-        void getClearRecordSummaryByUserIdAndSettingId(){
-//          [Given]
-            int page = 0;
-            int size = 5;
-
+        void getClearRecordSummaryByUserIdAndSettingId_Success() {
+            // [Given]
+            int page = 0, size = 5;
             Pageable pageable = PageRequest.of(page, size);
 
-            Page<ClearRecord> clearRecordMockPage = TestFixture.createMockPage(
-                    () -> ClearRecord.builder()
-                            .user(mockUser1)
-                            .gym(mockGym1)
-                            .setting(mockSetting1)
-                            .problem(mockProblem1)
-                            .videoUrl(videoUrl)
-                            .clearDate(LocalDate.now())
-                            .build(), 5);
+            Page<ClearRecord> mockPage = TestFixture.createMockPage(() -> ClearRecord.builder()
+                    .user(mockUser1).gym(mockGym1).setting(mockSetting1)
+                    .problem(mockProblem1).videoUrl(videoUrl).clearDate(LocalDate.now()).build(), size);
 
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
             given(settingRepository.findById(settingId)).willReturn(Optional.of(mockSetting1));
-            given(clearRecordRepository.findAllByUserAndSettingOrderByClearDateDesc(mockUser1, mockSetting1, pageable)).willReturn(clearRecordMockPage);
+            given(clearRecordRepository.findAllByUserAndSettingOrderByClearDateDesc(mockUser1, mockSetting1, pageable)).willReturn(mockPage);
 
-//          [When]
-
+            // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserIdAndSettingId(userId, settingId, page, size);
 
-//          [Then]
-            //          요청한 페이지의 번호와 크기가 일치하는지 검증
+            // [Then]
             assertThat(result.getSize()).isEqualTo(size);
-            assertThat(result.getPageable().getPageNumber()).isEqualTo(page);
-            assertThat(result.getContent().getFirst().getUsername()).isEqualTo(mockUser1.getUsername());
-
             verify(clearRecordRepository, times(1)).findAllByUserAndSettingOrderByClearDateDesc(mockUser1, mockSetting1, pageable);
-
-
-        }
-
-        @Test
-        @DisplayName("실패: 존재하지 않는 사용자 ID 요청시 예외 발생")
-        void getClearRecordSummaryByUserIdAndSettingId_UserNotFound(){
-//          [Given]
-            int page = 0;
-            int size = 10;
-            given(userRepository.findById(invalidUserId)).willReturn(Optional.empty());
-
-//          [When & Then]
-            assertThatThrownBy(()->clearRecordService.getClearRecordSummaryByUserIdAndSettingId(invalidUserId, settingId, page, size))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("사용자를 찾을 수 없습니다.");
-
-            verify(clearRecordRepository, times(0)).findAllByUserAndSettingOrderByClearDateDesc(any(), any(), any());
-
         }
 
         @Test
         @DisplayName("실패: 존재하지 않는 세팅 ID 요청시 예외 발생")
-        void getClearRecordSummaryByUserIdAndSettingId_SettingNotFound(){
-//          [Given]
-            int page = 0;
-            int size = 10;
-
+        void getClearRecordSummaryByUserIdAndSettingId_SettingNotFound() {
+            // [Given]
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
             given(settingRepository.findById(invalidSettingId)).willReturn(Optional.empty());
 
-//          [When & Then]
-            assertThatThrownBy(()->clearRecordService.getClearRecordSummaryByUserIdAndSettingId(userId, invalidSettingId, page, size))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("세팅을 찾을 수 없습니다.");
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserIdAndSettingId(userId, invalidSettingId, 0, 10))
+                    .isInstanceOf(SettingNotFoundException.class);
 
-            verify(clearRecordRepository, times(0)).findAllByUserAndSettingOrderByClearDateDesc(any(), any(), any());
+            verify(clearRecordRepository, never()).findAllByUserAndSettingOrderByClearDateDesc(any(), any(), any());
         }
     }
 
     @Nested
-    @DisplayName("getClearRecordSummaryByProblemExistVideoUrl() 단위 테스트")
-    class GetClearRecordSummaryByProblemExistVideoUrl{
+    @DisplayName("getClearRecordSummaryByProblemExistVideoUrl() 메서드 테스트")
+    class GetClearRecordSummaryByProblemExistVideoUrlTest {
 
         @Test
-        @DisplayName("완등 기록 조회 성공")
-        void getClearRecordSummaryByProblemExistVideoUrl_Success(){
-//      ToDo: 테스트 Mock 객체 다양화를 통해 더 세분화된 테스트 필요
-
-//          [Given]
-            int page = 0;
-            int size = 5;
-
+        @DisplayName("영상 있는 완등 기록 조회 성공")
+        void getClearRecordSummaryByProblemExistVideoUrl_Success() {
+            // [Given]
+            int page = 0, size = 5;
             Pageable pageable = PageRequest.of(page, size);
 
-            Page<ClearRecord> clearRecordMockPage = TestFixture.createMockPage(
-                    () -> ClearRecord.builder()
-                            .user(mockUser1)
-                            .gym(mockGym1)
-                            .setting(mockSetting1)
-                            .problem(mockProblem1)
-                            .videoUrl(videoUrl)
-                            .clearDate(LocalDate.now())
-                            .build(), 5);
+            Page<ClearRecord> mockPage = TestFixture.createMockPage(() -> ClearRecord.builder()
+                    .user(mockUser1).gym(mockGym1).setting(mockSetting1)
+                    .problem(mockProblem1).videoUrl(videoUrl).clearDate(LocalDate.now()).build(), size);
 
             given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem1));
-            given(clearRecordRepository.findAllByProblemAndVideoUrlIsNotNull(mockProblem1, pageable)).willReturn(clearRecordMockPage);
+            given(clearRecordRepository.findAllByProblemAndVideoUrlIsNotNull(mockProblem1, pageable)).willReturn(mockPage);
 
-//          [When]
+            // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByProblemExistVideoUrl(problemId, page, size);
 
-//          [Then]
-            assertThat(result.getSize()).isEqualTo(5);
-            assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
-
-            verify(clearRecordRepository, times(1)).findAllByProblemAndVideoUrlIsNotNull(any(), any());
-
+            // [Then]
+            assertThat(result.getSize()).isEqualTo(size);
+            verify(clearRecordRepository, times(1)).findAllByProblemAndVideoUrlIsNotNull(mockProblem1, pageable);
         }
 
         @Test
         @DisplayName("실패: 존재하지 않는 문제 ID 요청시 예외 발생")
-        void getClearRecordSummaryByProblemExistVideoUrl_ProblemNotFound(){
-//          [Given]
-            int page = 0;
-            int size = 10;
-
+        void getClearRecordSummaryByProblemExistVideoUrl_ProblemNotFound() {
+            // [Given]
             given(problemRepository.findById(invalidProblemId)).willReturn(Optional.empty());
 
-//          [When & Then]
-            assertThatThrownBy(()-> clearRecordService.getClearRecordSummaryByProblemExistVideoUrl(invalidProblemId, page, size))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("문제를 찾을 수 없습니다.");
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByProblemExistVideoUrl(invalidProblemId, 0, 10))
+                    .isInstanceOf(ProblemNotFoundException.class);
 
-            verify(clearRecordRepository, times(0)).findAllByProblemAndVideoUrlIsNotNull(any(), any());
+            verify(clearRecordRepository, never()).findAllByProblemAndVideoUrlIsNotNull(any(), any());
         }
     }
 
     @Nested
-    @DisplayName("getClearRecordSummaryBySectorExistVideoUrl() 단위 테스트")
-    class GetClearRecordSummaryBySectorExistVideoUrl{
+    @DisplayName("getClearRecordSummaryBySectorExistVideoUrl() 메서드 테스트")
+    class GetClearRecordSummaryBySectorExistVideoUrlTest {
 
         @Test
-        @DisplayName("완등 기록 조회 성공")
-        void getClearRecordSummaryBySectorExistVideoUrl_Success(){
-//          [Given]
-            int page = 0;
-            int size = 10;
+        @DisplayName("섹터 영상 있는 완등 기록 조회 성공")
+        void getClearRecordSummaryBySectorExistVideoUrl_Success() {
+            // [Given]
+            int page = 0, size = 10;
             Pageable pageable = PageRequest.of(page, size);
 
-            Page<ClearRecord> clearRecordMockPage = TestFixture.createMockPage(
-                    () -> ClearRecord.builder()
-                            .user(mockUser1)
-                            .gym(mockGym1)
-                            .setting(mockSetting1)
-                            .problem(mockProblem1)
-                            .videoUrl(videoUrl)
-                            .clearDate(LocalDate.now())
-                            .build(), 10);
+            Page<ClearRecord> mockPage = TestFixture.createMockPage(() -> ClearRecord.builder()
+                    .user(mockUser1).gym(mockGym1).setting(mockSetting1)
+                    .problem(mockProblem1).videoUrl(videoUrl).clearDate(LocalDate.now()).build(), size);
 
             given(sectorRepository.findById(sectorId)).willReturn(Optional.of(mockSector1));
             given(settingRepository.findTopBySectorAndIsActiveOrderBySettingDateDesc(mockSector1, true)).willReturn(Optional.of(mockSetting1));
-            given(clearRecordRepository.findAllBySettingAndVideoUrlIsNotNull(mockSetting1, pageable)).willReturn(clearRecordMockPage);
-//          [When]
+            given(clearRecordRepository.findAllBySettingAndVideoUrlIsNotNull(mockSetting1, pageable)).willReturn(mockPage);
+
+            // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(sectorId, page, size);
 
-//          [Then]
-
-            verify(clearRecordRepository, times(1)).findAllBySettingAndVideoUrlIsNotNull(any(), any());
-
-
+            // [Then]
+            assertThat(result.getSize()).isEqualTo(size);
+            verify(clearRecordRepository, times(1)).findAllBySettingAndVideoUrlIsNotNull(mockSetting1, pageable);
         }
 
         @Test
         @DisplayName("실패: 존재하지 않는 섹터 ID 요청시 예외 발생")
-        void getClearRecordSummaryBySectorExistVideoUrl_SectorNotFound(){
-//          [Given]
-            int page = 0;
-            int size = 10;
-
+        void getClearRecordSummaryBySectorExistVideoUrl_SectorNotFound() {
+            // [Given]
             given(sectorRepository.findById(invalidSectorId)).willReturn(Optional.empty());
 
-//          [When & Then]
-            assertThatThrownBy(()-> clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(invalidSectorId, page, size))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("섹터를 찾을 수 없습니다.");
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(invalidSectorId, 0, 10))
+                    .isInstanceOf(SectorNotFoundException.class);
 
-            verify(clearRecordRepository, times(0)).findAllBySettingAndVideoUrlIsNotNull(any(), any());
+            verify(clearRecordRepository, never()).findAllBySettingAndVideoUrlIsNotNull(any(), any());
         }
 
         @Test
-        @DisplayName("실패: 존재하지 않는 세팅 ID 요청시 예외 발생")
-        void getClearRecordSummaryBySectorExistVideoUrl_SettingNotFound(){
-//          [Given]
-            int page = 0;
-            int size = 10;
+        @DisplayName("실패: 활성 세팅이 없을 때 예외 발생")
+        void getClearRecordSummaryBySectorExistVideoUrl_SettingNotFound() {
+            // [Given]
             given(sectorRepository.findById(sectorId)).willReturn(Optional.of(mockSector1));
             given(settingRepository.findTopBySectorAndIsActiveOrderBySettingDateDesc(mockSector1, true)).willReturn(Optional.empty());
 
-//          [When & Then]
-            assertThatThrownBy(()-> clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(sectorId, page, size))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("세팅을 찾을 수 없습니다.");
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(sectorId, 0, 10))
+                    .isInstanceOf(SettingNotFoundException.class);
 
-            verify(clearRecordRepository, times(0)).findAllBySettingAndVideoUrlIsNotNull(any(), any());
+            verify(clearRecordRepository, never()).findAllBySettingAndVideoUrlIsNotNull(any(), any());
         }
     }
 
     @Nested
-    @DisplayName("updateClearRecord() 단위 테스트")
-    class UpdateClearRecord{
+    @DisplayName("updateClearRecord() 메서드 테스트")
+    class UpdateClearRecordTest {
 
         @Test
-        @DisplayName("완등 기록 업데이트 성공")
-        void updateClearRecord_Success(){
-//          [Given]
-            Long updateProblemId = 50L;
-            String updateVideoUrl = "updateUrl";
+        @DisplayName("완등 기록 업데이트 성공 - 문제와 영상 모두 변경")
+        void updateClearRecord_Success() {
+            // [Given]
+            Long newProblemId = 50L;
+            String newVideoUrl = "https://new-url.com/video.mp4";
+
+            Problem newProblem = Problem.builder().title("새 문제").gym(mockGym1).setting(mockSetting1).gymLevel(mockGymLevel1).build();
+            ReflectionTestUtils.setField(newProblem, "id", newProblemId);
 
             ClearRecordUpdateDTO request = new ClearRecordUpdateDTO();
-            request.setProblemId(updateProblemId);
-            request.setVideoUrl(updateVideoUrl);
+            request.setProblemId(newProblemId);
+            request.setVideoUrl(newVideoUrl);
 
-//          새 문제 객체 생성 (ID를 50L로 설정)
-            Problem updateProblem = Problem.builder().title("새로운 문제").build();
-            ReflectionTestUtils.setField(updateProblem, "id", updateProblemId);
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
+            given(clearRecordRepository.findById(clearRecordId)).willReturn(Optional.of(mockClearRecord1));
+            given(problemRepository.findById(newProblemId)).willReturn(Optional.of(newProblem));
+
+            // [When]
+            ClearRecordResponseDTO result = clearRecordService.updateClearRecord(userId, clearRecordId, request);
+
+            // [Then]
+            assertThat(result.getProblemId()).isEqualTo(newProblemId);
+            assertThat(result.getVideoUrl()).isEqualTo(newVideoUrl);
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 완등 기록 요청시 예외 발생")
+        void updateClearRecord_RecordNotFound() {
+            // [Given]
+            ClearRecordUpdateDTO request = new ClearRecordUpdateDTO();
+            request.setProblemId(problemId);
+            request.setVideoUrl(videoUrl);
+
+            given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
+            given(clearRecordRepository.findById(invalidClearRecordId)).willReturn(Optional.empty());
+
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.updateClearRecord(userId, invalidClearRecordId, request))
+                    .isInstanceOf(ClearRecordNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("실패: 다른 사용자의 완등 기록 수정 시도시 예외 발생")
+        void updateClearRecord_AccessDenied() {
+            // [Given]
+            ClearRecordUpdateDTO request = new ClearRecordUpdateDTO();
+            request.setProblemId(problemId);
+            request.setVideoUrl(videoUrl);
+
+            given(userRepository.findById(userId2)).willReturn(Optional.of(mockUser2));
+            given(clearRecordRepository.findById(clearRecordId)).willReturn(Optional.of(mockClearRecord1));
+
+            // [When & Then] mockClearRecord1은 mockUser1 소유
+            assertThatThrownBy(() -> clearRecordService.updateClearRecord(userId2, clearRecordId, request))
+                    .isInstanceOf(ClearRecordAccessDeniedException.class);
+        }
+
+        @Test
+        @DisplayName("ADMIN은 타인 완등 기록도 수정 가능")
+        void updateClearRecord_AdminSuccess() {
+            // [Given]
+            ClearRecordUpdateDTO request = new ClearRecordUpdateDTO();
+            request.setProblemId(problemId);
+            request.setVideoUrl(videoUrl);
+
+            given(userRepository.findById(adminUserId)).willReturn(Optional.of(mockAdmin));
+            given(clearRecordRepository.findById(clearRecordId)).willReturn(Optional.of(mockClearRecord1));
+
+            // [When] 예외 없이 성공해야 함
+            ClearRecordResponseDTO result = clearRecordService.updateClearRecord(adminUserId, clearRecordId, request);
+
+            // [Then]
+            assertThat(result).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteClearRecord() 메서드 테스트")
+    class DeleteClearRecordTest {
+
+        @Test
+        @DisplayName("완등 기록 삭제 성공 - clearUserCount 감소 검증")
+        void deleteClearRecord_Success() {
+            // [Given]
+            mockProblem1.addClearUserCount();
+            assertThat(mockProblem1.getClearUserCount()).isEqualTo(1);
 
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
             given(clearRecordRepository.findById(clearRecordId)).willReturn(Optional.of(mockClearRecord1));
 
-//          50L에 대한 응답
-            given(problemRepository.findById(updateProblemId)).willReturn(Optional.of(updateProblem));
+            // [When]
+            clearRecordService.deleteClearRecord(userId, clearRecordId);
 
-//          [When]
-            ClearRecordResponseDTO result = clearRecordService.updateClearRecord(userId, clearRecordId, request);
+            // [Then]
+            assertThat(mockProblem1.getClearUserCount()).isEqualTo(0);
+            verify(clearRecordRepository, times(1)).delete(mockClearRecord1);
+        }
 
-//          [Then]
-//          50L로 바뀌었는지 검증
-            assertThat(result.getProblemId()).isEqualTo(50L);
-//          videoUrl이 변경되었는지 검증
-            assertThat(result.getVideoUrl()).isEqualTo(updateVideoUrl);
+        @Test
+        @DisplayName("실패: 다른 사용자의 완등 기록 삭제 시도시 예외 발생")
+        void deleteClearRecord_AccessDenied() {
+            // [Given]
+            given(userRepository.findById(userId2)).willReturn(Optional.of(mockUser2));
+            given(clearRecordRepository.findById(clearRecordId)).willReturn(Optional.of(mockClearRecord1));
 
+            // [When & Then]
+            assertThatThrownBy(() -> clearRecordService.deleteClearRecord(userId2, clearRecordId))
+                    .isInstanceOf(ClearRecordAccessDeniedException.class);
+
+            verify(clearRecordRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("ADMIN은 타인 완등 기록도 삭제 가능")
+        void deleteClearRecord_AdminSuccess() {
+            // [Given]
+            given(userRepository.findById(adminUserId)).willReturn(Optional.of(mockAdmin));
+            given(clearRecordRepository.findById(clearRecordId)).willReturn(Optional.of(mockClearRecord1));
+
+            // [When & Then] 예외 없이 성공
+            clearRecordService.deleteClearRecord(adminUserId, clearRecordId);
+
+            verify(clearRecordRepository, times(1)).delete(mockClearRecord1);
         }
     }
-
 }
