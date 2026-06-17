@@ -2,8 +2,6 @@ package com.project.greatcloud13.ClimbingWith.controller;
 
 import com.project.greatcloud13.ClimbingWith.dto.FileUploadResponseDTO;
 import com.project.greatcloud13.ClimbingWith.service.FileService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,22 +22,19 @@ public class FileController {
     private final FileService fileService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<FileUploadResponseDTO> uploadFile(@RequestPart("file")MultipartFile file){
-        FileUploadResponseDTO fileUploadResponseDTO = new FileUploadResponseDTO();
+    public ResponseEntity<FileUploadResponseDTO> uploadFile(@RequestPart("file") MultipartFile file) {
+        FileUploadResponseDTO response = new FileUploadResponseDTO();
         try {
             String savedName = fileService.saveFile(file);
-
-            fileUploadResponseDTO.setMessage("업로드에 성공하였습니다.");
-            fileUploadResponseDTO.setFileName(savedName);
-            return ResponseEntity.ok(fileUploadResponseDTO);
-        }catch (IOException e){
-            fileUploadResponseDTO.setMessage("파일 업로드에 실패하였습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(fileUploadResponseDTO);
-        } catch (IllegalArgumentException e){
-            fileUploadResponseDTO.setMessage("파일이 비어있습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(fileUploadResponseDTO);
+            response.setMessage("업로드에 성공하였습니다.");
+            response.setFileName(savedName);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            response.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (IOException e) {
+            response.setMessage("파일 업로드에 실패하였습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
     }
-
 }
