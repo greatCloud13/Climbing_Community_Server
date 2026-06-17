@@ -8,12 +8,14 @@ import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Post;
 import com.project.greatcloud13.ClimbingWith.entity.PostType;
 import com.project.greatcloud13.ClimbingWith.entity.User;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.post.PostAccessDeniedException;
+import com.project.greatcloud13.ClimbingWith.exception.post.PostNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PostService {
 
     private final PostRepository postRepository;
@@ -32,10 +35,10 @@ public class PostService {
     @Transactional
     public PostResponseDTO createPost(Long userId, PostCreateDTO requestDTO) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
-        if(!user.isManager()){
-            throw new IllegalArgumentException("잘못된 접근 입니다.");
+        if (!user.isManager()) {
+            throw new PostAccessDeniedException();
         }
 
         Post post = Post.builder()
@@ -53,17 +56,16 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDTO updatePost(Long userId, Long postId, PostUpdateDTO request){
+    public PostResponseDTO updatePost(Long userId, Long postId, PostUpdateDTO request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("존재하지 않는 사용자 입니다."));
+                .orElseThrow(UserNotFoundException::new);
 
-        if(!user.isManager()){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
+        if (!user.isManager()) {
+            throw new PostAccessDeniedException();
         }
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(()->new EntityNotFoundException("게시글을 찾을 수 없습니다."));
-
+                .orElseThrow(PostNotFoundException::new);
 
         post.validateWriter(userId);
         post.updatePost(request, LocalDateTime.now());
@@ -71,34 +73,24 @@ public class PostService {
         return PostResponseDTO.from(post);
     }
 
-    @Transactional(readOnly = true)
-    public PostResponseDTO getPostById(Long postId){
-
+    public PostResponseDTO getPostById(Long postId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(()->new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(PostNotFoundException::new);
 
         return PostResponseDTO.from(post);
     }
 
-    @Transactional(readOnly = true)
-    public Page<PostSummaryDTO> getAllByGym(Long gymId, Pageable pageable){
-
+    public Page<PostSummaryDTO> getAllByGym(Long gymId, Pageable pageable) {
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+                .orElseThrow(GymNotFoundException::new);
 
-        Page<Post> postPage = postRepository.findAllByGym(gym, pageable);
-
-        return postPage.map(PostSummaryDTO :: from);
+        return postRepository.findAllByGym(gym, pageable).map(PostSummaryDTO::from);
     }
 
-    @Transactional(readOnly = true)
-    public Page<PostSummaryDTO> getAllByGymWithPostType(Long gymId, PostType postType, Pageable pageable){
+    public Page<PostSummaryDTO> getAllByGymWithPostType(Long gymId, PostType postType, Pageable pageable) {
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+                .orElseThrow(GymNotFoundException::new);
 
-        Page<Post> postPage = postRepository.findAllByGymAndPostType(gym, postType, pageable);
-
-        return postPage.map(PostSummaryDTO::from);
+        return postRepository.findAllByGymAndPostType(gym, postType, pageable).map(PostSummaryDTO::from);
     }
-
 }
