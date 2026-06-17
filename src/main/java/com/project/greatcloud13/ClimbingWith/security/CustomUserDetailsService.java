@@ -3,6 +3,7 @@ package com.project.greatcloud13.ClimbingWith.security;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new UsernameNotFoundException("사용자를 찾을 수 없습니다."+ username));
+        if (!user.isActive()) {
+            throw new DisabledException("탈퇴한 계정입니다.");
+        }
         return new CustomUserDetails(user.getId(), user.getUsername(),user.getPassword(), user.getRole());
     }
 }
