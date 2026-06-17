@@ -58,9 +58,9 @@ public class User {
         this.isActive = false;
     }
 
-    public void activate(String password){
+    public void activate(String password, PasswordEncoder passwordEncoder){
 
-        if(!this.password.equals(password)){
+        if(!passwordEncoder.matches(password, this.password)){
             throw new IllegalArgumentException("잘못된 계정 정보 입니다.");
         }
         this.isActive = true;
@@ -85,7 +85,7 @@ public class User {
     }
 
     public Boolean gymValidate(Gym gym){
-        return this.gym.equals(gym)||this.role.equals(Role.ADMIN);
+        return this.role.equals(Role.ADMIN) || (this.gym != null && this.gym.equals(gym));
     }
 
 }

@@ -10,9 +10,10 @@ import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.util.TestFixture;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityNotFoundException;
-import org.hibernate.boot.model.naming.IllegalIdentifierException;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.post.PostAccessDeniedException;
+import com.project.greatcloud13.ClimbingWith.exception.post.PostNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -186,8 +187,7 @@ public class PostServiceTest {
 
 //          [When && Then]
             assertThatThrownBy(()-> postService.createPost(invalidUserId, requestDTO))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("사용자를 찾을 수 없습니다.");
+                    .isInstanceOf(UserNotFoundException.class);
 
             verify(postRepository, times(0)).save(any());
         }
@@ -201,8 +201,7 @@ public class PostServiceTest {
 
 //          [When & Then]
             assertThatThrownBy(()->postService.createPost(testUserId1, requestDTO))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("잘못된 접근 입니다.");
+                    .isInstanceOf(PostAccessDeniedException.class);
 
             verify(postRepository, times(0)).save(any());
         }
@@ -234,8 +233,7 @@ public class PostServiceTest {
             given(postRepository.findById(invalidPostId)).willReturn(Optional.empty());
 //          [When & Then]
             assertThatThrownBy(()->postService.getPostById(invalidPostId))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("게시글을 찾을 수 없습니다.");
+                    .isInstanceOf(PostNotFoundException.class);
         }
     }
 
@@ -326,8 +324,7 @@ public class PostServiceTest {
             given(userRepository.findById(invalidUserId)).willReturn(Optional.empty());
 //          [When & When]
             assertThatThrownBy(()-> postService.updatePost(invalidUserId, testPostId, request))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("존재하지 않는 사용자 입니다.");
+                    .isInstanceOf(UserNotFoundException.class);
 
             verify(postRepository, times(0)).save(any());
         }
@@ -345,8 +342,7 @@ public class PostServiceTest {
             given(postRepository.findById(invalidPostId)).willReturn(Optional.empty());
 //          [When & Then]
             assertThatThrownBy(()->postService.updatePost(testManagerId1, invalidPostId, request))
-                    .isInstanceOf(EntityNotFoundException.class)
-                    .hasMessage("게시글을 찾을 수 없습니다.");
+                    .isInstanceOf(PostNotFoundException.class);
 
             verify(postRepository, times(0)).save(any());
         }
@@ -363,8 +359,7 @@ public class PostServiceTest {
             given(userRepository.findById(testUserId1)).willReturn(Optional.of(mockUser1));
 //          [When & Then]
             assertThatThrownBy(()->postService.updatePost(testUserId1, testPostId, request))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("잘못된 접근입니다.");
+                    .isInstanceOf(PostAccessDeniedException.class);
 
             verify(postRepository, times(0)).save(any());
         }
