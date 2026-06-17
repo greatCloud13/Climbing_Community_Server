@@ -47,8 +47,11 @@ public enum ErrorCode {
     ACCESS_DENIED_POST(HttpStatus.FORBIDDEN, "PO002", "게시글에 대한 권한이 없습니다."),
     TO_MANY_REQUEST_POST(HttpStatus.TOO_MANY_REQUESTS, "PO003", "게시글 요청이 너무 많습니다."),
 
-//  ====================================COMMON ERROR CODE=================================
-    AccessDenied(HttpStatus.FORBIDDEN, "C001", "접근 권한이 없습니다."),
+//  ====================================FILE ERROR CODE=================================
+    FILE_EMPTY(HttpStatus.BAD_REQUEST, "F001", "파일이 비어있습니다."),
+    FILE_INVALID_NAME(HttpStatus.BAD_REQUEST, "F002", "파일 이름이 유효하지 않습니다."),
+    FILE_NO_EXTENSION(HttpStatus.BAD_REQUEST, "F003", "확장자가 없는 파일은 업로드할 수 없습니다."),
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "F004", "파일 업로드에 실패하였습니다."),
 
 //  ====================================COMMON ERROR CODE=================================
     AccessDenied(HttpStatus.FORBIDDEN, "C001", "접근 권한이 없습니다."),

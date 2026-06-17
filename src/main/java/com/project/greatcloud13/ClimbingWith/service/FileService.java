@@ -1,6 +1,8 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
+import com.project.greatcloud13.ClimbingWith.common.ErrorCode;
 import com.project.greatcloud13.ClimbingWith.entity.FileEntity;
+import com.project.greatcloud13.ClimbingWith.exception.file.FileUploadException;
 import com.project.greatcloud13.ClimbingWith.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,38 +23,39 @@ public class FileService {
     private final FileRepository fileRepository;
 
     @Transactional
-    public String saveFile(MultipartFile file) throws IOException {
+    public String saveFile(MultipartFile file) {
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 비어있습니다.");
+            throw new FileUploadException(ErrorCode.FILE_EMPTY);
         }
 
         String originalName = file.getOriginalFilename();
         if (originalName == null || originalName.isBlank()) {
-            throw new IllegalArgumentException("파일 이름이 유효하지 않습니다.");
+            throw new FileUploadException(ErrorCode.FILE_INVALID_NAME);
         }
 
         int dotIndex = originalName.lastIndexOf(".");
         if (dotIndex == -1) {
-            throw new IllegalArgumentException("확장자가 없는 파일은 업로드할 수 없습니다.");
+            throw new FileUploadException(ErrorCode.FILE_NO_EXTENSION);
         }
 
         String extension = originalName.substring(dotIndex);
-        String uuid = UUID.randomUUID().toString();
-        String savedName = uuid + extension;
-
+        String savedName = UUID.randomUUID() + extension;
         String separator = uploadPath.endsWith(File.separator) ? "" : File.separator;
         File targetFile = new File(uploadPath + separator + savedName);
-        file.transferTo(targetFile);
 
-        FileEntity fileEntity = FileEntity.builder()
+        try {
+            file.transferTo(targetFile);
+        } catch (IOException e) {
+            throw new FileUploadException(ErrorCode.FILE_UPLOAD_FAILED);
+        }
+
+        fileRepository.save(FileEntity.builder()
                 .orgName(originalName)
                 .savedName(savedName)
                 .savedPath(targetFile.getAbsolutePath())
                 .ext(extension)
                 .size(file.getSize())
-                .build();
-
-        fileRepository.save(fileEntity);
+                .build());
 
         return savedName;
     }
