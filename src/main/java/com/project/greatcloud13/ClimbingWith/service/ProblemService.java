@@ -97,6 +97,9 @@ public class ProblemService {
     }
 
     public List<ProblemDTO> getProblemListBySetting(Long settingId) {
+        settingRepository.findById(settingId)
+                .orElseThrow(SettingNotFoundException::new);
+
         return problemRepository.findAllBySettingId(settingId).stream()
                 .map(ProblemDTO::from)
                 .toList();
