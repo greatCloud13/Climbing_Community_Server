@@ -22,7 +22,7 @@ public class Post {
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User writer;
 

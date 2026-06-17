@@ -1,11 +1,14 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
 import com.project.greatcloud13.ClimbingWith.dto.GymLevelCreateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.GymLevelDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymLevelUpdateDTO;
-import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
+import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import com.project.greatcloud13.ClimbingWith.service.GymLevelService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,38 +21,33 @@ public class GymLevelController {
     private final GymLevelService gymLevelService;
 
     @PostMapping
-    public ResponseEntity<GymLevel> createGymLevel(@RequestBody GymLevelCreateDTO request){
-        GymLevel result = gymLevelService.createGymLevel(request);
-
-        return ResponseEntity.ok(result);
+    public ResponseEntity<GymLevelDTO> createGymLevel(@RequestBody GymLevelCreateDTO request,
+                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        GymLevelDTO result = gymLevelService.createGymLevel(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping("/gym/{gymId}")
-    public ResponseEntity<List<GymLevel>> getGymLevelList(@PathVariable Long gymId){
-        List<GymLevel> result = gymLevelService.getAllGymLevelByGym(gymId);
-
-        return ResponseEntity.ok(result);
+    public ResponseEntity<List<GymLevelDTO>> getGymLevelList(@PathVariable Long gymId) {
+        return ResponseEntity.ok(gymLevelService.getAllGymLevelByGym(gymId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GymLevel> getGymLevel(@PathVariable Long id){
-        GymLevel result = gymLevelService.getGymLevel(id);
-
-        return ResponseEntity.ok(result);
+    public ResponseEntity<GymLevelDTO> getGymLevel(@PathVariable Long id) {
+        return ResponseEntity.ok(gymLevelService.getGymLevel(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GymLevel> updateGymLevel(@PathVariable Long id, @RequestBody GymLevelUpdateDTO request){
-        GymLevel result = gymLevelService.updateGymLevel(id, request);
-
-        return ResponseEntity.ok(result);
+    public ResponseEntity<GymLevelDTO> updateGymLevel(@PathVariable Long id,
+                                                       @RequestBody GymLevelUpdateDTO request,
+                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(gymLevelService.updateGymLevel(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Boolean> deleteGymLevel(@PathVariable Long id){
+    public ResponseEntity<Void> deleteGymLevel(@PathVariable Long id,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         gymLevelService.deleteGymLevel(id);
-
-        return ResponseEntity.ok(true);
+        return ResponseEntity.noContent().build();
     }
-
 }

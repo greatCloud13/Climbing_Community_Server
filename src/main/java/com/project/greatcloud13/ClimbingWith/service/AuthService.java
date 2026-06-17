@@ -1,13 +1,15 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
+import com.project.greatcloud13.ClimbingWith.common.ErrorCode;
 import com.project.greatcloud13.ClimbingWith.dto.LoginRequest;
 import com.project.greatcloud13.ClimbingWith.dto.LoginResponse;
 import com.project.greatcloud13.ClimbingWith.dto.SignUpRequest;
 import com.project.greatcloud13.ClimbingWith.entity.Role;
 import com.project.greatcloud13.ClimbingWith.entity.User;
+import com.project.greatcloud13.ClimbingWith.exception.auth.DuplicateFieldException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.security.JwtTokenProvider;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -25,18 +28,15 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Transactional
-    public void signup(SignUpRequest request){
-
-        if(userRepository.existsByUsername(request.getUsername())){
-            throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
+    public void signup(SignUpRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new DuplicateFieldException(ErrorCode.DUPLICATE_USERNAME);
         }
-        if(userRepository.existsByNickname(request.getNickname())) {
-            throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
+        if (userRepository.existsByNickname(request.getNickname())) {
+            throw new DuplicateFieldException(ErrorCode.DUPLICATE_NICKNAME);
         }
-        if(userRepository.existsByEmail(request.getEmail())){
-            throw new IllegalArgumentException("이미 사용중인 이메일 입니다.");
-
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateFieldException(ErrorCode.DUPLICATE_EMAIL);
         }
 
         User user = User.builder()
@@ -49,9 +49,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    @Transactional
-    public LoginResponse login(LoginRequest request){
-
+    public LoginResponse login(LoginRequest request) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -64,16 +62,16 @@ public class AuthService {
         String token = jwtTokenProvider.generateToken(username);
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
-        return new LoginResponse(token, username, user.getRole().toString(), user.getRole()==Role.GYM_MANAGER ? user.getGym().getId() : null , user.getNickname());
+        return new LoginResponse(token, username, user.getRole().toString(),
+                user.getRole() == Role.GYM_MANAGER ? user.getGym().getId() : null,
+                user.getNickname());
     }
 
-    @Transactional
-    public void withdraw(LoginRequest request){
-
+    public void withdraw(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         user.checkPassword(request.getPassword(), passwordEncoder);
         user.deactivate();

@@ -1,21 +1,26 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.*;
+import java.util.Objects;
 import com.project.greatcloud13.ClimbingWith.entity.*;
+import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordAccessDeniedException;
+import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.problem.ProblemNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.sector.SectorNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.setting.SettingNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.*;
-import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ClearRecordService {
 
     private final ClearRecordRepository clearRecordRepository;
@@ -26,20 +31,13 @@ public class ClearRecordService {
     private final GymRepository gymRepository;
     private final ClearRecordRepositoryCustom clearRecordRepositoryCustom;
 
-
-    /**
-     * 완등 기록 작성
-     * @param userId 사용자 ID
-     * @param clearRecordCreateDTO clearRecordCreateDTO
-     * @return ClearRecordResponseDTO 
-     */
     @Transactional
-    public ClearRecordResponseDTO createClearRecord(Long userId, ClearRecordCreateDTO clearRecordCreateDTO){
+    public ClearRecordResponseDTO createClearRecord(Long userId, ClearRecordCreateDTO clearRecordCreateDTO) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         Problem problem = problemRepository.findById(clearRecordCreateDTO.getProblemId())
-                .orElseThrow(()-> new EntityNotFoundException("문제를 찾을 수 없습니다."));
+                .orElseThrow(ProblemNotFoundException::new);
 
         ClearRecord clearRecord = ClearRecord.builder()
                 .user(user)
@@ -56,176 +54,114 @@ public class ClearRecordService {
         return ClearRecordResponseDTO.from(clearRecord);
     }
 
-    /**
-     * 사용자 ID 기준 완등 기록 요약 조회
-     * @param userId 사용자 ID
-     * @param page page
-     * @param size size
-     * @return Page<ClearRecordSummaryDTO>
-     */
-    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserId(Long userId, int page, int size){
-
+    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserId(Long userId, int page, int size) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ClearRecord> clearRecord = clearRecordRepository.findAllByUserOrderByClearDateDesc(user, pageable);
-
-        return clearRecord.map(ClearRecordSummaryDTO :: from);
+        return clearRecordRepository.findAllByUserOrderByClearDateDesc(user, pageable)
+                .map(ClearRecordSummaryDTO::from);
     }
 
-    /**
-     * 사용자 ID와 암장 ID를 이용하여 완등 기록 요약 조회(완등일자기준 내림차순)
-     * @param userId 사용자 ID
-     * @param gymId 암장 ID
-     * @param page page
-     * @param size size
-     * @return Page<ClearRecordSummaryDTO>
-     */
-    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserIdAndGym(Long userId, Long gymId, int page, int size){
-
+    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserIdAndGym(Long userId, Long gymId, int page, int size) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(()-> new EntityNotFoundException("암장을 찾을 수 없습니다."));
+                .orElseThrow(GymNotFoundException::new);
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ClearRecord> clearRecordPage = clearRecordRepository.findAllByUserAndGymOrderByClearDateDesc(user, gym, pageable);
-
-        return clearRecordPage.map(ClearRecordSummaryDTO :: from);
+        return clearRecordRepository.findAllByUserAndGymOrderByClearDateDesc(user, gym, pageable)
+                .map(ClearRecordSummaryDTO::from);
     }
 
-    /**
-     * 사용자 ID와 세팅 ID를 이용하여 완등 기록 요약 조회
-     * @param userId 사용자 ID
-     * @param settingId 세팅 ID
-     * @param page page
-     * @param size size
-     * @return Page<ClearRecordSummaryDTO>
-     */
-    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserIdAndSettingId(Long userId, Long settingId, int page, int size){
-
+    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserIdAndSettingId(Long userId, Long settingId, int page, int size) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         Setting setting = settingRepository.findById(settingId)
-                .orElseThrow(()-> new EntityNotFoundException("세팅을 찾을 수 없습니다."));
+                .orElseThrow(SettingNotFoundException::new);
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ClearRecord> clearRecordPage = clearRecordRepository.findAllByUserAndSettingOrderByClearDateDesc(user, setting, pageable);
-
-        return clearRecordPage.map(ClearRecordSummaryDTO :: from);
+        return clearRecordRepository.findAllByUserAndSettingOrderByClearDateDesc(user, setting, pageable)
+                .map(ClearRecordSummaryDTO::from);
     }
 
-    /**
-     * 문제 ID 기준 완등 기록 요약(영상 URL이 있는 기록만)
-     * @param problemId 문제 ID
-     * @param page page
-     * @param size size
-     * @return Page<ClearRecordSummaryDTO>
-     */
-    @Transactional
-    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByProblemExistVideoUrl(Long problemId, int page, int size){
+    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByProblemExistVideoUrl(Long problemId, int page, int size) {
         Problem problem = problemRepository.findById(problemId)
-                .orElseThrow(()-> new EntityNotFoundException("문제를 찾을 수 없습니다."));
+                .orElseThrow(ProblemNotFoundException::new);
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ClearRecord> clearRecordPage = clearRecordRepository.findAllByProblemAndVideoUrlIsNotNull(problem, pageable);
-
-        return clearRecordPage.map(ClearRecordSummaryDTO:: from);
+        return clearRecordRepository.findAllByProblemAndVideoUrlIsNotNull(problem, pageable)
+                .map(ClearRecordSummaryDTO::from);
     }
 
-    /**
-     * 섹터 ID 기준 완등 기록 요약(영상 URL이 있는 기록만)
-     * @param sectorId 섹터 ID
-     * @param page page
-     * @param size size
-     * @return Page<ClearRecordSummaryDTO>
-     */
-    @Transactional
-    public Page<ClearRecordSummaryDTO> getClearRecordSummaryBySectorExistVideoUrl(Long sectorId, int page, int size){
+    public Page<ClearRecordSummaryDTO> getClearRecordSummaryBySectorExistVideoUrl(Long sectorId, int page, int size) {
         Sector sector = sectorRepository.findById(sectorId)
-                .orElseThrow(()-> new EntityNotFoundException("섹터를 찾을 수 없습니다."));
-
-        Pageable pageable = PageRequest.of(page, size);
+                .orElseThrow(SectorNotFoundException::new);
 
         Setting setting = settingRepository.findTopBySectorAndIsActiveOrderBySettingDateDesc(sector, true)
-                .orElseThrow(()-> new EntityNotFoundException("세팅을 찾을 수 없습니다."));
+                .orElseThrow(SettingNotFoundException::new);
 
-        Page<ClearRecord> clearRecordPage = clearRecordRepository.findAllBySettingAndVideoUrlIsNotNull(setting, pageable);
+        Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordPage.map(ClearRecordSummaryDTO :: from);
+        return clearRecordRepository.findAllBySettingAndVideoUrlIsNotNull(setting, pageable)
+                .map(ClearRecordSummaryDTO::from);
     }
 
-    /**
-     * 완등 기록 업데이트
-     * @param userId 사용자 ID
-     * @param clearRecordId 완등 기록 ID
-     * @param clearRecordUpdateDTO 완등 기록 Update 정보
-     * @return ClearRecordResponseDTO
-     */
     @Transactional
-    public ClearRecordResponseDTO updateClearRecord(Long userId, Long clearRecordId, ClearRecordUpdateDTO clearRecordUpdateDTO){
-
+    public ClearRecordResponseDTO updateClearRecord(Long userId, Long clearRecordId, ClearRecordUpdateDTO clearRecordUpdateDTO) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        
-        ClearRecord clearRecord = clearRecordRepository.findById(clearRecordId)
-                .orElseThrow(()-> new EntityNotFoundException("기록을 찾을 수 없습니다"));
+                .orElseThrow(UserNotFoundException::new);
 
-        if(user.getRole()!=Role.ADMIN && !clearRecord.getUser().equals(user)){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
+        ClearRecord clearRecord = clearRecordRepository.findById(clearRecordId)
+                .orElseThrow(ClearRecordNotFoundException::new);
+
+        if (user.getRole() != Role.ADMIN && !clearRecord.getUser().equals(user)) {
+            throw new ClearRecordAccessDeniedException();
         }
         
-        if(!clearRecord.getId().equals(clearRecordUpdateDTO.getProblemId())){
+        if(!clearRecord.getProblem().getId().equals(clearRecordUpdateDTO.getProblemId())){
             Problem problem = problemRepository.findById(clearRecordUpdateDTO.getProblemId())
-                    .orElseThrow(()-> new EntityNotFoundException("문제를 찾을 수 없습니다."));
+                    .orElseThrow(ProblemNotFoundException::new);
             clearRecord.updateProblem(problem);
         }
-        if(!clearRecord.getVideoUrl().equals(clearRecordUpdateDTO.getVideoUrl())){
+        if(!Objects.equals(clearRecordUpdateDTO.getVideoUrl(), clearRecord.getVideoUrl())){
             clearRecord.updateVideoUrl(clearRecordUpdateDTO.getVideoUrl());
         }
+
         return ClearRecordResponseDTO.from(clearRecord);
     }
 
-
-    public ClearRecordStatisticsResponse getClearRecordStatistics(Long userId, Long gymId){
+    public ClearRecordStatisticsResponse getClearRecordStatistics(Long userId, Long gymId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+                .orElseThrow(GymNotFoundException::new);
 
         ClearRecordStatistics statistics = clearRecordRepositoryCustom.getStatistics(user, gym);
 
         return ClearRecordStatisticsResponse.from(statistics);
     }
 
-
-    /**
-     * 완등 기록 영구삭제
-     * @param userId 사용자 ID
-     * @param clearRecordId 완등 기록 ID
-     */
     @Transactional
-    public void deleteClearRecord(Long userId, Long clearRecordId){
+    public void deleteClearRecord(Long userId, Long clearRecordId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        ClearRecord clearRecord = clearRecordRepository.findById(clearRecordId)
-                .orElseThrow(()->new EntityNotFoundException("기록을 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
-        if(user.getRole()!=Role.ADMIN && !clearRecord.getUser().equals(user)){
-            throw new IllegalArgumentException("잘못된 접근입니다.");
+        ClearRecord clearRecord = clearRecordRepository.findById(clearRecordId)
+                .orElseThrow(ClearRecordNotFoundException::new);
+
+        if (user.getRole() != Role.ADMIN && !clearRecord.getUser().equals(user)) {
+            throw new ClearRecordAccessDeniedException();
         }
 
         clearRecord.getProblem().subClearUserCount();
-
         clearRecordRepository.delete(clearRecord);
     }
-
 }

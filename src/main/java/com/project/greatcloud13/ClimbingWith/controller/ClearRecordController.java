@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class ClearRecordController {
     public ResponseEntity<ClearRecordResponseDTO> createClearRecord(@RequestBody ClearRecordCreateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
         ClearRecordResponseDTO result = clearRecordService.createClearRecord(userDetails.getUserId(), request);
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @Operation(
@@ -116,11 +117,11 @@ public class ClearRecordController {
             summary = "완등 기록 삭제",
             description = "ID에 해당하는 완등 기록을 영구적으로 삭제합니다."
     )
-    @DeleteMapping
-    public ResponseEntity<Boolean> deleteRecord(Long userId, Long id){
-        clearRecordService.deleteClearRecord(userId, id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRecord(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails){
+        clearRecordService.deleteClearRecord(userDetails.getUserId(), id);
 
-        return ResponseEntity.ok(true);
+        return ResponseEntity.noContent().build();
     }
 
 }
