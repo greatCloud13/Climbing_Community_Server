@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.*;
+import java.util.Objects;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordAccessDeniedException;
 import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordNotFoundException;
@@ -123,14 +124,13 @@ public class ClearRecordService {
         if (user.getRole() != Role.ADMIN && !clearRecord.getUser().equals(user)) {
             throw new ClearRecordAccessDeniedException();
         }
-
-        if (!clearRecord.getProblem().getId().equals(clearRecordUpdateDTO.getProblemId())) {
+        
+        if(!clearRecord.getProblem().getId().equals(clearRecordUpdateDTO.getProblemId())){
             Problem problem = problemRepository.findById(clearRecordUpdateDTO.getProblemId())
                     .orElseThrow(ProblemNotFoundException::new);
             clearRecord.updateProblem(problem);
         }
-
-        if (!clearRecordUpdateDTO.getVideoUrl().equals(clearRecord.getVideoUrl())) {
+        if(!Objects.equals(clearRecordUpdateDTO.getVideoUrl(), clearRecord.getVideoUrl())){
             clearRecord.updateVideoUrl(clearRecordUpdateDTO.getVideoUrl());
         }
 
