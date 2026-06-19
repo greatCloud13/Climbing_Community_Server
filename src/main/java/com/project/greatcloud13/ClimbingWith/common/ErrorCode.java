@@ -50,9 +50,6 @@ public enum ErrorCode {
 //  ====================================COMMON ERROR CODE=================================
     AccessDenied(HttpStatus.FORBIDDEN, "C001", "접근 권한이 없습니다."),
 
-//  ====================================COMMON ERROR CODE=================================
-    AccessDenied(HttpStatus.FORBIDDEN, "C001", "접근 권한이 없습니다."),
-
     ;
 
     private final HttpStatus status;
