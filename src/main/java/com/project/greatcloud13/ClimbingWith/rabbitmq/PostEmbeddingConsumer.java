@@ -22,15 +22,15 @@ public class PostEmbeddingConsumer {
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
     public void handlePostEmbedding(PostMessage message){
-
-        log.info("전처리 가공(게시글 ID: {})", message.getPostId());
+        long start = System.currentTimeMillis();
+        log.info("전처리 가공 시작 (게시글 ID: {})", message.getPostId());
 
         try{
             vectorService.createPostEmbedding(message);
-            log.info("게시글(ID: {}) 임베딩 및 인덱싱 완료", message.getPostId());
+            long elapsed = System.currentTimeMillis() - start;
+            log.info("게시글(ID: {}) 임베딩 완료 - 소요시간: {}ms", message.getPostId(), elapsed);
         }catch (Exception e){
             log.error("인덱싱 중 에러 발생");
-//          todo: 인덱싱 중 에러 발생시 메시지 처리 방법 구상 후 구현
         }
     }
 
