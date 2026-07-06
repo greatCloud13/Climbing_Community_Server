@@ -1,9 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
-import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostSummaryDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Post;
 import com.project.greatcloud13.ClimbingWith.entity.PostType;
@@ -12,10 +9,13 @@ import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.post.PostAccessDeniedException;
 import com.project.greatcloud13.ClimbingWith.exception.post.PostNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.boot.model.naming.IllegalIdentifierException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,17 @@ public class PostService {
     private final PostRepository postRepository;
     private final GymRepository gymRepository;
     private final UserRepository userRepository;
+    private final RabbitTemplate rabbitTemplate;
 
+    /**
+     * 신규 게시글을 작성, 임베딩
+     * [Business Rule]
+     * 1. 요청한 사용자가 존재하고 해당 지점의 관리권한이 있어야합니다.
+     *
+     * @param userId 사용자 ID
+     * @param requestDTO 게시글 정보
+     * @return 생성된 게시글 DTO
+     */
     @Transactional
     public PostResponseDTO createPost(Long userId, PostCreateDTO requestDTO) {
         User user = userRepository.findById(userId)
@@ -51,6 +61,14 @@ public class PostService {
                 .build();
 
         postRepository.save(post);
+
+//      RabbitMQ 메시지 전달
+        PostMessage message = PostMessage.from(post);
+        rabbitTemplate.convertAndSend(
+                "post.embedding.exchange",
+                "post.embedding.key",
+                message
+        );
 
         return PostResponseDTO.from(post);
     }

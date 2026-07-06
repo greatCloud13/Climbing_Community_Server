@@ -1,12 +1,11 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
-import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostSummaryDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.common.SearchTag;
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.PostType;
 import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import com.project.greatcloud13.ClimbingWith.service.PostService;
+import com.project.greatcloud13.ClimbingWith.service.VectorService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -16,12 +15,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/post")
 public class PostController {
 
     private final PostService postService;
+    private final VectorService vectorService;
 
     @Operation(
             summary = "신규 게시글 작성",
@@ -80,4 +82,24 @@ public class PostController {
 
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<PostSummaryDTO>> getPostSearchByRAG(@ModelAttribute PostSearchRequest request){
+
+
+        if(request.getGymId() != null && request.getPostType() != null){
+            List<PostSummaryDTO> result = vectorService.postSearchByPostTypeWithGym(request.getQuery(), request.getGymId(), request.getPostType(), request.getCount());
+            return ResponseEntity.ok(result);
+        } else if(request.getGymId() != null){
+            List<PostSummaryDTO> result = vectorService.postSearchWithGym(request.getQuery(), request.getCount(), request.getGymId());
+            return ResponseEntity.ok(result);
+        } else if(request.getPostType() != null){
+            List<PostSummaryDTO> result = vectorService.postSearchByPostType(request.getQuery(), request.getPostType(),request.getCount());
+            return ResponseEntity.ok(result);
+        }
+        List<PostSummaryDTO> result = vectorService.postSearch(request.getQuery(), request.getCount());
+
+        return ResponseEntity.ok(result);
+    }
+
 }

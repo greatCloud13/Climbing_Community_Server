@@ -20,7 +20,44 @@ services:
       retries: 10
       interval: 5s
 
-  # 2. spring boot app Container
+  # 2. Redisearch(VectorDB)
+  vector:
+    image: redis/redis-stack
+    container_name: climbingwith-vectordb
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - ./vector_data:/data
+    environment:
+      - REDIS_ARGS=--save 60 1
+    networks:
+      - climbing-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 3. RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: climbingWith-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - climbing-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 4. spring boot app Container
   app:
     build: .
     container_name: climbingwith-app
@@ -35,6 +72,10 @@ services:
     depends_on:
       db:
         condition: service_healthy # DB의 healthcheck가 통과될 때까지 대기
+      vector:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
 networks:
   climbing-network:

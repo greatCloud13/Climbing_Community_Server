@@ -49,6 +49,14 @@ public enum ErrorCode {
 
 //  ====================================COMMON ERROR CODE=================================
     AccessDenied(HttpStatus.FORBIDDEN, "C001", "접근 권한이 없습니다."),
+//  ====================================BOARD ERROR CODE=================================
+    TO_MANY_REQUEST_POST(HttpStatus.TOO_MANY_REQUESTS, "B001", "검색 요청 갯수는 10개 이하로 설정해야합니다."),
+
+
+//  ====================================COMMON ERROR CODE=================================
+    AccessDenied(HttpStatus.FORBIDDEN, "S001", "접근 권한이 없습니다."),
+
+
 
     ;
 
