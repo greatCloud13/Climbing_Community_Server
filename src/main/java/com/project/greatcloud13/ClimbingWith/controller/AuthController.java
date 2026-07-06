@@ -5,6 +5,7 @@ import com.project.greatcloud13.ClimbingWith.dto.LoginRequest;
 import com.project.greatcloud13.ClimbingWith.dto.LoginResponse;
 import com.project.greatcloud13.ClimbingWith.dto.SignUpRequest;
 import com.project.greatcloud13.ClimbingWith.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,21 +21,21 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@RequestBody SignUpRequest request){
+    public ResponseEntity<AuthResponse> signup(@Valid @RequestBody SignUpRequest request){
         authService.signup(request);
 
         return ResponseEntity.ok(new AuthResponse("가입이 완료되었습니다."));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
         LoginResponse result = authService.login(request);
 
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<AuthResponse> withdraw(@RequestBody LoginRequest request){
+    public ResponseEntity<AuthResponse> withdraw(@Valid @RequestBody LoginRequest request){
         authService.withdraw(request);
 
         return ResponseEntity.ok(new AuthResponse("탈퇴가 완료되었습니다."));

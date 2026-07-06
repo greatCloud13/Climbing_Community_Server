@@ -1,0 +1,65 @@
+##  프로젝트 소개
+
+클라이밍 문제 리뷰&평가 커뮤니티 서비스 Climbing With 서버입니다.
+---
+
+##  기술 스택
+
+### Backend
+- **Framework**: Spring Boot 3.4.5
+- **Language**: Java 21
+- **ORM**: Spring Data JPA
+- **Cache**: Redis 7
+- **Message Queue**: RabbitMQ 3
+- **Embedding Model**: bge-m3
+
+### Database
+- **RDBMS**: MySQL 8.0
+
+### Infrastructure
+- **Containerization**: Docker, Docker Compose
+- **API Test**: Swagger, Postman
+- **Performance Test**: Apache JMeter
+
+---
+
+##  주요 기능
+
+### 1. 클라이밍장 정보 제공
+- 클라이밍장 관리자 지정을 통한 클라이밍장별 문제 레벨, 섹터, 세팅, 문제 등록 및 소개
+### 2. 클라이밍 문제 리뷰 서비스
+- 등록된 문제 리뷰 기능 제공
+### 3. 게시글 시멘틱 검색 기능
+- RAG 검색기능을 통한 단어 검색이 아닌 맥락 검색 기능 제공
+---
+
+##  실행 방법
+
+### 1. 사전 준비
+- Docker & Docker Compose 설치
+- ollama BGE-M3 모델 설치
+
+### 2. Docker 실행
+```bash
+# MySQL, Redis, RabbitMQ 실행
+docker compose up -d
+```
+
+### 3. 접속 확인
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **RabbitMQ Management**: http://localhost:15672 (guest/guest)
+- **Redis Database**: http://localhost:8001/
+
+---
+
+##  API 문서
+
+Swagger UI를 통해 모든 API를 확인하고 테스트할 수 있습니다.
+
+자세한 API 명세는 Swagger 문서를 참고하세요.
+
+---
+
+##  향후 계획
+- [ ] RAG 클라이밍장, 태그 구분을 통한 검색 성능 강화
+- [ ] Prometheus + Grafana 모니터링

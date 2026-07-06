@@ -5,9 +5,10 @@ import com.project.greatcloud13.ClimbingWith.dto.UserDTO;
 import com.project.greatcloud13.ClimbingWith.dto.UserDetailDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.User;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
+import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,56 +17,45 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
     private final GymRepository gymRepository;
 
-    @Transactional(readOnly = true)
-    public Page<UserDTO> getUserList(int page, int size){
-
-        Pageable pageable = PageRequest.of(page, size,
-                Sort.by("id").descending());
-        Page<User> userList = userRepository.findAll(pageable);
-
-        return userList.map(UserDTO::from);
+    public Page<UserDTO> getUserList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return userRepository.findAll(pageable).map(UserDTO::from);
     }
 
-    @Transactional(readOnly = true)
-    public Page<UserDTO> searchUser(String keyword, SearchTag searchTag, int page){
-
+    public Page<UserDTO> searchUser(String keyword, SearchTag searchTag, int page) {
         Pageable pageable = PageRequest.of(page, 100);
 
-        Page<User> userList = switch (searchTag){
-            case USERNAME -> userList = userRepository.findAllByUsername(keyword, pageable);
-            case EMAIL -> userList = userRepository.findAllByEmail(keyword, pageable);
-            case NICKNAME -> userList = userRepository.findAllByNickname(keyword, pageable);
+        Page<User> userList = switch (searchTag) {
+            case USERNAME -> userRepository.findAllByUsername(keyword, pageable);
+            case EMAIL -> userRepository.findAllByEmail(keyword, pageable);
+            case NICKNAME -> userRepository.findAllByNickname(keyword, pageable);
         };
 
         return userList.map(UserDTO::from);
     }
 
-    @Transactional(readOnly = true)
-    public UserDetailDTO getUserDetail(String username){
-
+    public UserDetailDTO getUserDetail(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         return UserDetailDTO.from(user);
     }
 
     @Transactional
-    public UserDetailDTO assignGymManager(Long gymId, Long id){
+    public UserDetailDTO assignGymManager(Long gymId, Long id) {
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(()->new EntityNotFoundException("암장을 찾을 수 없습니다."));
+                .orElseThrow(GymNotFoundException::new);
 
         User user = userRepository.findById(id)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         user.assignGymManager(gym);
 
@@ -73,18 +63,12 @@ public class UserService {
     }
 
     @Transactional
-    public UserDetailDTO unassignGymManager(String username){
-
+    public UserDetailDTO unassignGymManager(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         user.unassignGym();
 
         return UserDetailDTO.from(user);
     }
-
-
-
-
-
 }
