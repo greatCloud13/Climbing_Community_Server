@@ -45,18 +45,12 @@ public enum ErrorCode {
 //  ====================================POST ERROR CODE=================================
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "PO001", "게시글을 찾을 수 없습니다."),
     ACCESS_DENIED_POST(HttpStatus.FORBIDDEN, "PO002", "게시글에 대한 권한이 없습니다."),
-    TO_MANY_REQUEST_POST(HttpStatus.TOO_MANY_REQUESTS, "PO003", "게시글 요청이 너무 많습니다."),
 
 //  ====================================COMMON ERROR CODE=================================
     AccessDenied(HttpStatus.FORBIDDEN, "C001", "접근 권한이 없습니다."),
+
 //  ====================================BOARD ERROR CODE=================================
     TO_MANY_REQUEST_POST(HttpStatus.TOO_MANY_REQUESTS, "B001", "검색 요청 갯수는 10개 이하로 설정해야합니다."),
-
-
-//  ====================================COMMON ERROR CODE=================================
-    AccessDenied(HttpStatus.FORBIDDEN, "S001", "접근 권한이 없습니다."),
-
-
 
     ;
 
