@@ -28,7 +28,7 @@ spring:
 
 vector:
   redis:
-    host: localhost
+    host: vector
     port: 6379
 
 jwt:
