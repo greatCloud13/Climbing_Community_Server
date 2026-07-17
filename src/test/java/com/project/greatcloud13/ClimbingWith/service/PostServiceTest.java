@@ -1,10 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
+import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.util.EntityFixture;
-import com.project.greatcloud13.ClimbingWith.dto.PostCreateDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostResponseDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostSummaryDTO;
-import com.project.greatcloud13.ClimbingWith.dto.PostUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
@@ -24,6 +21,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +62,8 @@ public class PostServiceTest {
     private UserRepository userRepository;
     @Mock
     private GymRepository gymRepository;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
 //   ========================= Mock Objects =========================
     private Gym mockGym1;

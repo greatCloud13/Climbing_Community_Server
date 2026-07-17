@@ -83,6 +83,19 @@ public class PostController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(
+            summary = "게시글 삭제",
+            description = "요청한 ID의 게시글을 삭제합니다."
+
+    )
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails userDetails){
+        postService.deletePost(userDetails.getUserId(), postId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+
     @GetMapping("/search")
     public ResponseEntity<List<PostSummaryDTO>> getPostSearchByRAG(@ModelAttribute PostSearchRequest request){
 

@@ -25,6 +25,12 @@ spring:
     username: guest
     password: guest
 
+
+vector:
+  redis:
+    host: vector
+    port: 6379
+
 jwt:
   # TODO: [PRODUCTION] 환경변수로 변경 필요
   secret: your-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm

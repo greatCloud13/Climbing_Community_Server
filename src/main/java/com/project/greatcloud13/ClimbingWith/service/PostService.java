@@ -98,6 +98,23 @@ public class PostService {
         return PostResponseDTO.from(post);
     }
 
+    @Transactional
+    public void deletePost(Long userId, Long postId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!user.isManager()) {
+            throw new PostAccessDeniedException();
+        }
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        post.validateWriter(userId);
+
+        postRepository.delete(post);
+    }
+
     public Page<PostSummaryDTO> getAllByGym(Long gymId, Pageable pageable) {
         Gym gym = gymRepository.findById(gymId)
                 .orElseThrow(GymNotFoundException::new);
