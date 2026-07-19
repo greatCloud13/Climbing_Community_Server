@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -60,9 +61,21 @@ public class SecurityConfig {
                 //URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // 인증 관련 API는 모두 허용
-                        .requestMatchers("/api/**").permitAll()         // #todo 권한별 api 접근 설정 필요
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll() //Swagger api 허용
                         .requestMatchers("/error", "/error/**").permitAll()
+                        // 클라이밍장/섹터/레벨/문제/게시글/리뷰 열람(GET)은 비로그인 사용자도 허용
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/gym/**",
+                                "/api/sector/**",
+                                "/api/level/**",
+                                "/api/setting/**",
+                                "/api/problem/**",
+                                "/api/post/**",
+                                "/api/review/**"
+                        ).permitAll()
+                        // 관리자 전용 API
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // 그 외(생성/수정/삭제, 개인 기록/파일/유저 관리 등)는 로그인 필요
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);                      // 외에는 인증 필요
         return http.build();
