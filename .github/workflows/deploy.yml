@@ -2,7 +2,10 @@ name: ClimbingWith CI/CD
 
 on:
   push:
-    branches: ["main"] #main 브랜치에 푸시될 때 실행
+    branches: ["main", "production"]
+  pull_request:
+    branches: ["main", "production"]
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -38,8 +41,10 @@ jobs:
           name: test-report
           path: build/reports/tests/test
 
+  # production 브랜치로 push될 때만 이미지 빌드
   build:
     needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,8 +67,10 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/climbingwith-app .
           docker push ${{ secrets.DOCKER_USERNAME }}/climbingwith-app
 
+  # production 브랜치로 push될 때만 EC2 배포
   deploy:
     needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     runs-on: ubuntu-latest
     steps:
       - name: EC2 Docker Run
