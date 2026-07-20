@@ -45,7 +45,13 @@
 docker compose up -d
 ```
 
-### 3. 접속 확인
+### 3. Ollama BGE-M3 로컬 실행
+RAG 시스템을 정상적으로 동작시키려면 로컬(Ollama)에 `bge-m3` 모델이 실행 중이어야 합니다.
+
+- **엔드포인트**: http://host.docker.internal:11434
+- 해당 경로(Docker 호스트)를 통해 `bge-m3` 모델이 요청을 대기(Listening)하는 상태여야 합니다.
+
+### 4. 접속 확인
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
 - **RabbitMQ Management**: http://localhost:15672 (guest/guest)
 - **Redis Database**: http://localhost:8001/
@@ -57,6 +63,17 @@ docker compose up -d
 Swagger UI를 통해 모든 API를 확인하고 테스트할 수 있습니다.
 
 자세한 API 명세는 Swagger 문서를 참고하세요.
+
+---
+
+##  브랜치 전략
+
+- **Production** (운영 및 배포)
+  - **설명**: AWS EC2 실서버 배포를 위한 최상위 브랜치입니다.
+  - **규칙**: `Main` 브랜치로부터의 PR을 통해서만 반영(Push)이 가능합니다.
+- **Main** (개발)
+  - **설명**: 신규 기능 개발, 버그 수정, 리팩토링이 이루어지는 중심 브랜치입니다.
+  - **규칙**: 해당 브랜치를 `Fork`하여 개별 작업 후 PR을 보냅니다.
 
 ---
 
