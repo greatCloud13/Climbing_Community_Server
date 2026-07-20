@@ -73,24 +73,37 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy docker-compose.prod.yml to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "~/app"
+
       - name: EC2 Docker Run
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
-          envs: DB_PASSWORD,RABBITMQ_PASSWORD,JWT_SECRET
+          envs: DB_PASSWORD,RABBITMQ_PASSWORD,JWT_SECRET,DOCKER_USERNAME
           script: |
             cd ~/app
             cat > .env <<EOF
             DB_PASSWORD=${DB_PASSWORD}
             RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
             JWT_SECRET=${JWT_SECRET}
+            DOCKER_USERNAME=${DOCKER_USERNAME}
             EOF
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/climbingwith-app
-            sudo docker-compose down || true
-            sudo docker-compose up -d
+            sudo docker-compose -f docker-compose.prod.yml down || true
+            sudo docker-compose -f docker-compose.prod.yml up -d
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
