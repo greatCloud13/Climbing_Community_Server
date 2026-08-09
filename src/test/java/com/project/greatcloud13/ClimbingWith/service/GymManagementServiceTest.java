@@ -12,6 +12,7 @@ import com.project.greatcloud13.ClimbingWith.exception.common.AccessDeniedExcept
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
+import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import com.project.greatcloud13.ClimbingWith.repository.SectorRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +53,7 @@ public class GymManagementServiceTest {
     @Mock private GymRepository gymRepository;
     @Mock private SectorRepository sectorRepository;
     @Mock private UserRepository userRepository;
+    @Mock private ProblemRepository problemRepository;
 
 //   ========================= Mock Objects =========================
     private User mockAdmin;
@@ -85,7 +87,7 @@ public class GymManagementServiceTest {
         @DisplayName("ADMIN 유저 암장 생성 성공")
         void createGym_success() {
             // [Given]
-            GymCreateDTO request = new GymCreateDTO("새 암장", Gym.GymType.BOULDER, "서울시 강남구", null, null, null, null, null);
+            GymCreateDTO request = new GymCreateDTO("새 암장", Gym.GymType.BOULDER, "서울시 강남구", null, null, null, null, null, null, null);
             given(userRepository.findById(adminId)).willReturn(Optional.of(mockAdmin));
             given(gymRepository.save(any(Gym.class))).willReturn(mockGym);
 
@@ -101,7 +103,7 @@ public class GymManagementServiceTest {
         @DisplayName("ADMIN이 아닌 유저 → AccessDeniedException")
         void createGym_notAdmin() {
             // [Given]
-            GymCreateDTO request = new GymCreateDTO("새 암장", Gym.GymType.BOULDER, "서울시 강남구", null, null, null, null, null);
+            GymCreateDTO request = new GymCreateDTO("새 암장", Gym.GymType.BOULDER, "서울시 강남구", null, null, null, null, null, null, null);
             given(userRepository.findById(memberId)).willReturn(Optional.of(mockMember));
 
             // [When] & [Then]
@@ -115,7 +117,7 @@ public class GymManagementServiceTest {
         @DisplayName("존재하지 않는 userId → UserNotFoundException")
         void createGym_userNotFound() {
             // [Given]
-            GymCreateDTO request = new GymCreateDTO("새 암장", Gym.GymType.BOULDER, "서울시 강남구", null, null, null, null, null);
+            GymCreateDTO request = new GymCreateDTO("새 암장", Gym.GymType.BOULDER, "서울시 강남구", null, null, null, null, null, null, null);
             given(userRepository.findById(999L)).willReturn(Optional.empty());
 
             // [When] & [Then]
