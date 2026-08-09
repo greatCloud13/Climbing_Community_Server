@@ -11,6 +11,7 @@ public enum ErrorCode {
 //  ====================================GYM ERROR CODE=================================
     GYM_NOT_FOUND(HttpStatus.NOT_FOUND, "G001", "암장을 찾을 수 없습니다."),
     ACCESS_DENIED_GYM(HttpStatus.FORBIDDEN, "G002", "암장에 대한 권한이 없습니다."),
+    GYM_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "G003", "암장 소개 사진은 최대 10장까지 등록할 수 있습니다."),
 
 //  ====================================SECTOR ERROR CODE=================================
     SECTOR_NOT_FOUND(HttpStatus.NOT_FOUND, "SEC001", "섹터를 찾을 수 없습니다."),

@@ -25,20 +25,25 @@ public class GymLevel {
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    private ProblemType climbType;
+
     @Builder
-    public GymLevel(Gym gym, String levelName, Integer displayOrder, String colorCode, String description){
+    public GymLevel(Gym gym, String levelName, Integer displayOrder, String colorCode, String description, ProblemType climbType){
         this.gym = gym;
         this.levelName = levelName;
         this.displayOrder = displayOrder;
         this.colorCode = colorCode;
         this.description = description;
+        this.climbType = climbType;
     }
 
-    public void updateGymLevel(String levelName, Integer displayOrder, String colorCode, String description){
+    public void updateGymLevel(String levelName, Integer displayOrder, String colorCode, String description, ProblemType climbType){
         this.levelName = levelName;
         this.displayOrder = displayOrder;
         this.colorCode = colorCode;
         this.description = description;
+        this.climbType = climbType;
     }
 
 }

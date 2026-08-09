@@ -15,4 +15,6 @@ public class SectorCreateDTO {
 
     private String sectorName;
 
+    private String description;
+
 }

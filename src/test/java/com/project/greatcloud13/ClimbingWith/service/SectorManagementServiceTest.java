@@ -13,6 +13,7 @@ import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.sector.SectorNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
+import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import com.project.greatcloud13.ClimbingWith.repository.SectorRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.repository.WallSettingRepository;
@@ -52,6 +53,7 @@ public class SectorManagementServiceTest {
     @Mock private GymRepository gymRepository;
     @Mock private WallSettingRepository settingRepository;
     @Mock private UserRepository userRepository;
+    @Mock private ProblemRepository problemRepository;
 
 //   ========================= Mock Objects =========================
     private Gym mockGym;
