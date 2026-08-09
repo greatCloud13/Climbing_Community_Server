@@ -34,6 +34,7 @@ public class GymLevelService {
                 .levelName(request.getLevelName())
                 .colorCode(request.getColorCode())
                 .description(request.getDescription())
+                .climbType(request.getClimbType())
                 .build();
 
         return GymLevelDTO.from(gymLevelRepository.save(gymLevel));
@@ -56,7 +57,7 @@ public class GymLevelService {
         GymLevel gymLevel = gymLevelRepository.findById(id)
                 .orElseThrow(GymLevelNotFoundException::new);
 
-        gymLevel.updateGymLevel(request.getLevelName(), request.getDisplayOrder(), request.getColorCode(), request.getDescription());
+        gymLevel.updateGymLevel(request.getLevelName(), request.getDisplayOrder(), request.getColorCode(), request.getDescription(), request.getClimbType());
 
         return GymLevelDTO.from(gymLevel);
     }
