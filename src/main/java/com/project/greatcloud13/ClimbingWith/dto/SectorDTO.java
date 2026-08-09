@@ -14,17 +14,23 @@ public class SectorDTO {
 
     private String sectorName;
 
+    private String description;
+
     private String settingDate;
 
     private String nextSettingDate;
 
-    public static SectorDTO from(Sector sector){
+    private long problemCount;
+
+    public static SectorDTO from(Sector sector, long problemCount){
         return SectorDTO.builder()
                 .id(sector.getId())
                 .gymId(sector.getGym().getId())
                 .sectorName(sector.getSectorName())
+                .description(sector.getDescription())
                 .settingDate(sector.getSettingDate() != null ? sector.getSettingDate().toString() : null )
                 .nextSettingDate(sector.getNextSettingDate() != null ? sector.getNextSettingDate().toString() : null)
+                .problemCount(problemCount)
                 .build();
     }
 

@@ -9,6 +9,8 @@ public class SectorUpdateDTO {
 
     private String sectorName;
 
+    private String description;
+
     private LocalDate settingDate;
 
     private LocalDate nextSettingDate;

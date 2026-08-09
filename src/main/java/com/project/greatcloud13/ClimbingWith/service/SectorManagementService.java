@@ -24,6 +24,7 @@ public class SectorManagementService {
     private final GymRepository gymRepository;
     private final WallSettingRepository settingRepository;
     private final UserRepository userRepository;
+    private final ProblemRepository problemRepository;
 
     /**
      * 새로운 섹터를 등록합니다.
@@ -54,11 +55,12 @@ public class SectorManagementService {
         Sector sector = Sector.builder()
                 .gym(gym)
                 .sectorName(request.getSectorName())
+                .description(request.getDescription())
                 .settingDate(null)
                 .nextSettingDate(null)
                 .build();
 
-        return SectorDTO.from(sectorRepository.save(sector));
+        return SectorDTO.from(sectorRepository.save(sector), 0L);
     }
 
     /**
@@ -78,7 +80,9 @@ public class SectorManagementService {
                 .map(SettingDTO::from)
                 .toList();
 
-        return SectorDetailDTO.from(sector, settingList);
+        long problemCount = problemRepository.countBySetting_Sector(sector);
+
+        return SectorDetailDTO.from(sector, settingList, problemCount);
     }
 
     /**
@@ -108,9 +112,11 @@ public class SectorManagementService {
             throw new GymAccessDeniedException();
         }
 
-        sector.update(request.getSectorName(), request.getSettingDate(), request.getNextSettingDate());
+        sector.update(request.getSectorName(), request.getDescription(), request.getSettingDate(), request.getNextSettingDate());
 
-        return SectorDTO.from(sector);
+        long problemCount = problemRepository.countBySetting_Sector(sector);
+
+        return SectorDTO.from(sector, problemCount);
     }
 
     /**
@@ -127,7 +133,7 @@ public class SectorManagementService {
                 .orElseThrow(GymNotFoundException::new);
 
         return sectorRepository.findAllByGym(gym).stream()
-                .map(SectorDTO::from)
+                .map(sector -> SectorDTO.from(sector, problemRepository.countBySetting_Sector(sector)))
                 .toList();
     }
 }
