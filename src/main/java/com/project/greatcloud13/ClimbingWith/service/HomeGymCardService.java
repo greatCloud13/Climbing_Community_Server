@@ -6,6 +6,9 @@ import com.project.greatcloud13.ClimbingWith.entity.GymBookmark;
 import com.project.greatcloud13.ClimbingWith.entity.Post;
 import com.project.greatcloud13.ClimbingWith.repository.GymBookmarkRepository;
 import com.project.greatcloud13.ClimbingWith.repository.PostRepository;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,13 +33,17 @@ public class HomeGymCardService {
         List<GymBookmark> bookmarks = gymBookmarkRepository.findAllByUser_IdOrderByIdDesc(userId);
 
         List<HomeDataDTO.GymCard> gymCardList = bookmarks.stream()
-                .map(bookmark -> toGymCard(bookmark.getGym()))
+                .map(bookmark -> toGymCard(bookmark.getGym(), bookmark.getId()))
                 .toList();
 
-        return HomeDataDTO.builder().gymCardList(gymCardList).build();
+        List<Long> bookmarkIdList = bookmarks.stream()
+                .map(GymBookmark::getId)
+                .toList();
+
+        return HomeDataDTO.builder().gymCardList(gymCardList).bookmarkIdList(bookmarkIdList).build();
     }
 
-    private HomeDataDTO.GymCard toGymCard(Gym gym) {
+    private HomeDataDTO.GymCard toGymCard(Gym gym, Long bookmarkId) {
         List<HomeDataDTO.GymNotice> notices = postRepository
                 .findAllByGym(gym, PageRequest.of(0, NOTICE_COUNT, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .stream()
@@ -49,6 +56,7 @@ public class HomeGymCardService {
                 .address(gym.getAddress())
                 .imageUrl(null) // #todo 차후 이미지 업로드 URL 기능 구현 후 추가 예정
                 .notices(notices)
+                .bookmarkId(bookmarkId)
                 .build();
     }
 

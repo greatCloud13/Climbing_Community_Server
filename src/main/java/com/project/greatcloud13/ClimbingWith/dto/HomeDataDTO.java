@@ -15,6 +15,8 @@ public class HomeDataDTO {
 
     private List<GymCard> gymCardList;
 
+    private List<Long> bookmarkIdList;
+
     @Data
     @Builder
     @AllArgsConstructor
@@ -29,7 +31,10 @@ public class HomeDataDTO {
 
         private String imageUrl;
 
+        private Long bookmarkId;
+
         private List<GymNotice> notices;
+
     }
 
     @Data
