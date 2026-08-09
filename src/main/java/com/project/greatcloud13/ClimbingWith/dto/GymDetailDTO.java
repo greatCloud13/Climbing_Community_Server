@@ -31,6 +31,10 @@ public class GymDetailDTO {
 
     private String memo;
 
+    private List<String> hashtags;
+
+    private List<String> introImages;
+
     private List<Sector> sectorList;
 
     public static GymDetailDTO from(Gym gym, List<Sector> sectorList){
@@ -45,6 +49,8 @@ public class GymDetailDTO {
                 .weekendOpenAt(gym.getWeekend_open_at()==null ? null : gym.getWeekend_open_at().toString())
                 .weekendCloseAt(gym.getWeekend_close_at()==null ? null : gym.getWeekend_close_at().toString())
                 .memo(gym.getMemo()==null ? null : gym.getMemo())
+                .hashtags(gym.getHashtags())
+                .introImages(gym.getIntroImages())
                 .sectorList(sectorList)
                 .isActive(gym.isActive())
                 .build();

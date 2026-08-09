@@ -8,6 +8,7 @@ import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Sector;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.exception.common.AccessDeniedException;
+import com.project.greatcloud13.ClimbingWith.exception.gym.GymImageLimitExceededException;
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
@@ -28,6 +29,8 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class GymManagementService {
 
+    private static final int MAX_INTRO_IMAGE_COUNT = 10;
+
     private final GymRepository gymRepository;
     private final SectorRepository sectorRepository;
     private final UserRepository userRepository;
@@ -41,6 +44,8 @@ public class GymManagementService {
             throw new AccessDeniedException();
         }
 
+        validateIntroImageCount(request.getIntroImages());
+
         Gym gym = Gym.builder()
                 .gymName(request.getGymName())
                 .gymType(request.getType())
@@ -50,9 +55,17 @@ public class GymManagementService {
                 .weekendOpenAt(request.getWeekendOpenAt())
                 .weekendCloseAt(request.getWeekendCloseAt())
                 .memo(request.getMemo())
+                .hashtags(request.getHashtags())
+                .introImages(request.getIntroImages())
                 .build();
 
         return GymDTO.from(gymRepository.save(gym));
+    }
+
+    private void validateIntroImageCount(List<String> introImages) {
+        if (introImages != null && introImages.size() > MAX_INTRO_IMAGE_COUNT) {
+            throw new GymImageLimitExceededException();
+        }
     }
 
     public Page<GymDTO> findAll(int page, int size) {
@@ -68,6 +81,8 @@ public class GymManagementService {
         if (!user.isAdmin()) {
             throw new AccessDeniedException();
         }
+
+        validateIntroImageCount(request.getIntroImages());
 
         Gym gym = gymRepository.findById(id)
                 .orElseThrow(GymNotFoundException::new);
