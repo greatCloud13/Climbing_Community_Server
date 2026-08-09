@@ -4,14 +4,15 @@ import com.project.greatcloud13.ClimbingWith.dto.GymCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.SectorDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
-import com.project.greatcloud13.ClimbingWith.entity.Sector;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.exception.common.AccessDeniedException;
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymImageLimitExceededException;
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
+import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import com.project.greatcloud13.ClimbingWith.repository.SectorRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class GymManagementService {
     private final GymRepository gymRepository;
     private final SectorRepository sectorRepository;
     private final UserRepository userRepository;
+    private final ProblemRepository problemRepository;
 
     @Transactional
     public GymDTO createGym(GymCreateDTO request, Long userId) {
@@ -96,7 +98,9 @@ public class GymManagementService {
         Gym gym = gymRepository.findById(id)
                 .orElseThrow(GymNotFoundException::new);
 
-        List<Sector> sectorList = sectorRepository.findAllByGym(gym);
+        List<SectorDTO> sectorList = sectorRepository.findAllByGym(gym).stream()
+                .map(sector -> SectorDTO.from(sector, problemRepository.countBySetting_Sector(sector)))
+                .toList();
 
         return GymDetailDTO.from(gym, sectorList);
     }

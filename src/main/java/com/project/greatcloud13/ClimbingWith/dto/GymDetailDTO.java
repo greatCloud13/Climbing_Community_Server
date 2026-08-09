@@ -1,7 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.dto;
 
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
-import com.project.greatcloud13.ClimbingWith.entity.Sector;
 import lombok.Builder;
 import lombok.Data;
 
@@ -35,9 +34,9 @@ public class GymDetailDTO {
 
     private List<String> introImages;
 
-    private List<Sector> sectorList;
+    private List<SectorDTO> sectorList;
 
-    public static GymDetailDTO from(Gym gym, List<Sector> sectorList){
+    public static GymDetailDTO from(Gym gym, List<SectorDTO> sectorList){
 
         return GymDetailDTO.builder()
                 .id(gym.getId())
