@@ -9,6 +9,7 @@ import com.project.greatcloud13.ClimbingWith.service.VectorService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +67,7 @@ public class PostController {
             description = "암장의 게시글 페이지를 조회합니다. 페이지네이션이 적용되어있습니다."
     )
     @GetMapping("/gym/{gymId}")
-    public ResponseEntity<Page<PostSummaryDTO>> getAllByGym(@PathVariable Long gymId, Pageable pageable){
+    public ResponseEntity<Page<PostSummaryDTO>> getAllByGym(@PathVariable Long gymId, @ParameterObject Pageable pageable){
         Page<PostSummaryDTO> result = postService.getAllByGym(gymId, pageable);
 
         return ResponseEntity.ok(result);
@@ -77,7 +78,7 @@ public class PostController {
             description = "지정한 암장의 요청한 게시글 타입과 일치하는 게시글 페이지를 조회합니다. "
     )
     @GetMapping("/gym/{gymId}/posttype/{postType}")
-    public ResponseEntity<Page<PostSummaryDTO>> getAllByGymWIthPostType(@PathVariable Long gymId, @PathVariable PostType postType, Pageable pageable){
+    public ResponseEntity<Page<PostSummaryDTO>> getAllByGymWIthPostType(@PathVariable Long gymId, @PathVariable PostType postType, @ParameterObject Pageable pageable){
         Page<PostSummaryDTO> result = postService.getAllByGymWithPostType(gymId, postType, pageable);
 
         return ResponseEntity.ok(result);
