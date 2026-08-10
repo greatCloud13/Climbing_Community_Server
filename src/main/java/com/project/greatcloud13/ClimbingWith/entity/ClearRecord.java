@@ -55,6 +55,14 @@ public class ClearRecord {
     }
 
     /**
+     * 트라이 완료(클리어) 처리. 클리어 API 요청 시 호출되어 isClear를 true로, clearDate를 등록합니다.
+     */
+    public void markClear(LocalDate clearDate){
+        this.isClear = true;
+        this.clearDate = clearDate;
+    }
+
+    /**
      * 문제/세팅이 삭제될 때 이 기록을 비활성화합니다.
      * 참조 무결성 때문에 problem/setting FK는 끊어지므로, 표시용으로 문제 제목을 스냅샷에 남겨둡니다.
      */
@@ -66,13 +74,14 @@ public class ClearRecord {
     }
 
     @Builder
-    public ClearRecord(User user, Gym gym, Setting setting, Problem problem, String videoUrl, LocalDate clearDate){
+    public ClearRecord(User user, Gym gym, Setting setting, Problem problem, String videoUrl){
         this.user = user;
         this.gym = gym;
         this.setting = setting;
         this.problem = problem;
         this.videoUrl = videoUrl;
-        this.clearDate = clearDate;
+        this.startDate = LocalDate.now();
+        this.isClear = false;
         this.isActive = true;
     }
 
