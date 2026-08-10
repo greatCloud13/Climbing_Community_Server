@@ -213,6 +213,7 @@ public class WallSettingServiceTest {
             given(userRepository.findById(managerId)).willReturn(Optional.of(mockManager));
             given(settingRepository.findById(settingId)).willReturn(Optional.of(mockSetting));
             given(settingRepository.findTop2ByGymOrderByIdDesc(mockGym)).willReturn(List.of(mockSetting));
+            given(settingRepository.findTopBySectorAndIsActiveOrderBySettingDateDesc(mockSector, true)).willReturn(Optional.of(mockSetting));
 
             // [When]
             SettingDTO result = wallSettingService.updateSetting(settingId, request, managerId);
