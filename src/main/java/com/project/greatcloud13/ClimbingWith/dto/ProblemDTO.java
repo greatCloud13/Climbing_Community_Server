@@ -28,6 +28,8 @@ public class ProblemDTO {
 
     private String colorCode;
 
+    private Integer holdCount;
+
     public static ProblemDTO from(Problem problem){
         return ProblemDTO.builder()
                 .id(problem.getId())
@@ -40,6 +42,7 @@ public class ProblemDTO {
                 .clearUserCount(problem.getClearUserCount())
                 .description(problem.getDescription())
                 .evaluation(problem.getEvaluation())
+                .holdCount(problem.getHoldCount())
                 .build();
     }
 }

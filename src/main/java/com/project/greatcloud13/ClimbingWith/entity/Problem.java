@@ -38,8 +38,10 @@ public class Problem {
 
     private Float evaluation;
 
+    private Integer holdCount;
+
     @Builder
-    public Problem(Setting setting, Gym gym, String title, ProblemType problemType, GymLevel gymLevel, String description){
+    public Problem(Setting setting, Gym gym, String title, ProblemType problemType, GymLevel gymLevel, String description, Integer holdCount){
         this.setting = setting;
         this.gym = gym;
         this.title = title;
@@ -48,13 +50,15 @@ public class Problem {
         this.clearUserCount = 0;
         this.evaluation = 3F;
         this.description = description;
+        this.holdCount = holdCount;
     }
 
-    public void update(String title, ProblemType problemType, GymLevel gymLevel, String description){
+    public void update(String title, ProblemType problemType, GymLevel gymLevel, String description, Integer holdCount){
         this.title = title;
         this.problemType = problemType;
         this.gymLevel = gymLevel;
         this.description = description;
+        this.holdCount = holdCount;
     }
 
     public void addClearUserCount(){
