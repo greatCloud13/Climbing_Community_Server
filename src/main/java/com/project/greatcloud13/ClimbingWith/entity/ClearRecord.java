@@ -39,7 +39,11 @@ public class ClearRecord {
 
     private String videoUrl;
 
+    private LocalDate startDate;
+
     private LocalDate clearDate;
+
+    private boolean isClear;
 
     private boolean isActive;
 
