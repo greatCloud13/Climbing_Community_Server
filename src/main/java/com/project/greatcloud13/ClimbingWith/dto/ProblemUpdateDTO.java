@@ -15,6 +15,4 @@ public class ProblemUpdateDTO {
     private Long gymLevelId;
 
     private String description;
-
-    private Integer holdCount;
 }

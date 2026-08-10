@@ -2,7 +2,6 @@ package com.project.greatcloud13.ClimbingWith.controller;
 
 import com.project.greatcloud13.ClimbingWith.dto.ProblemCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemDTO;
-import com.project.greatcloud13.ClimbingWith.dto.ProblemDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import com.project.greatcloud13.ClimbingWith.service.ProblemService;
@@ -53,13 +52,6 @@ public class ProblemController {
     @GetMapping("/{id}")
     public ResponseEntity<ProblemDTO> getProblemById(@PathVariable Long id) {
         ProblemDTO result = problemService.getProblem(id);
-
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/{id}/detail")
-    public ResponseEntity<ProblemDetailDTO> getProblemDetail(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        ProblemDetailDTO result = problemService.getProblemDetail(id, userDetails.getUserId());
 
         return ResponseEntity.ok(result);
     }

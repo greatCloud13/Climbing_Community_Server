@@ -14,6 +14,4 @@ public class ProblemCreateDTO {
     private Long gymLevelId;
 
     private String description;
-
-    private Integer holdCount;
 }

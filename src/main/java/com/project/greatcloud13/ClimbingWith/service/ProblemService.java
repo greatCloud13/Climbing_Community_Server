@@ -2,13 +2,11 @@ package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.ProblemCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemDTO;
-import com.project.greatcloud13.ClimbingWith.dto.ProblemDetailDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.ClearRecord;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
 import com.project.greatcloud13.ClimbingWith.entity.Problem;
-import com.project.greatcloud13.ClimbingWith.entity.ProblemTryLog;
 import com.project.greatcloud13.ClimbingWith.entity.Setting;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymAccessDeniedException;
@@ -22,7 +20,6 @@ import com.project.greatcloud13.ClimbingWith.repository.GymLevelRepository;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import com.project.greatcloud13.ClimbingWith.repository.ProblemReviewRepository;
-import com.project.greatcloud13.ClimbingWith.repository.ProblemTryLogRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.repository.WallSettingRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +43,6 @@ public class ProblemService {
     private final UserRepository userRepository;
     private final ClearRecordRepository clearRecordRepository;
     private final ProblemReviewRepository problemReviewRepository;
-    private final ProblemTryLogRepository problemTryLogRepository;
 
     @Transactional
     public ProblemDTO createProblem(ProblemCreateDTO request, Long userId) {
@@ -70,7 +66,6 @@ public class ProblemService {
                 .problemType(request.getProblemType())
                 .gymLevel(gymLevel)
                 .description(request.getDescription())
-                .holdCount(request.getHoldCount())
                 .build();
 
         return ProblemDTO.from(problemRepository.save(problem));
@@ -79,23 +74,6 @@ public class ProblemService {
     public ProblemDTO getProblem(Long id) {
         return ProblemDTO.from(problemRepository.findById(id)
                 .orElseThrow(ProblemNotFoundException::new));
-    }
-
-    // 문제 상세 조회: 홀드 갯수, 로그인한 사용자의 트라이 횟수, 문제의 클리어 인원을 함께 제공
-    public ProblemDetailDTO getProblemDetail(Long id, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(UserNotFoundException::new);
-
-        Problem problem = problemRepository.findById(id)
-                .orElseThrow(ProblemNotFoundException::new);
-
-        long tryCount = problemTryLogRepository.countByUserAndProblem(user, problem);
-        long clearCount = clearRecordRepository.countByProblemAndIsClearTrueAndIsActiveTrue(problem);
-        Integer myBestDropPoint = problemTryLogRepository.findTopByUserAndProblemOrderByDropPointDesc(user, problem)
-                .map(ProblemTryLog::getDropPoint)
-                .orElse(null);
-
-        return ProblemDetailDTO.from(problem, tryCount, clearCount, myBestDropPoint);
     }
 
     public List<ProblemDTO> getProblemByGymLevel(Long id) {
@@ -147,7 +125,7 @@ public class ProblemService {
         GymLevel gymLevel = gymLevelRepository.findById(request.getGymLevelId())
                 .orElseThrow(GymLevelNotFoundException::new);
 
-        problem.update(request.getTitle(), request.getProblemType(), gymLevel, request.getDescription(), request.getHoldCount());
+        problem.update(request.getTitle(), request.getProblemType(), gymLevel, request.getDescription());
 
         return ProblemDTO.from(problem);
     }
