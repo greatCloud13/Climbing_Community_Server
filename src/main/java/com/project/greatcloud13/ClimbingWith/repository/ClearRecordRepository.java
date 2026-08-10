@@ -11,17 +11,19 @@ import java.util.List;
 @Repository
 public interface ClearRecordRepository extends JpaRepository<ClearRecord, Long> {
 
-    Page<ClearRecord> findAllByProblemAndVideoUrlIsNotNullAndIsActiveTrue(Problem problem, Pageable pageable);
+    Page<ClearRecord> findAllByProblemAndVideoUrlIsNotNullAndIsClearTrueAndIsActiveTrue(Problem problem, Pageable pageable);
 
-    Page<ClearRecord> findAllBySettingAndVideoUrlIsNotNullAndIsActiveTrue(Setting setting, Pageable pageable);
+    Page<ClearRecord> findAllBySettingAndVideoUrlIsNotNullAndIsClearTrueAndIsActiveTrue(Setting setting, Pageable pageable);
 
-    Page<ClearRecord> findAllByUserAndIsActiveTrueOrderByClearDateDesc(User user, Pageable pageable);
+    Page<ClearRecord> findAllByUserAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(User user, Pageable pageable);
 
-    Page<ClearRecord> findAllByUserAndGymAndIsActiveTrueOrderByClearDateDesc(User user, Gym gym, Pageable pageable);
+    Page<ClearRecord> findAllByUserAndGymAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(User user, Gym gym, Pageable pageable);
 
-    Page<ClearRecord> findAllByUserAndSettingAndIsActiveTrueOrderByClearDateDesc(User user, Setting setting, Pageable pageable);
+    Page<ClearRecord> findAllByUserAndSettingAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(User user, Setting setting, Pageable pageable);
 
     List<ClearRecord> findAllByProblem(Problem problem);
 
     List<ClearRecord> findAllBySetting(Setting setting);
+
+    long countByProblemAndIsClearTrueAndIsActiveTrue(Problem problem);
 }

@@ -7,10 +7,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/clearRecord")
@@ -20,14 +23,28 @@ public class ClearRecordController {
     private final ClearRecordService clearRecordService;
 
     @Operation(
-            summary = "완등 기록 작성",
-            description = "새로운 완등기록을 작성합니다."
+            summary = "문제 트라이 시작",
+            description = "새로운 트라이 기록을 작성합니다. isClear=false, startDate=오늘, clearDate=null 상태로 등록됩니다."
     )
     @PostMapping
     public ResponseEntity<ClearRecordResponseDTO> createClearRecord(@RequestBody ClearRecordCreateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
         ClearRecordResponseDTO result = clearRecordService.createClearRecord(userDetails.getUserId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @Operation(
+            summary = "문제 클리어 처리",
+            description = "진행중이던 트라이 기록을 클리어 상태로 변경합니다. isClear=true로 변경되며 clearDate가 등록됩니다. clearDate 미입력시 오늘 날짜로 등록됩니다."
+    )
+    @PatchMapping("/{id}/clear")
+    public ResponseEntity<ClearRecordResponseDTO> clearProblem(
+            @PathVariable Long id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate clearDate,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        ClearRecordResponseDTO result = clearRecordService.clearProblem(userDetails.getUserId(), id, clearDate);
+
+        return ResponseEntity.ok(result);
     }
 
     @Operation(
