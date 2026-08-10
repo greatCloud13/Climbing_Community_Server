@@ -1,10 +1,13 @@
 package com.project.greatcloud13.ClimbingWith.repository;
 
+import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.entity.ProblemReview;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface ProblemReviewRepository extends JpaRepository<ProblemReview, Long> {
 
@@ -14,5 +17,7 @@ public interface ProblemReviewRepository extends JpaRepository<ProblemReview, Lo
 
     @Query("SELECT SUM(p.evaluation) FROM ProblemReview p WHERE p.problem.id = :problemId")
     Long sumEvaluationByProblemId(Long problemId);
+
+    void deleteAllByProblemIn(List<Problem> problems);
 
 }

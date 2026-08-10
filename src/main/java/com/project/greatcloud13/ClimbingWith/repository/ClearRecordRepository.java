@@ -6,16 +6,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ClearRecordRepository extends JpaRepository<ClearRecord, Long> {
 
-    Page<ClearRecord> findAllByProblemAndVideoUrlIsNotNull(Problem problem, Pageable pageable);
+    Page<ClearRecord> findAllByProblemAndVideoUrlIsNotNullAndIsActiveTrue(Problem problem, Pageable pageable);
 
-    Page<ClearRecord> findAllBySettingAndVideoUrlIsNotNull(Setting setting, Pageable pageable);
+    Page<ClearRecord> findAllBySettingAndVideoUrlIsNotNullAndIsActiveTrue(Setting setting, Pageable pageable);
 
-    Page<ClearRecord> findAllByUserOrderByClearDateDesc(User user, Pageable pageable);
+    Page<ClearRecord> findAllByUserAndIsActiveTrueOrderByClearDateDesc(User user, Pageable pageable);
 
-    Page<ClearRecord> findAllByUserAndGymOrderByClearDateDesc(User user, Gym gym, Pageable pageable);
+    Page<ClearRecord> findAllByUserAndGymAndIsActiveTrueOrderByClearDateDesc(User user, Gym gym, Pageable pageable);
 
-    Page<ClearRecord> findAllByUserAndSettingOrderByClearDateDesc(User user, Setting setting, Pageable pageable);
+    Page<ClearRecord> findAllByUserAndSettingAndIsActiveTrueOrderByClearDateDesc(User user, Setting setting, Pageable pageable);
+
+    List<ClearRecord> findAllByProblem(Problem problem);
+
+    List<ClearRecord> findAllBySetting(Setting setting);
 }

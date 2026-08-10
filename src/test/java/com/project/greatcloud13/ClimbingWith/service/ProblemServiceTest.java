@@ -51,6 +51,8 @@ public class ProblemServiceTest {
     @Mock private GymRepository gymRepository;
     @Mock private WallSettingRepository settingRepository;
     @Mock private UserRepository userRepository;
+    @Mock private ClearRecordRepository clearRecordRepository;
+    @Mock private ProblemReviewRepository problemReviewRepository;
 
 //   ========================= Mock Objects =========================
     private Gym mockGym;
@@ -332,16 +334,22 @@ public class ProblemServiceTest {
     class DeleteProblemTest {
 
         @Test
-        @DisplayName("문제 삭제 성공")
+        @DisplayName("문제 삭제 성공 - 연관 완등기록 비활성화, 리뷰 삭제")
         void deleteProblem_Success() {
             // [Given]
+            ClearRecord mockClearRecord = ClearRecord.builder()
+                    .user(mockManager).gym(mockGym).setting(mockSetting).problem(mockProblem).build();
+
             given(userRepository.findById(userId)).willReturn(Optional.of(mockManager));
             given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem));
+            given(clearRecordRepository.findAllByProblem(mockProblem)).willReturn(List.of(mockClearRecord));
 
             // [When]
             problemService.deleteProblem(problemId, userId);
 
             // [Then]
+            assertThat(mockClearRecord.isActive()).isFalse();
+            verify(problemReviewRepository, times(1)).deleteAllByProblemIn(List.of(mockProblem));
             verify(problemRepository, times(1)).deleteById(problemId);
         }
 

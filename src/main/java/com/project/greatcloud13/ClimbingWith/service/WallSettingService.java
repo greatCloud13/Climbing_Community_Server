@@ -25,6 +25,8 @@ public class WallSettingService {
     private final WallSettingRepository settingRepository;
     private final ProblemRepository problemRepository;
     private final UserRepository userRepository;
+    private final ClearRecordRepository clearRecordRepository;
+    private final ProblemReviewRepository problemReviewRepository;
 
     /**
      * 새로운 세팅을 등록합니다.
@@ -166,6 +168,12 @@ public class WallSettingService {
         }
 
         Gym gym = setting.getGym();
+
+        List<Problem> problems = problemRepository.findAllBySetting(setting);
+        clearRecordRepository.findAllBySetting(setting).forEach(ClearRecord::deactivate);
+        problemReviewRepository.deleteAllByProblemIn(problems);
+        problemRepository.deleteAll(problems);
+
         settingRepository.deleteById(id);
         settingRepository.findFirstByGymOrderByIdDesc(gym).ifPresent(Setting::active);
     }

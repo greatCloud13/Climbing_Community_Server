@@ -60,7 +60,7 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllByUserOrderByClearDateDesc(user, pageable)
+        return clearRecordRepository.findAllByUserAndIsActiveTrueOrderByClearDateDesc(user, pageable)
                 .map(ClearRecordSummaryDTO::from);
     }
 
@@ -73,7 +73,7 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllByUserAndGymOrderByClearDateDesc(user, gym, pageable)
+        return clearRecordRepository.findAllByUserAndGymAndIsActiveTrueOrderByClearDateDesc(user, gym, pageable)
                 .map(ClearRecordSummaryDTO::from);
     }
 
@@ -86,7 +86,7 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllByUserAndSettingOrderByClearDateDesc(user, setting, pageable)
+        return clearRecordRepository.findAllByUserAndSettingAndIsActiveTrueOrderByClearDateDesc(user, setting, pageable)
                 .map(ClearRecordSummaryDTO::from);
     }
 
@@ -96,7 +96,7 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllByProblemAndVideoUrlIsNotNull(problem, pageable)
+        return clearRecordRepository.findAllByProblemAndVideoUrlIsNotNullAndIsActiveTrue(problem, pageable)
                 .map(ClearRecordSummaryDTO::from);
     }
 
@@ -109,7 +109,7 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllBySettingAndVideoUrlIsNotNull(setting, pageable)
+        return clearRecordRepository.findAllBySettingAndVideoUrlIsNotNullAndIsActiveTrue(setting, pageable)
                 .map(ClearRecordSummaryDTO::from);
     }
 

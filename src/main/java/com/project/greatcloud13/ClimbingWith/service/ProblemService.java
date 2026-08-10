@@ -3,6 +3,7 @@ package com.project.greatcloud13.ClimbingWith.service;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.entity.ClearRecord;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
 import com.project.greatcloud13.ClimbingWith.entity.Problem;
@@ -14,9 +15,11 @@ import com.project.greatcloud13.ClimbingWith.exception.gym.GymLevelNotFoundExcep
 import com.project.greatcloud13.ClimbingWith.exception.problem.ProblemNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.setting.SettingNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
+import com.project.greatcloud13.ClimbingWith.repository.ClearRecordRepository;
 import com.project.greatcloud13.ClimbingWith.repository.GymLevelRepository;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
 import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
+import com.project.greatcloud13.ClimbingWith.repository.ProblemReviewRepository;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.repository.WallSettingRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,8 @@ public class ProblemService {
     private final GymRepository gymRepository;
     private final WallSettingRepository settingRepository;
     private final UserRepository userRepository;
+    private final ClearRecordRepository clearRecordRepository;
+    private final ProblemReviewRepository problemReviewRepository;
 
     @Transactional
     public ProblemDTO createProblem(ProblemCreateDTO request, Long userId) {
@@ -137,6 +142,8 @@ public class ProblemService {
             throw new GymAccessDeniedException();
         }
 
+        clearRecordRepository.findAllByProblem(problem).forEach(ClearRecord::deactivate);
+        problemReviewRepository.deleteAllByProblemIn(List.of(problem));
         problemRepository.deleteById(id);
     }
 }

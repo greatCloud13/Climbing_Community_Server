@@ -47,6 +47,8 @@ public class WallSettingServiceTest {
     @Mock private WallSettingRepository settingRepository;
     @Mock private ProblemRepository problemRepository;
     @Mock private UserRepository userRepository;
+    @Mock private ClearRecordRepository clearRecordRepository;
+    @Mock private ProblemReviewRepository problemReviewRepository;
 
 //   ========================= Mock Objects =========================
     private Gym mockGym;
@@ -238,20 +240,32 @@ public class WallSettingServiceTest {
     class DeleteSettingTest {
 
         @Test
-        @DisplayName("정상 세팅 삭제 성공 - 이전 세팅 활성화")
+        @DisplayName("정상 세팅 삭제 성공 - 이전 세팅 활성화, 연관 문제/완등기록 정리")
         void deleteSetting_success() {
             // [Given]
             Setting prevSetting = Setting.builder().sector(mockSector).gym(mockGym).build();
             ReflectionTestUtils.setField(prevSetting, "id", 299L);
 
+            Problem mockProblem = Problem.builder().gym(mockGym).setting(mockSetting).title("문제").build();
+            ReflectionTestUtils.setField(mockProblem, "id", 400L);
+            List<Problem> problems = List.of(mockProblem);
+
+            ClearRecord mockClearRecord = ClearRecord.builder()
+                    .user(mockManager).gym(mockGym).setting(mockSetting).problem(mockProblem).build();
+
             given(userRepository.findById(managerId)).willReturn(Optional.of(mockManager));
             given(settingRepository.findById(settingId)).willReturn(Optional.of(mockSetting));
             given(settingRepository.findFirstByGymOrderByIdDesc(mockGym)).willReturn(Optional.of(prevSetting));
+            given(problemRepository.findAllBySetting(mockSetting)).willReturn(problems);
+            given(clearRecordRepository.findAllBySetting(mockSetting)).willReturn(List.of(mockClearRecord));
 
             // [When]
             wallSettingService.deleteSetting(settingId, managerId);
 
             // [Then]
+            assertThat(mockClearRecord.isActive()).isFalse();
+            verify(problemReviewRepository, times(1)).deleteAllByProblemIn(problems);
+            verify(problemRepository, times(1)).deleteAll(problems);
             verify(settingRepository, times(1)).deleteById(settingId);
             assertThat(prevSetting.isActive()).isTrue();
         }
