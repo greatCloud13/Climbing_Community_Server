@@ -53,6 +53,7 @@ public class ProblemServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private ClearRecordRepository clearRecordRepository;
     @Mock private ProblemReviewRepository problemReviewRepository;
+    @Mock private ProblemTryLogRepository problemTryLogRepository;
 
 //   ========================= Mock Objects =========================
     private Gym mockGym;
@@ -233,6 +234,75 @@ public class ProblemServiceTest {
 
             // [When & Then]
             assertThatThrownBy(() -> problemService.getProblem(invalidId))
+                    .isInstanceOf(ProblemNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("getProblemDetail() 메서드 테스트")
+    class GetProblemDetailTest {
+
+        @Test
+        @DisplayName("문제 상세 조회 성공 - 트라이 횟수, 클리어 인원, 내 최고 도달 포함")
+        void getProblemDetail_Success() {
+            // [Given]
+            ProblemTryLog bestTryLog = ProblemTryLog.builder().user(mockMember).problem(mockProblem).dropPoint(8).build();
+
+            given(userRepository.findById(memberId)).willReturn(Optional.of(mockMember));
+            given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem));
+            given(problemTryLogRepository.countByUserAndProblem(mockMember, mockProblem)).willReturn(3L);
+            given(clearRecordRepository.countByProblemAndIsClearTrueAndIsActiveTrue(mockProblem)).willReturn(15L);
+            given(problemTryLogRepository.findTopByUserAndProblemOrderByDropPointDesc(mockMember, mockProblem))
+                    .willReturn(Optional.of(bestTryLog));
+
+            // [When]
+            var result = problemService.getProblemDetail(problemId, memberId);
+
+            // [Then]
+            assertThat(result.getId()).isEqualTo(problemId);
+            assertThat(result.getTryCount()).isEqualTo(3L);
+            assertThat(result.getClearCount()).isEqualTo(15L);
+            assertThat(result.getMyBestDropPoint()).isEqualTo(8);
+        }
+
+        @Test
+        @DisplayName("문제 상세 조회 성공 - 트라이 기록이 없으면 내 최고 도달은 null")
+        void getProblemDetail_NoTryLog() {
+            // [Given]
+            given(userRepository.findById(memberId)).willReturn(Optional.of(mockMember));
+            given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem));
+            given(problemTryLogRepository.countByUserAndProblem(mockMember, mockProblem)).willReturn(0L);
+            given(clearRecordRepository.countByProblemAndIsClearTrueAndIsActiveTrue(mockProblem)).willReturn(0L);
+            given(problemTryLogRepository.findTopByUserAndProblemOrderByDropPointDesc(mockMember, mockProblem))
+                    .willReturn(Optional.empty());
+
+            // [When]
+            var result = problemService.getProblemDetail(problemId, memberId);
+
+            // [Then]
+            assertThat(result.getMyBestDropPoint()).isNull();
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 사용자 ID 요청시 예외 발생")
+        void getProblemDetail_UserNotFound() {
+            // [Given]
+            given(userRepository.findById(invalidId)).willReturn(Optional.empty());
+
+            // [When & Then]
+            assertThatThrownBy(() -> problemService.getProblemDetail(problemId, invalidId))
+                    .isInstanceOf(UserNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 문제 ID 요청시 예외 발생")
+        void getProblemDetail_ProblemNotFound() {
+            // [Given]
+            given(userRepository.findById(memberId)).willReturn(Optional.of(mockMember));
+            given(problemRepository.findById(invalidId)).willReturn(Optional.empty());
+
+            // [When & Then]
+            assertThatThrownBy(() -> problemService.getProblemDetail(invalidId, memberId))
                     .isInstanceOf(ProblemNotFoundException.class);
         }
     }
