@@ -217,7 +217,7 @@ public class ClearRecordServiceTest {
                     .problem(mockProblem1).videoUrl(videoUrl).clearDate(LocalDate.now()).build(), size);
 
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
-            given(clearRecordRepository.findAllByUserOrderByClearDateDesc(mockUser1, pageable)).willReturn(mockPage);
+            given(clearRecordRepository.findAllByUserAndIsActiveTrueOrderByClearDateDesc(mockUser1, pageable)).willReturn(mockPage);
 
             // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, page, size);
@@ -225,7 +225,7 @@ public class ClearRecordServiceTest {
             // [Then]
             assertThat(result.getSize()).isEqualTo(size);
             assertThat(result.getContent().getFirst().getUsername()).isEqualTo(mockUser1.getUsername());
-            verify(clearRecordRepository, times(1)).findAllByUserOrderByClearDateDesc(mockUser1, pageable);
+            verify(clearRecordRepository, times(1)).findAllByUserAndIsActiveTrueOrderByClearDateDesc(mockUser1, pageable);
         }
 
         @Test
@@ -238,7 +238,7 @@ public class ClearRecordServiceTest {
             assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserId(invalidUserId, 0, 10))
                     .isInstanceOf(UserNotFoundException.class);
 
-            verify(clearRecordRepository, never()).findAllByUserOrderByClearDateDesc(any(), any());
+            verify(clearRecordRepository, never()).findAllByUserAndIsActiveTrueOrderByClearDateDesc(any(), any());
         }
     }
 
@@ -259,7 +259,7 @@ public class ClearRecordServiceTest {
 
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
             given(gymRepository.findById(gymId)).willReturn(Optional.of(mockGym1));
-            given(clearRecordRepository.findAllByUserAndGymOrderByClearDateDesc(mockUser1, mockGym1, pageable)).willReturn(mockPage);
+            given(clearRecordRepository.findAllByUserAndGymAndIsActiveTrueOrderByClearDateDesc(mockUser1, mockGym1, pageable)).willReturn(mockPage);
 
             // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserIdAndGym(userId, gymId, page, size);
@@ -267,7 +267,7 @@ public class ClearRecordServiceTest {
             // [Then]
             assertThat(result.getSize()).isEqualTo(size);
             assertThat(result.getContent().getFirst().getUsername()).isEqualTo(mockUser1.getUsername());
-            verify(clearRecordRepository, times(1)).findAllByUserAndGymOrderByClearDateDesc(mockUser1, mockGym1, pageable);
+            verify(clearRecordRepository, times(1)).findAllByUserAndGymAndIsActiveTrueOrderByClearDateDesc(mockUser1, mockGym1, pageable);
         }
 
         @Test
@@ -280,7 +280,7 @@ public class ClearRecordServiceTest {
             assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserIdAndGym(invalidUserId, gymId, 0, 10))
                     .isInstanceOf(UserNotFoundException.class);
 
-            verify(clearRecordRepository, never()).findAllByUserAndGymOrderByClearDateDesc(any(), any(), any());
+            verify(clearRecordRepository, never()).findAllByUserAndGymAndIsActiveTrueOrderByClearDateDesc(any(), any(), any());
         }
 
         @Test
@@ -294,7 +294,7 @@ public class ClearRecordServiceTest {
             assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserIdAndGym(userId, invalidGymId, 0, 10))
                     .isInstanceOf(GymNotFoundException.class);
 
-            verify(clearRecordRepository, never()).findAllByUserAndGymOrderByClearDateDesc(any(), any(), any());
+            verify(clearRecordRepository, never()).findAllByUserAndGymAndIsActiveTrueOrderByClearDateDesc(any(), any(), any());
         }
     }
 
@@ -315,14 +315,14 @@ public class ClearRecordServiceTest {
 
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
             given(settingRepository.findById(settingId)).willReturn(Optional.of(mockSetting1));
-            given(clearRecordRepository.findAllByUserAndSettingOrderByClearDateDesc(mockUser1, mockSetting1, pageable)).willReturn(mockPage);
+            given(clearRecordRepository.findAllByUserAndSettingAndIsActiveTrueOrderByClearDateDesc(mockUser1, mockSetting1, pageable)).willReturn(mockPage);
 
             // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserIdAndSettingId(userId, settingId, page, size);
 
             // [Then]
             assertThat(result.getSize()).isEqualTo(size);
-            verify(clearRecordRepository, times(1)).findAllByUserAndSettingOrderByClearDateDesc(mockUser1, mockSetting1, pageable);
+            verify(clearRecordRepository, times(1)).findAllByUserAndSettingAndIsActiveTrueOrderByClearDateDesc(mockUser1, mockSetting1, pageable);
         }
 
         @Test
@@ -336,7 +336,7 @@ public class ClearRecordServiceTest {
             assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByUserIdAndSettingId(userId, invalidSettingId, 0, 10))
                     .isInstanceOf(SettingNotFoundException.class);
 
-            verify(clearRecordRepository, never()).findAllByUserAndSettingOrderByClearDateDesc(any(), any(), any());
+            verify(clearRecordRepository, never()).findAllByUserAndSettingAndIsActiveTrueOrderByClearDateDesc(any(), any(), any());
         }
     }
 
@@ -356,14 +356,14 @@ public class ClearRecordServiceTest {
                     .problem(mockProblem1).videoUrl(videoUrl).clearDate(LocalDate.now()).build(), size);
 
             given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem1));
-            given(clearRecordRepository.findAllByProblemAndVideoUrlIsNotNull(mockProblem1, pageable)).willReturn(mockPage);
+            given(clearRecordRepository.findAllByProblemAndVideoUrlIsNotNullAndIsActiveTrue(mockProblem1, pageable)).willReturn(mockPage);
 
             // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByProblemExistVideoUrl(problemId, page, size);
 
             // [Then]
             assertThat(result.getSize()).isEqualTo(size);
-            verify(clearRecordRepository, times(1)).findAllByProblemAndVideoUrlIsNotNull(mockProblem1, pageable);
+            verify(clearRecordRepository, times(1)).findAllByProblemAndVideoUrlIsNotNullAndIsActiveTrue(mockProblem1, pageable);
         }
 
         @Test
@@ -376,7 +376,7 @@ public class ClearRecordServiceTest {
             assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryByProblemExistVideoUrl(invalidProblemId, 0, 10))
                     .isInstanceOf(ProblemNotFoundException.class);
 
-            verify(clearRecordRepository, never()).findAllByProblemAndVideoUrlIsNotNull(any(), any());
+            verify(clearRecordRepository, never()).findAllByProblemAndVideoUrlIsNotNullAndIsActiveTrue(any(), any());
         }
     }
 
@@ -397,14 +397,14 @@ public class ClearRecordServiceTest {
 
             given(sectorRepository.findById(sectorId)).willReturn(Optional.of(mockSector1));
             given(settingRepository.findTopBySectorAndIsActiveOrderBySettingDateDesc(mockSector1, true)).willReturn(Optional.of(mockSetting1));
-            given(clearRecordRepository.findAllBySettingAndVideoUrlIsNotNull(mockSetting1, pageable)).willReturn(mockPage);
+            given(clearRecordRepository.findAllBySettingAndVideoUrlIsNotNullAndIsActiveTrue(mockSetting1, pageable)).willReturn(mockPage);
 
             // [When]
             Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(sectorId, page, size);
 
             // [Then]
             assertThat(result.getSize()).isEqualTo(size);
-            verify(clearRecordRepository, times(1)).findAllBySettingAndVideoUrlIsNotNull(mockSetting1, pageable);
+            verify(clearRecordRepository, times(1)).findAllBySettingAndVideoUrlIsNotNullAndIsActiveTrue(mockSetting1, pageable);
         }
 
         @Test
@@ -417,7 +417,7 @@ public class ClearRecordServiceTest {
             assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(invalidSectorId, 0, 10))
                     .isInstanceOf(SectorNotFoundException.class);
 
-            verify(clearRecordRepository, never()).findAllBySettingAndVideoUrlIsNotNull(any(), any());
+            verify(clearRecordRepository, never()).findAllBySettingAndVideoUrlIsNotNullAndIsActiveTrue(any(), any());
         }
 
         @Test
@@ -431,7 +431,7 @@ public class ClearRecordServiceTest {
             assertThatThrownBy(() -> clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(sectorId, 0, 10))
                     .isInstanceOf(SettingNotFoundException.class);
 
-            verify(clearRecordRepository, never()).findAllBySettingAndVideoUrlIsNotNull(any(), any());
+            verify(clearRecordRepository, never()).findAllBySettingAndVideoUrlIsNotNullAndIsActiveTrue(any(), any());
         }
     }
 

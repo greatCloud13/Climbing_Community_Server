@@ -35,15 +35,30 @@ public class ClearRecord {
     @JoinColumn(name = "problem_id")
     private Problem problem;
 
+    private String problemTitle;
+
     private String videoUrl;
 
     private LocalDate clearDate;
+
+    private boolean isActive;
 
     public void updateProblem(Problem problem){
         this.problem = problem;
     }
     public void updateVideoUrl(String url){
         this.videoUrl = url;
+    }
+
+    /**
+     * 문제/세팅이 삭제될 때 이 기록을 비활성화합니다.
+     * 참조 무결성 때문에 problem/setting FK는 끊어지므로, 표시용으로 문제 제목을 스냅샷에 남겨둡니다.
+     */
+    public void deactivate(){
+        this.problemTitle = problem.getTitle();
+        this.problem = null;
+        this.setting = null;
+        this.isActive = false;
     }
 
     @Builder
@@ -54,6 +69,7 @@ public class ClearRecord {
         this.problem = problem;
         this.videoUrl = videoUrl;
         this.clearDate = clearDate;
+        this.isActive = true;
     }
 
 }

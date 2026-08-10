@@ -28,7 +28,8 @@ public class ClearRecordRepositoryImpl implements ClearRecordRepositoryCustom {
                 .from(clearRecord)
                 .where(
                         clearRecord.user.eq(user),
-                        clearRecord.gym.eq(gym)
+                        clearRecord.gym.eq(gym),
+                        clearRecord.isActive.isTrue()
                 )
                 .groupBy(clearRecord.problem.gymLevel)
                 .fetch();
