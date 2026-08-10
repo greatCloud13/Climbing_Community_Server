@@ -127,6 +127,7 @@ public class WallSettingService {
         Setting setting = settingRepository.findById(settingId)
                 .orElseThrow(SettingNotFoundException::new);
 
+
         if (!user.gymValidate(setting.getGym())) {
             throw new GymAccessDeniedException();
         }
@@ -138,7 +139,11 @@ public class WallSettingService {
                 .findFirst()
                 .ifPresent(Setting::inActive);
 
+        Setting activeSetting = settingRepository.findTopBySectorAndIsActiveOrderBySettingDateDesc(setting.getSector(), true)
+                        .orElseThrow(SettingNotFoundException::new);
+
         setting.update(request.getSettingDate(), request.getStartDate(), request.getEndDate());
+        setting.getSector().setSettingDate(activeSetting.getSettingDate());
 
         return SettingDTO.from(setting);
     }

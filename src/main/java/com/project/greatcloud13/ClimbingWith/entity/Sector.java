@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
@@ -27,6 +28,7 @@ public class Sector {
     @Column(name = "description")
     private String description;
 
+    @Setter
     @Column(name = "setting_date")
     private LocalDate settingDate;
 
@@ -48,4 +50,5 @@ public class Sector {
         this.settingDate = settingDate;
         this.nextSettingDate = nextSettingDate;
     }
+
 }
