@@ -24,13 +24,19 @@ public class ProblemDTO {
 
     private Float evaluation;
 
+    private Long levelId;
+
+    private String colorCode;
+
     public static ProblemDTO from(Problem problem){
         return ProblemDTO.builder()
                 .id(problem.getId())
                 .settingId(problem.getSetting().getId())
                 .title(problem.getTitle())
                 .problemType(problem.getProblemType().toString())
+                .levelId(problem.getGymLevel().getId())
                 .gymLevel(problem.getGymLevel().getLevelName())
+                .colorCode(problem.getGymLevel().getColorCode())
                 .clearUserCount(problem.getClearUserCount())
                 .description(problem.getDescription())
                 .evaluation(problem.getEvaluation())
