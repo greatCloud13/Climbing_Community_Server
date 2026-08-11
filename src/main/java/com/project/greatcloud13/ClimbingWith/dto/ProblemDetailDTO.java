@@ -28,13 +28,13 @@ public class ProblemDetailDTO {
 
     private Float evaluation;
 
-    private Long tryCount;
+    private Long myTryCount;
 
     private Long clearCount;
 
     private Integer myBestDropPoint;
 
-    public static ProblemDetailDTO from(Problem problem, long tryCount, long clearCount, Integer myBestDropPoint){
+    public static ProblemDetailDTO from(Problem problem, long myTryCount, long clearCount, Integer myBestDropPoint){
         return ProblemDetailDTO.builder()
                 .id(problem.getId())
                 .settingId(problem.getSetting().getId())
@@ -46,7 +46,7 @@ public class ProblemDetailDTO {
                 .holdCount(problem.getHoldCount())
                 .description(problem.getDescription())
                 .evaluation(problem.getEvaluation())
-                .tryCount(tryCount)
+                .myTryCount(myTryCount)
                 .clearCount(clearCount)
                 .myBestDropPoint(myBestDropPoint)
                 .build();

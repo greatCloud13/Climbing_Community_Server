@@ -56,6 +56,18 @@ public class ProblemTryLogController {
     }
 
     @Operation(
+            summary = "문제별 내 시도 기록 목록 조회",
+            description = "로그인한 사용자의 특정 문제에 대한 시도 기록을 최신 시도 일자 순으로 조회합니다."
+    )
+    @GetMapping("/problem/{problemId}")
+    public ResponseEntity<Page<ProblemTryLogDTO>> getProblemTryLogsByProblem(
+            @PathVariable Long problemId, @ParameterObject Pageable pageable, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Page<ProblemTryLogDTO> result = problemTryLogService.getProblemTryLogsByUserAndProblem(userDetails.getUserId(), problemId, pageable.getPageNumber(), pageable.getPageSize());
+
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(
             summary = "문제 시도 기록 수정",
             description = "작성자 본인의 문제 시도 기록을 수정합니다."
     )

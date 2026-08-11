@@ -1,8 +1,10 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
+import com.project.greatcloud13.ClimbingWith.dto.DropPointStat;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemDetailDTO;
+import com.project.greatcloud13.ClimbingWith.dto.ProblemDropPointStatsResponse;
 import com.project.greatcloud13.ClimbingWith.dto.ProblemUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.ClearRecord;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
@@ -32,7 +34,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -89,13 +93,35 @@ public class ProblemService {
         Problem problem = problemRepository.findById(id)
                 .orElseThrow(ProblemNotFoundException::new);
 
-        long tryCount = problemTryLogRepository.countByUserAndProblem(user, problem);
+        long myTryCount = problemTryLogRepository.countByUserAndProblem(user, problem);
         long clearCount = clearRecordRepository.countByProblemAndIsClearTrueAndIsActiveTrue(problem);
         Integer myBestDropPoint = problemTryLogRepository.findTopByUserAndProblemOrderByDropPointDesc(user, problem)
                 .map(ProblemTryLog::getDropPoint)
                 .orElse(null);
 
-        return ProblemDetailDTO.from(problem, tryCount, clearCount, myBestDropPoint);
+        return ProblemDetailDTO.from(problem, myTryCount, clearCount, myBestDropPoint);
+    }
+
+    // 홀드별 낙하 분포 조회: 사용자당 최고 도달 지점 기준으로 집계
+    public ProblemDropPointStatsResponse getDropPointStats(Long id) {
+        Problem problem = problemRepository.findById(id)
+                .orElseThrow(ProblemNotFoundException::new);
+
+        List<Integer> bestDropPoints = problemTryLogRepository.findBestDropPointPerUser(problem);
+
+        List<DropPointStat> distribution = bestDropPoints.stream()
+                .collect(Collectors.groupingBy(dp -> dp, Collectors.counting()))
+                .entrySet().stream()
+                .map(e -> new DropPointStat(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(DropPointStat::getDropPoint))
+                .toList();
+
+        return ProblemDropPointStatsResponse.builder()
+                .problemId(problem.getId())
+                .holdCount(problem.getHoldCount())
+                .totalUserCount((long) bestDropPoints.size())
+                .distribution(distribution)
+                .build();
     }
 
     public List<ProblemDTO> getProblemByGymLevel(Long id) {

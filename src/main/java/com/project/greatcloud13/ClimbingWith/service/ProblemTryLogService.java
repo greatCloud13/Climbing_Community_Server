@@ -72,6 +72,20 @@ public class ProblemTryLogService {
                 .map(log -> ProblemTryLogDTO.builder().log(log).build());
     }
 
+    // 문제별 내 시도 기록 목록 조회 (최신순)
+    public Page<ProblemTryLogDTO> getProblemTryLogsByUserAndProblem(Long userId, Long problemId, int page, int size) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(ProblemNotFoundException::new);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("tryDate").descending());
+
+        return problemTryLogRepository.findAllByUserAndProblem(user, problem, pageable)
+                .map(log -> ProblemTryLogDTO.builder().log(log).build());
+    }
+
     // 시도 기록 수정 (작성자 본인만 가능)
     @Transactional
     public ProblemTryLogDTO updateProblemTryLog(Long id, Long userId, ProblemTryLogDTO request) {
