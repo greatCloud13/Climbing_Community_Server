@@ -10,6 +10,7 @@ import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.problem.ProblemNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.setting.SettingNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
+import com.project.greatcloud13.ClimbingWith.dto.DropPointStat;
 import com.project.greatcloud13.ClimbingWith.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -260,7 +261,7 @@ public class ProblemServiceTest {
 
             // [Then]
             assertThat(result.getId()).isEqualTo(problemId);
-            assertThat(result.getTryCount()).isEqualTo(3L);
+            assertThat(result.getMyTryCount()).isEqualTo(3L);
             assertThat(result.getClearCount()).isEqualTo(15L);
             assertThat(result.getMyBestDropPoint()).isEqualTo(8);
         }
@@ -303,6 +304,58 @@ public class ProblemServiceTest {
 
             // [When & Then]
             assertThatThrownBy(() -> problemService.getProblemDetail(invalidId, memberId))
+                    .isInstanceOf(ProblemNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("getDropPointStats() 메서드 테스트")
+    class GetDropPointStatsTest {
+
+        @Test
+        @DisplayName("홀드별 낙하 분포 조회 성공 - 사용자당 최고 도달 지점 기준으로 집계")
+        void getDropPointStats_Success() {
+            // [Given]
+            given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem));
+            given(problemTryLogRepository.findBestDropPointPerUser(mockProblem))
+                    .willReturn(List.of(4, 4, 7, 7, 7, 9));
+
+            // [When]
+            var result = problemService.getDropPointStats(problemId);
+
+            // [Then]
+            assertThat(result.getProblemId()).isEqualTo(problemId);
+            assertThat(result.getTotalUserCount()).isEqualTo(6L);
+            assertThat(result.getDistribution()).isEqualTo(List.of(
+                    new DropPointStat(4, 2L),
+                    new DropPointStat(7, 3L),
+                    new DropPointStat(9, 1L)
+            ));
+        }
+
+        @Test
+        @DisplayName("낙하 기록이 없으면 빈 분포를 반환")
+        void getDropPointStats_NoRecords() {
+            // [Given]
+            given(problemRepository.findById(problemId)).willReturn(Optional.of(mockProblem));
+            given(problemTryLogRepository.findBestDropPointPerUser(mockProblem)).willReturn(List.of());
+
+            // [When]
+            var result = problemService.getDropPointStats(problemId);
+
+            // [Then]
+            assertThat(result.getDistribution().size()).isEqualTo(0);
+            assertThat(result.getTotalUserCount()).isEqualTo(0L);
+        }
+
+        @Test
+        @DisplayName("실패: 존재하지 않는 문제 ID 요청시 예외 발생")
+        void getDropPointStats_ProblemNotFound() {
+            // [Given]
+            given(problemRepository.findById(invalidId)).willReturn(Optional.empty());
+
+            // [When & Then]
+            assertThatThrownBy(() -> problemService.getDropPointStats(invalidId))
                     .isInstanceOf(ProblemNotFoundException.class);
         }
     }
