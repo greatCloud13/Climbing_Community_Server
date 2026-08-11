@@ -5,9 +5,9 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ClearRecordCreateDTO {
+public class DropPointStat {
 
-    private Long problemId;
+    private Integer dropPoint;
 
-    private String videoUrl;
+    private Long count;
 }

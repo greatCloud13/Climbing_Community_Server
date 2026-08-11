@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ProblemDTO {
+public class ProblemDetailDTO {
 
     private Long id;
 
@@ -18,20 +18,24 @@ public class ProblemDTO {
 
     private String gymLevel;
 
-    private Integer clearUserCount;
-
-    private String description;
-
-    private Float evaluation;
-
     private Long levelId;
 
     private String colorCode;
 
     private Integer holdCount;
 
-    public static ProblemDTO from(Problem problem){
-        return ProblemDTO.builder()
+    private String description;
+
+    private Float evaluation;
+
+    private Long myTryCount;
+
+    private Long clearCount;
+
+    private Integer myBestDropPoint;
+
+    public static ProblemDetailDTO from(Problem problem, long myTryCount, long clearCount, Integer myBestDropPoint){
+        return ProblemDetailDTO.builder()
                 .id(problem.getId())
                 .settingId(problem.getSetting().getId())
                 .title(problem.getTitle())
@@ -39,10 +43,12 @@ public class ProblemDTO {
                 .levelId(problem.getGymLevel().getId())
                 .gymLevel(problem.getGymLevel().getLevelName())
                 .colorCode(problem.getGymLevel().getColorCode())
-                .clearUserCount(problem.getClearUserCount())
+                .holdCount(problem.getHoldCount())
                 .description(problem.getDescription())
                 .evaluation(problem.getEvaluation())
-                .holdCount(problem.getHoldCount())
+                .myTryCount(myTryCount)
+                .clearCount(clearCount)
+                .myBestDropPoint(myBestDropPoint)
                 .build();
     }
 }

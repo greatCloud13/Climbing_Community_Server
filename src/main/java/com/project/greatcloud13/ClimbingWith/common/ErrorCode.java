@@ -43,6 +43,10 @@ public enum ErrorCode {
     PROBLEM_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "PR001", "리뷰를 찾을 수 없습니다."),
     ACCESS_DENIED_REVIEW(HttpStatus.FORBIDDEN, "PR002", "리뷰에 대한 권한이 없습니다."),
 
+//  ====================================PROBLEM TRY LOG ERROR CODE=================================
+    PROBLEM_TRY_LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "PTL001", "시도 기록을 찾을 수 없습니다."),
+    ACCESS_DENIED_PROBLEM_TRY_LOG(HttpStatus.FORBIDDEN, "PTL002", "시도 기록에 대한 권한이 없습니다."),
+
 //  ====================================POST ERROR CODE=================================
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "PO001", "게시글을 찾을 수 없습니다."),
     ACCESS_DENIED_POST(HttpStatus.FORBIDDEN, "PO002", "게시글에 대한 권한이 없습니다."),

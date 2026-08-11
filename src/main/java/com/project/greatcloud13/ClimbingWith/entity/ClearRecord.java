@@ -39,7 +39,11 @@ public class ClearRecord {
 
     private String videoUrl;
 
+    private LocalDate startDate;
+
     private LocalDate clearDate;
+
+    private boolean isClear;
 
     private boolean isActive;
 
@@ -48,6 +52,14 @@ public class ClearRecord {
     }
     public void updateVideoUrl(String url){
         this.videoUrl = url;
+    }
+
+    /**
+     * 트라이 완료(클리어) 처리. 클리어 API 요청 시 호출되어 isClear를 true로, clearDate를 등록합니다.
+     */
+    public void markClear(LocalDate clearDate){
+        this.isClear = true;
+        this.clearDate = clearDate;
     }
 
     /**
@@ -62,13 +74,14 @@ public class ClearRecord {
     }
 
     @Builder
-    public ClearRecord(User user, Gym gym, Setting setting, Problem problem, String videoUrl, LocalDate clearDate){
+    public ClearRecord(User user, Gym gym, Setting setting, Problem problem, String videoUrl){
         this.user = user;
         this.gym = gym;
         this.setting = setting;
         this.problem = problem;
         this.videoUrl = videoUrl;
-        this.clearDate = clearDate;
+        this.startDate = LocalDate.now();
+        this.isClear = false;
         this.isActive = true;
     }
 
