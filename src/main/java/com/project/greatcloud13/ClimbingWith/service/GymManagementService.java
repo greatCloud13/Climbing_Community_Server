@@ -3,6 +3,7 @@ package com.project.greatcloud13.ClimbingWith.service;
 import com.project.greatcloud13.ClimbingWith.dto.GymCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDetailDTO;
+import com.project.greatcloud13.ClimbingWith.dto.GymSearchRequest;
 import com.project.greatcloud13.ClimbingWith.dto.GymUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.SectorDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
@@ -73,6 +74,11 @@ public class GymManagementService {
     public Page<GymDTO> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return gymRepository.findAll(pageable).map(GymDTO::from);
+    }
+
+    public Page<GymDTO> search(GymSearchRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+        return gymRepository.search(request, pageable).map(GymDTO::from);
     }
 
     @Transactional

@@ -3,6 +3,7 @@ package com.project.greatcloud13.ClimbingWith.service;
 import com.project.greatcloud13.ClimbingWith.dto.GymCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymDetailDTO;
+import com.project.greatcloud13.ClimbingWith.dto.GymSearchRequest;
 import com.project.greatcloud13.ClimbingWith.dto.GymUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Role;
@@ -142,6 +143,28 @@ public class GymManagementServiceTest {
 
             // [Then]
             assertThat(result.getTotalElements()).isEqualTo(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("search() 메서드 테스트")
+    class SearchTest {
+
+        @Test
+        @DisplayName("키워드로 암장 검색 성공")
+        void search_success() {
+            // [Given]
+            GymSearchRequest request = new GymSearchRequest();
+            request.setKeyword("테스트");
+            Page<Gym> mockPage = new PageImpl<>(List.of(mockGym), PageRequest.of(0, 10), 1);
+            given(gymRepository.search(eq(request), any(org.springframework.data.domain.Pageable.class))).willReturn(mockPage);
+
+            // [When]
+            Page<GymDTO> result = gymManagementService.search(request);
+
+            // [Then]
+            assertThat(result.getTotalElements()).isEqualTo(1);
+            assertThat(result.getContent().get(0).getGymName()).isEqualTo("테스트 암장");
         }
     }
 
