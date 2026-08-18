@@ -32,6 +32,10 @@ public class Problem {
     @JoinColumn(name = "gym_level")
     private GymLevel gymLevel;
 
+    private String gymLevelName;
+
+    private String gymLevelColorCode;
+
     private Integer clearUserCount;
 
     private String description;
@@ -71,6 +75,16 @@ public class Problem {
 
     public void updateEvaluation(Float evaluation){
         this.evaluation = evaluation;
+    }
+
+    /**
+     * 암장 레벨이 삭제될 때 이 문제의 레벨 참조를 끊습니다.
+     * 참조 무결성 때문에 gymLevel FK는 끊어지므로, 표시용으로 레벨명/색상을 스냅샷에 남겨둡니다.
+     */
+    public void detachGymLevel(){
+        this.gymLevelName = gymLevel.getLevelName();
+        this.gymLevelColorCode = gymLevel.getColorCode();
+        this.gymLevel = null;
     }
 
 }

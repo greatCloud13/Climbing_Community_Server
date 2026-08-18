@@ -35,14 +35,16 @@ public class ProblemDetailDTO {
     private Integer myBestDropPoint;
 
     public static ProblemDetailDTO from(Problem problem, long myTryCount, long clearCount, Integer myBestDropPoint){
+        boolean gymLevelDeleted = problem.getGymLevel() == null;
+
         return ProblemDetailDTO.builder()
                 .id(problem.getId())
                 .settingId(problem.getSetting().getId())
                 .title(problem.getTitle())
                 .problemType(problem.getProblemType().toString())
-                .levelId(problem.getGymLevel().getId())
-                .gymLevel(problem.getGymLevel().getLevelName())
-                .colorCode(problem.getGymLevel().getColorCode())
+                .levelId(gymLevelDeleted ? null : problem.getGymLevel().getId())
+                .gymLevel(gymLevelDeleted ? problem.getGymLevelName() : problem.getGymLevel().getLevelName())
+                .colorCode(gymLevelDeleted ? problem.getGymLevelColorCode() : problem.getGymLevel().getColorCode())
                 .holdCount(problem.getHoldCount())
                 .description(problem.getDescription())
                 .evaluation(problem.getEvaluation())
