@@ -135,6 +135,21 @@ public class ClearRecordService {
                 .map(ClearRecordSummaryDTO::from);
     }
 
+    // user+problem 기준 진행 중(isClear=false, isActive=true)인 트라이 기록을 조회합니다.
+    public ClearRecordResponseDTO getInProgressClearRecord(Long userId, Long problemId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(ProblemNotFoundException::new);
+
+        ClearRecord clearRecord = clearRecordRepository
+                .findFirstByUserAndProblemAndIsClearFalseAndIsActiveTrueOrderByStartDateDesc(user, problem)
+                .orElseThrow(ClearRecordNotFoundException::new);
+
+        return ClearRecordResponseDTO.from(clearRecord);
+    }
+
     @Transactional
     public ClearRecordResponseDTO updateClearRecord(Long userId, Long clearRecordId, ClearRecordUpdateDTO clearRecordUpdateDTO) {
         User user = userRepository.findById(userId)
