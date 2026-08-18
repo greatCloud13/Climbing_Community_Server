@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClearRecordRepository extends JpaRepository<ClearRecord, Long> {
@@ -20,6 +21,8 @@ public interface ClearRecordRepository extends JpaRepository<ClearRecord, Long> 
     Page<ClearRecord> findAllByUserAndGymAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(User user, Gym gym, Pageable pageable);
 
     Page<ClearRecord> findAllByUserAndSettingAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(User user, Setting setting, Pageable pageable);
+
+    Optional<ClearRecord> findFirstByUserAndProblemAndIsClearFalseAndIsActiveTrueOrderByStartDateDesc(User user, Problem problem);
 
     List<ClearRecord> findAllByProblem(Problem problem);
 

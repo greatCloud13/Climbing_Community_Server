@@ -108,6 +108,18 @@ public class ClearRecordController {
     }
 
     @Operation(
+            summary = "사용자 ID와 문제 ID에 해당하는 진행 중인 트라이 기록 조회",
+            description = "isClear=false 상태인 진행 중인 트라이 기록을 조회합니다. 진행 중인 기록이 여러 건이면 가장 최근에 시작된 기록을 반환합니다."
+    )
+    @GetMapping("/user/{userId}/problem/{problemId}/inProgress")
+    public ResponseEntity<ClearRecordResponseDTO> getInProgressClearRecord(
+            @PathVariable Long userId, @PathVariable Long problemId){
+        ClearRecordResponseDTO result = clearRecordService.getInProgressClearRecord(userId, problemId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(
             summary = "완등 기록 업데이트",
             description = "기존의 완등기록을 갱신합니다."
     )
