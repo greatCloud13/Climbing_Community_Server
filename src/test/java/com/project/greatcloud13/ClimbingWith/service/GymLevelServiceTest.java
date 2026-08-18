@@ -5,10 +5,12 @@ import com.project.greatcloud13.ClimbingWith.dto.GymLevelDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymLevelUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
+import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymLevelNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymLevelRepository;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
+import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,6 +45,7 @@ public class GymLevelServiceTest {
 
     @Mock private GymLevelRepository gymLevelRepository;
     @Mock private GymRepository gymRepository;
+    @Mock private ProblemRepository problemRepository;
 
 //   ========================= Mock Objects =========================
     private Gym mockGym;
@@ -198,29 +201,53 @@ public class GymLevelServiceTest {
     class DeleteGymLevelTest {
 
         @Test
-        @DisplayName("레벨 삭제 성공")
+        @DisplayName("레벨 삭제 성공 - 참조하는 문제가 없으면 바로 삭제")
         void deleteGymLevel_success() {
             // [Given]
-            given(gymLevelRepository.existsById(levelId)).willReturn(true);
+            given(gymLevelRepository.findById(levelId)).willReturn(Optional.of(mockGymLevel));
+            given(problemRepository.findAllByGymLevel(mockGymLevel)).willReturn(List.of());
 
             // [When]
             gymLevelService.deleteGymLevel(levelId);
 
             // [Then]
-            verify(gymLevelRepository, times(1)).deleteById(levelId);
+            verify(gymLevelRepository, times(1)).delete(mockGymLevel);
+        }
+
+        @Test
+        @DisplayName("레벨 삭제 성공 - 참조하는 문제는 레벨 스냅샷을 남기고 FK가 끊긴다")
+        void deleteGymLevel_detachesReferencingProblems() {
+            // [Given]
+            Problem problem = Problem.builder()
+                    .gym(mockGym)
+                    .title("테스트 문제")
+                    .gymLevel(mockGymLevel)
+                    .build();
+
+            given(gymLevelRepository.findById(levelId)).willReturn(Optional.of(mockGymLevel));
+            given(problemRepository.findAllByGymLevel(mockGymLevel)).willReturn(List.of(problem));
+
+            // [When]
+            gymLevelService.deleteGymLevel(levelId);
+
+            // [Then]
+            assertThat(problem.getGymLevel()).isNull();
+            assertThat(problem.getGymLevelName()).isEqualTo("초급");
+            assertThat(problem.getGymLevelColorCode()).isEqualTo("#FF0000");
+            verify(gymLevelRepository, times(1)).delete(mockGymLevel);
         }
 
         @Test
         @DisplayName("존재하지 않는 id → GymLevelNotFoundException")
         void deleteGymLevel_notFound() {
             // [Given]
-            given(gymLevelRepository.existsById(999L)).willReturn(false);
+            given(gymLevelRepository.findById(999L)).willReturn(Optional.empty());
 
             // [When] & [Then]
             assertThatThrownBy(() -> gymLevelService.deleteGymLevel(999L))
                     .isInstanceOf(GymLevelNotFoundException.class);
 
-            verify(gymLevelRepository, never()).deleteById(any());
+            verify(gymLevelRepository, never()).delete(any());
         }
     }
 }

@@ -31,14 +31,16 @@ public class ProblemDTO {
     private Integer holdCount;
 
     public static ProblemDTO from(Problem problem){
+        boolean gymLevelDeleted = problem.getGymLevel() == null;
+
         return ProblemDTO.builder()
                 .id(problem.getId())
                 .settingId(problem.getSetting().getId())
                 .title(problem.getTitle())
                 .problemType(problem.getProblemType().toString())
-                .levelId(problem.getGymLevel().getId())
-                .gymLevel(problem.getGymLevel().getLevelName())
-                .colorCode(problem.getGymLevel().getColorCode())
+                .levelId(gymLevelDeleted ? null : problem.getGymLevel().getId())
+                .gymLevel(gymLevelDeleted ? problem.getGymLevelName() : problem.getGymLevel().getLevelName())
+                .colorCode(gymLevelDeleted ? problem.getGymLevelColorCode() : problem.getGymLevel().getColorCode())
                 .clearUserCount(problem.getClearUserCount())
                 .description(problem.getDescription())
                 .evaluation(problem.getEvaluation())
