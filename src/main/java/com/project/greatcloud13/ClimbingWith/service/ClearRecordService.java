@@ -31,6 +31,7 @@ public class ClearRecordService {
     private final WallSettingRepository settingRepository;
     private final GymRepository gymRepository;
     private final ClearRecordRepositoryCustom clearRecordRepositoryCustom;
+    private final ProblemTryLogRepository problemTryLogRepository;
 
     // 트라이 시작: isClear=false, startDate=등록일, clearDate=null 상태로 등록됩니다.
     @Transactional
@@ -76,14 +77,17 @@ public class ClearRecordService {
         return ClearRecordResponseDTO.from(clearRecord);
     }
 
-    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserId(Long userId, int page, int size) {
+    public Page<ClearRecordUserDetailDTO> getClearRecordSummaryByUserId(Long userId, int page, int size) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Pageable pageable = PageRequest.of(page, size);
 
         return clearRecordRepository.findAllByUserAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(user, pageable)
-                .map(ClearRecordSummaryDTO::from);
+                .map(clearRecord -> ClearRecordUserDetailDTO.from(
+                        clearRecord,
+                        problemTryLogRepository.countByUserAndProblem(user, clearRecord.getProblem())
+                ));
     }
 
     public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserIdAndGym(Long userId, Long gymId, int page, int size) {

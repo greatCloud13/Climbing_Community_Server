@@ -52,10 +52,10 @@ public class ClearRecordController {
             description = "최신 일자의 완등 기록부터 정렬됩니다 Pageable 파라미터는 페이지번호와 페이지 사이즈만 동작합니다"
     )
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<ClearRecordSummaryDTO>> getAllClearRecordSummaryByUserId(
+    public ResponseEntity<Page<ClearRecordUserDetailDTO>> getAllClearRecordSummaryByUserId(
             @PathVariable Long userId,
             Pageable pageable){
-        Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, pageable.getPageNumber(), pageable.getPageSize());
+        Page<ClearRecordUserDetailDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, pageable.getPageNumber(), pageable.getPageSize());
 
         return ResponseEntity.ok(result);
     }
