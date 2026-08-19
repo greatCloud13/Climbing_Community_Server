@@ -64,7 +64,7 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(UserNotFoundException::new);
 
-        return new LoginResponse(token, username, user.getRole().toString(),
+        return new LoginResponse(user.getId(), token, username, user.getRole().toString(),
                 user.getRole() == Role.GYM_MANAGER ? user.getGym().getId() : null,
                 user.getNickname());
     }
