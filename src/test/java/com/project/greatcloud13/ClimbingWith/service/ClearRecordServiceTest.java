@@ -4,6 +4,7 @@ import com.project.greatcloud13.ClimbingWith.dto.ClearRecordCreateDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ClearRecordResponseDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ClearRecordSummaryDTO;
 import com.project.greatcloud13.ClimbingWith.dto.ClearRecordUpdateDTO;
+import com.project.greatcloud13.ClimbingWith.dto.ClearRecordUserDetailDTO;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordAccessDeniedException;
 import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordNotFoundException;
@@ -61,6 +62,7 @@ public class ClearRecordServiceTest {
     @Mock private WallSettingRepository settingRepository;
     @Mock private SectorRepository sectorRepository;
     @Mock private ClearRecordRepositoryCustom clearRecordRepositoryCustom;
+    @Mock private ProblemTryLogRepository problemTryLogRepository;
 
 //   ========================= Mock Objects =========================
     private Gym mockGym1;
@@ -118,7 +120,7 @@ public class ClearRecordServiceTest {
         mockSetting2 = Setting.builder().gym(mockGym2).build();
         ReflectionTestUtils.setField(mockSetting2, "id", settingId2);
 
-        mockGymLevel1 = GymLevel.builder().gym(mockGym1).levelName("테스트 난이도 1").build();
+        mockGymLevel1 = GymLevel.builder().gym(mockGym1).levelName("테스트 난이도 1").colorCode("#00FF00").build();
 
         mockProblem1 = Problem.builder().title("테스트 문제1").gym(mockGym1).setting(mockSetting1).gymLevel(mockGymLevel1).build();
         ReflectionTestUtils.setField(mockProblem1, "id", problemId);
@@ -334,13 +336,20 @@ public class ClearRecordServiceTest {
 
             given(userRepository.findById(userId)).willReturn(Optional.of(mockUser1));
             given(clearRecordRepository.findAllByUserAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(mockUser1, pageable)).willReturn(mockPage);
+            given(problemTryLogRepository.countByUserAndProblem(mockUser1, mockProblem1)).willReturn(3L);
 
             // [When]
-            Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, page, size);
+            Page<ClearRecordUserDetailDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, page, size);
 
             // [Then]
             assertThat(result.getSize()).isEqualTo(size);
             assertThat(result.getContent().getFirst().getUsername()).isEqualTo(mockUser1.getUsername());
+            assertThat(result.getContent().getFirst().getProblemId()).isEqualTo(problemId);
+            assertThat(result.getContent().getFirst().getLevelColorCode()).isEqualTo(mockGymLevel1.getColorCode());
+            assertThat(result.getContent().getFirst().getGymId()).isEqualTo(gymId);
+            assertThat(result.getContent().getFirst().getSectorId()).isEqualTo(sectorId);
+            assertThat(result.getContent().getFirst().getSettingId()).isEqualTo(settingId);
+            assertThat(result.getContent().getFirst().getTryCount()).isEqualTo(3L);
             verify(clearRecordRepository, times(1)).findAllByUserAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(mockUser1, pageable);
         }
 
