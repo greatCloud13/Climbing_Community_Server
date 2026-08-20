@@ -98,4 +98,32 @@ public class WallSettingController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(
+            summary = "세팅 비활성화",
+            description = "세팅 ID에 해당하는 세팅을 비활성화합니다."
+    )
+    @PatchMapping("/{id}/disable")
+    @ApiResponse(responseCode = "200", description = "세팅 비활성화 성공")
+    @ApiResponse(responseCode = "403", description = "요청한 사용자의 권한이 없음")
+    @ApiResponse(responseCode = "404", description = "유저 혹은 세팅을 찾을 수 없음")
+    public ResponseEntity<ApiResult<SettingDTO>> disableSetting(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails){
+        SettingDTO result = wallSettingService.disableSetting(id, userDetails.getUserId());
+
+        return ResponseEntity.ok(ApiResult.ok(result));
+    }
+
+    @Operation(
+            summary = "세팅 활성화",
+            description = "세팅 ID에 해당하는 세팅을 활성화합니다."
+    )
+    @PatchMapping("/{id}/active")
+    @ApiResponse(responseCode = "200", description = "세팅 활성화 성공")
+    @ApiResponse(responseCode = "403", description = "요청한 사용자의 권한이 없음")
+    @ApiResponse(responseCode = "404", description = "유저 혹은 세팅을 찾을 수 없음")
+    public ResponseEntity<ApiResult<SettingDTO>> activeSetting(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails){
+        SettingDTO result = wallSettingService.activeSetting(id, userDetails.getUserId());
+
+        return ResponseEntity.ok(ApiResult.ok(result));
+    }
 }

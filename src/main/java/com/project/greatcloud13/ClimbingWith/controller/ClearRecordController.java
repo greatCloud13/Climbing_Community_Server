@@ -7,10 +7,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/clearRecord")
@@ -20,8 +23,8 @@ public class ClearRecordController {
     private final ClearRecordService clearRecordService;
 
     @Operation(
-            summary = "완등 기록 작성",
-            description = "새로운 완등기록을 작성합니다."
+            summary = "문제 트라이 시작",
+            description = "새로운 트라이 기록을 작성합니다. isClear=false, startDate=오늘, clearDate=null 상태로 등록됩니다."
     )
     @PostMapping
     public ResponseEntity<ClearRecordResponseDTO> createClearRecord(@RequestBody ClearRecordCreateDTO request, @AuthenticationPrincipal CustomUserDetails userDetails){
@@ -31,14 +34,28 @@ public class ClearRecordController {
     }
 
     @Operation(
+            summary = "문제 클리어 처리",
+            description = "진행중이던 트라이 기록을 클리어 상태로 변경합니다. isClear=true로 변경되며 clearDate가 등록됩니다. clearDate 미입력시 오늘 날짜로 등록됩니다."
+    )
+    @PatchMapping("/{id}/clear")
+    public ResponseEntity<ClearRecordResponseDTO> clearProblem(
+            @PathVariable Long id,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate clearDate,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        ClearRecordResponseDTO result = clearRecordService.clearProblem(userDetails.getUserId(), id, clearDate);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(
             summary = "사용자 ID 기준 완등 기록 조회",
             description = "최신 일자의 완등 기록부터 정렬됩니다 Pageable 파라미터는 페이지번호와 페이지 사이즈만 동작합니다"
     )
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<ClearRecordSummaryDTO>> getAllClearRecordSummaryByUserId(
+    public ResponseEntity<Page<ClearRecordUserDetailDTO>> getAllClearRecordSummaryByUserId(
             @PathVariable Long userId,
             Pageable pageable){
-        Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, pageable.getPageNumber(), pageable.getPageSize());
+        Page<ClearRecordUserDetailDTO> result = clearRecordService.getClearRecordSummaryByUserId(userId, pageable.getPageNumber(), pageable.getPageSize());
 
         return ResponseEntity.ok(result);
     }
@@ -86,6 +103,18 @@ public class ClearRecordController {
     public ResponseEntity<Page<ClearRecordSummaryDTO>> getClearRecordSummaryBySectorExistVideoUrl(
             @PathVariable Long sectorId, Pageable pageable){
         Page<ClearRecordSummaryDTO> result = clearRecordService.getClearRecordSummaryBySectorExistVideoUrl(sectorId, pageable.getPageNumber(), pageable.getPageSize());
+
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(
+            summary = "사용자 ID와 문제 ID에 해당하는 진행 중인 트라이 기록 조회",
+            description = "isClear=false 상태인 진행 중인 트라이 기록을 조회합니다. 진행 중인 기록이 여러 건이면 가장 최근에 시작된 기록을 반환합니다."
+    )
+    @GetMapping("/user/{userId}/problem/{problemId}/inProgress")
+    public ResponseEntity<ClearRecordResponseDTO> getInProgressClearRecord(
+            @PathVariable Long userId, @PathVariable Long problemId){
+        ClearRecordResponseDTO result = clearRecordService.getInProgressClearRecord(userId, problemId);
 
         return ResponseEntity.ok(result);
     }

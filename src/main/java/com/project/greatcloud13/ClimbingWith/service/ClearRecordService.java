@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.service;
 
 import com.project.greatcloud13.ClimbingWith.dto.*;
+import java.time.LocalDate;
 import java.util.Objects;
 import com.project.greatcloud13.ClimbingWith.entity.*;
 import com.project.greatcloud13.ClimbingWith.exception.clearrecord.ClearRecordAccessDeniedException;
@@ -30,7 +31,9 @@ public class ClearRecordService {
     private final WallSettingRepository settingRepository;
     private final GymRepository gymRepository;
     private final ClearRecordRepositoryCustom clearRecordRepositoryCustom;
+    private final ProblemTryLogRepository problemTryLogRepository;
 
+    // 트라이 시작: isClear=false, startDate=등록일, clearDate=null 상태로 등록됩니다.
     @Transactional
     public ClearRecordResponseDTO createClearRecord(Long userId, ClearRecordCreateDTO clearRecordCreateDTO) {
         User user = userRepository.findById(userId)
@@ -45,23 +48,46 @@ public class ClearRecordService {
                 .setting(problem.getSetting())
                 .problem(problem)
                 .videoUrl(clearRecordCreateDTO.getVideoUrl())
-                .clearDate(clearRecordCreateDTO.getClearDate())
                 .build();
 
-        problem.addClearUserCount();
         clearRecordRepository.save(clearRecord);
 
         return ClearRecordResponseDTO.from(clearRecord);
     }
 
-    public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserId(Long userId, int page, int size) {
+    // 클리어 처리: 진행중이던 트라이 기록을 isClear=true, clearDate 등록 상태로 갱신합니다.
+    @Transactional
+    public ClearRecordResponseDTO clearProblem(Long userId, Long clearRecordId, LocalDate clearDate) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        ClearRecord clearRecord = clearRecordRepository.findById(clearRecordId)
+                .orElseThrow(ClearRecordNotFoundException::new);
+
+        if (user.getRole() != Role.ADMIN && !clearRecord.getUser().equals(user)) {
+            throw new ClearRecordAccessDeniedException();
+        }
+
+        if (!clearRecord.isClear()) {
+            clearRecord.getProblem().addClearUserCount();
+        }
+
+        clearRecord.markClear(clearDate != null ? clearDate : LocalDate.now());
+
+        return ClearRecordResponseDTO.from(clearRecord);
+    }
+
+    public Page<ClearRecordUserDetailDTO> getClearRecordSummaryByUserId(Long userId, int page, int size) {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllByUserOrderByClearDateDesc(user, pageable)
-                .map(ClearRecordSummaryDTO::from);
+        return clearRecordRepository.findAllByUserAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(user, pageable)
+                .map(clearRecord -> ClearRecordUserDetailDTO.from(
+                        clearRecord,
+                        problemTryLogRepository.countByUserAndProblem(user, clearRecord.getProblem())
+                ));
     }
 
     public Page<ClearRecordSummaryDTO> getClearRecordSummaryByUserIdAndGym(Long userId, Long gymId, int page, int size) {
@@ -73,7 +99,7 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllByUserAndGymOrderByClearDateDesc(user, gym, pageable)
+        return clearRecordRepository.findAllByUserAndGymAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(user, gym, pageable)
                 .map(ClearRecordSummaryDTO::from);
     }
 
@@ -86,7 +112,7 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllByUserAndSettingOrderByClearDateDesc(user, setting, pageable)
+        return clearRecordRepository.findAllByUserAndSettingAndIsClearTrueAndIsActiveTrueOrderByClearDateDesc(user, setting, pageable)
                 .map(ClearRecordSummaryDTO::from);
     }
 
@@ -96,7 +122,7 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllByProblemAndVideoUrlIsNotNull(problem, pageable)
+        return clearRecordRepository.findAllByProblemAndVideoUrlIsNotNullAndIsClearTrueAndIsActiveTrue(problem, pageable)
                 .map(ClearRecordSummaryDTO::from);
     }
 
@@ -109,8 +135,23 @@ public class ClearRecordService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return clearRecordRepository.findAllBySettingAndVideoUrlIsNotNull(setting, pageable)
+        return clearRecordRepository.findAllBySettingAndVideoUrlIsNotNullAndIsClearTrueAndIsActiveTrue(setting, pageable)
                 .map(ClearRecordSummaryDTO::from);
+    }
+
+    // user+problem 기준 진행 중(isClear=false, isActive=true)인 트라이 기록을 조회합니다.
+    public ClearRecordResponseDTO getInProgressClearRecord(Long userId, Long problemId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(ProblemNotFoundException::new);
+
+        ClearRecord clearRecord = clearRecordRepository
+                .findFirstByUserAndProblemAndIsClearFalseAndIsActiveTrueOrderByStartDateDesc(user, problem)
+                .orElseThrow(ClearRecordNotFoundException::new);
+
+        return ClearRecordResponseDTO.from(clearRecord);
     }
 
     @Transactional
@@ -161,7 +202,9 @@ public class ClearRecordService {
             throw new ClearRecordAccessDeniedException();
         }
 
-        clearRecord.getProblem().subClearUserCount();
+        if (clearRecord.isClear()) {
+            clearRecord.getProblem().subClearUserCount();
+        }
         clearRecordRepository.delete(clearRecord);
     }
 }

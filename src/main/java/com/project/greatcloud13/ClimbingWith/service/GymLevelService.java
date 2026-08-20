@@ -5,10 +5,12 @@ import com.project.greatcloud13.ClimbingWith.dto.GymLevelDTO;
 import com.project.greatcloud13.ClimbingWith.dto.GymLevelUpdateDTO;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
+import com.project.greatcloud13.ClimbingWith.entity.Problem;
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymLevelNotFoundException;
 import com.project.greatcloud13.ClimbingWith.exception.gym.GymNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.GymLevelRepository;
 import com.project.greatcloud13.ClimbingWith.repository.GymRepository;
+import com.project.greatcloud13.ClimbingWith.repository.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ public class GymLevelService {
 
     private final GymLevelRepository gymLevelRepository;
     private final GymRepository gymRepository;
+    private final ProblemRepository problemRepository;
 
     @Transactional
     public GymLevelDTO createGymLevel(GymLevelCreateDTO request) {
@@ -34,6 +37,7 @@ public class GymLevelService {
                 .levelName(request.getLevelName())
                 .colorCode(request.getColorCode())
                 .description(request.getDescription())
+                .climbType(request.getClimbType())
                 .build();
 
         return GymLevelDTO.from(gymLevelRepository.save(gymLevel));
@@ -56,16 +60,18 @@ public class GymLevelService {
         GymLevel gymLevel = gymLevelRepository.findById(id)
                 .orElseThrow(GymLevelNotFoundException::new);
 
-        gymLevel.updateGymLevel(request.getLevelName(), request.getDisplayOrder(), request.getColorCode(), request.getDescription());
+        gymLevel.updateGymLevel(request.getLevelName(), request.getDisplayOrder(), request.getColorCode(), request.getDescription(), request.getClimbType());
 
         return GymLevelDTO.from(gymLevel);
     }
 
     @Transactional
     public void deleteGymLevel(Long id) {
-        if (!gymLevelRepository.existsById(id)) {
-            throw new GymLevelNotFoundException();
-        }
-        gymLevelRepository.deleteById(id);
+        GymLevel gymLevel = gymLevelRepository.findById(id)
+                .orElseThrow(GymLevelNotFoundException::new);
+
+        problemRepository.findAllByGymLevel(gymLevel).forEach(Problem::detachGymLevel);
+
+        gymLevelRepository.delete(gymLevel);
     }
 }

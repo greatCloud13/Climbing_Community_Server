@@ -23,9 +23,9 @@ public class GymBookmarkController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBookmark(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        gymBookmarkService.deleteBookmark(id);
+    @DeleteMapping("/{gymId}")
+    public ResponseEntity<Void> deleteBookmark(@PathVariable Long gymId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        gymBookmarkService.deleteBookmark(gymId);
 
         return ResponseEntity.noContent().build();
     }

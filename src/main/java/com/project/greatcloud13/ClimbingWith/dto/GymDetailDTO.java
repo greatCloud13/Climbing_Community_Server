@@ -1,7 +1,6 @@
 package com.project.greatcloud13.ClimbingWith.dto;
 
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
-import com.project.greatcloud13.ClimbingWith.entity.Sector;
 import lombok.Builder;
 import lombok.Data;
 
@@ -31,9 +30,13 @@ public class GymDetailDTO {
 
     private String memo;
 
-    private List<Sector> sectorList;
+    private List<String> hashtags;
 
-    public static GymDetailDTO from(Gym gym, List<Sector> sectorList){
+    private List<String> introImages;
+
+    private List<SectorDTO> sectorList;
+
+    public static GymDetailDTO from(Gym gym, List<SectorDTO> sectorList){
 
         return GymDetailDTO.builder()
                 .id(gym.getId())
@@ -45,6 +48,8 @@ public class GymDetailDTO {
                 .weekendOpenAt(gym.getWeekend_open_at()==null ? null : gym.getWeekend_open_at().toString())
                 .weekendCloseAt(gym.getWeekend_close_at()==null ? null : gym.getWeekend_close_at().toString())
                 .memo(gym.getMemo()==null ? null : gym.getMemo())
+                .hashtags(gym.getHashtags())
+                .introImages(gym.getIntroImages())
                 .sectorList(sectorList)
                 .isActive(gym.isActive())
                 .build();

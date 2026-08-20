@@ -36,5 +36,4 @@ public class GymBookmarkService {
     public void deleteBookmark(Long id){
         gymBookmarkRepository.deleteById(id);
     }
-
 }

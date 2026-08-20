@@ -1,6 +1,7 @@
 package com.project.greatcloud13.ClimbingWith.dto;
 
 import com.project.greatcloud13.ClimbingWith.entity.GymLevel;
+import com.project.greatcloud13.ClimbingWith.entity.ProblemType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public class GymLevelDTO {
     private Integer displayOrder;
     private String colorCode;
     private String description;
+    private ProblemType climbType;
 
     public static GymLevelDTO from(GymLevel gymLevel) {
         return GymLevelDTO.builder()
@@ -25,6 +27,7 @@ public class GymLevelDTO {
                 .displayOrder(gymLevel.getDisplayOrder())
                 .colorCode(gymLevel.getColorCode())
                 .description(gymLevel.getDescription())
+                .climbType(gymLevel.getClimbType())
                 .build();
     }
 }

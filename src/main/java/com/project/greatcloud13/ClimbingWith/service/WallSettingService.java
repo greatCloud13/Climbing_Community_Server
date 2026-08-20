@@ -25,6 +25,8 @@ public class WallSettingService {
     private final WallSettingRepository settingRepository;
     private final ProblemRepository problemRepository;
     private final UserRepository userRepository;
+    private final ClearRecordRepository clearRecordRepository;
+    private final ProblemReviewRepository problemReviewRepository;
 
     /**
      * 새로운 세팅을 등록합니다.
@@ -125,6 +127,7 @@ public class WallSettingService {
         Setting setting = settingRepository.findById(settingId)
                 .orElseThrow(SettingNotFoundException::new);
 
+
         if (!user.gymValidate(setting.getGym())) {
             throw new GymAccessDeniedException();
         }
@@ -136,7 +139,11 @@ public class WallSettingService {
                 .findFirst()
                 .ifPresent(Setting::inActive);
 
+        Setting activeSetting = settingRepository.findTopBySectorAndIsActiveOrderBySettingDateDesc(setting.getSector(), true)
+                        .orElseThrow(SettingNotFoundException::new);
+
         setting.update(request.getSettingDate(), request.getStartDate(), request.getEndDate());
+        setting.getSector().setSettingDate(activeSetting.getSettingDate());
 
         return SettingDTO.from(setting);
     }
@@ -166,7 +173,77 @@ public class WallSettingService {
         }
 
         Gym gym = setting.getGym();
+
+        List<Problem> problems = problemRepository.findAllBySetting(setting);
+        clearRecordRepository.findAllBySetting(setting).forEach(ClearRecord::deactivate);
+        problemReviewRepository.deleteAllByProblemIn(problems);
+        problemRepository.deleteAll(problems);
+
         settingRepository.deleteById(id);
         settingRepository.findFirstByGymOrderByIdDesc(gym).ifPresent(Setting::active);
+    }
+
+    /**
+     * 요청한 ID의 세팅을 비활성화합니다.
+     * [Business Rule]
+     * 1. 비활성화를 시도하는 유저가 존재해야합니다.
+     * 2. 비활성화하는 대상 세팅이 존재해야합니다.
+     * 3. 비활성화를 시도하는 유저는 해당 세팅이 속한 암장에 대한 관리 권한이 있어야 합니다.
+     *
+     * @param id 비활성화할 세팅 ID
+     * @param userId 요청을 시도하는 사용자 ID
+     * @return 비활성화된 세팅 DTO
+     * @throws UserNotFoundException 유저가 없는 경우
+     * @throws SettingNotFoundException 세팅이 없는 경우
+     * @throws GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
+     */
+    @Transactional
+    public SettingDTO disableSetting(Long id, Long userId){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        Setting setting = settingRepository.findById(id)
+                .orElseThrow(SettingNotFoundException::new);
+
+        if (!user.gymValidate(setting.getGym())) {
+            throw new GymAccessDeniedException();
+        }
+
+        setting.inActive();
+
+        return SettingDTO.from(setting);
+    }
+
+    /**
+     * 요청한 ID의 세팅을 활성화합니다.
+     * [Business Rule]
+     * 1. 활성화를 시도하는 유저가 존재해야합니다.
+     * 2. 활성화하는 대상 세팅이 존재해야합니다.
+     * 3. 활성화를 시도하는 유저는 해당 세팅이 속한 암장에 대한 관리 권한이 있어야 합니다.
+     *
+     * @param id 활성화할 세팅 ID
+     * @param userId 요청을 시도하는 사용자 ID
+     * @return 활성화된 세팅 DTO
+     * @throws UserNotFoundException 유저가 없는 경우
+     * @throws SettingNotFoundException 세팅이 없는 경우
+     * @throws GymAccessDeniedException 유저가 요청한 암장에 대한 권한이 없는 경우
+     */
+    @Transactional
+    public SettingDTO activeSetting(Long id, Long userId){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        Setting setting = settingRepository.findById(id)
+                .orElseThrow(SettingNotFoundException::new);
+
+        if (!user.gymValidate(setting.getGym())) {
+            throw new GymAccessDeniedException();
+        }
+
+        setting.active();
+
+        return SettingDTO.from(setting);
     }
 }

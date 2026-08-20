@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -33,4 +34,8 @@ public class GymCreateDTO {
     private LocalTime weekendCloseAt;
 
     private String memo;
+
+    private List<String> hashtags;
+
+    private List<String> introImages;
 }

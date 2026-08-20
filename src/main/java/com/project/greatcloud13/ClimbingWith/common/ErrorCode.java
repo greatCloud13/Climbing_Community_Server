@@ -11,6 +11,7 @@ public enum ErrorCode {
 //  ====================================GYM ERROR CODE=================================
     GYM_NOT_FOUND(HttpStatus.NOT_FOUND, "G001", "암장을 찾을 수 없습니다."),
     ACCESS_DENIED_GYM(HttpStatus.FORBIDDEN, "G002", "암장에 대한 권한이 없습니다."),
+    GYM_IMAGE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "G003", "암장 소개 사진은 최대 10장까지 등록할 수 있습니다."),
 
 //  ====================================SECTOR ERROR CODE=================================
     SECTOR_NOT_FOUND(HttpStatus.NOT_FOUND, "SEC001", "섹터를 찾을 수 없습니다."),
@@ -41,6 +42,10 @@ public enum ErrorCode {
 //  ====================================PROBLEM REVIEW ERROR CODE=================================
     PROBLEM_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "PR001", "리뷰를 찾을 수 없습니다."),
     ACCESS_DENIED_REVIEW(HttpStatus.FORBIDDEN, "PR002", "리뷰에 대한 권한이 없습니다."),
+
+//  ====================================PROBLEM TRY LOG ERROR CODE=================================
+    PROBLEM_TRY_LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "PTL001", "시도 기록을 찾을 수 없습니다."),
+    ACCESS_DENIED_PROBLEM_TRY_LOG(HttpStatus.FORBIDDEN, "PTL002", "시도 기록에 대한 권한이 없습니다."),
 
 //  ====================================POST ERROR CODE=================================
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "PO001", "게시글을 찾을 수 없습니다."),

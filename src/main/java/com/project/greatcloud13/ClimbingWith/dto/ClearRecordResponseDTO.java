@@ -23,7 +23,11 @@ public class ClearRecordResponseDTO {
 
     private String videoUrl;
 
+    private String startDate;
+
     private String clearDate;
+
+    private boolean isClear;
 
     public static ClearRecordResponseDTO from(ClearRecord clearRecord){
         return ClearRecordResponseDTO
@@ -33,7 +37,9 @@ public class ClearRecordResponseDTO {
                 .settingId(clearRecord.getSetting().getId())
                 .problemId(clearRecord.getProblem().getId())
                 .videoUrl(clearRecord.getVideoUrl())
-                .clearDate(clearRecord.getClearDate().toString())
+                .startDate(clearRecord.getStartDate() != null ? clearRecord.getStartDate().toString() : null)
+                .clearDate(clearRecord.getClearDate() != null ? clearRecord.getClearDate().toString() : null)
+                .isClear(clearRecord.isClear())
                 .build();
     }
 

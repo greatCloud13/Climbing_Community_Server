@@ -18,19 +18,25 @@ public class SectorDetailDTO {
 
     private String sectorName;
 
+    private String description;
+
     private String settingDate;
 
     private String nextSettingDate;
 
+    private long problemCount;
+
     private List<SettingDTO> settingList;
 
-    public static SectorDetailDTO from(Sector sector, List<SettingDTO> settingList){
+    public static SectorDetailDTO from(Sector sector, List<SettingDTO> settingList, long problemCount){
         return SectorDetailDTO.builder()
                 .id(sector.getId())
                 .sectorName(sector.getSectorName())
+                .description(sector.getDescription())
                 .gymName(sector.getGym().getGymName())
                 .settingDate(sector.getSettingDate() != null ? sector.getSettingDate().toString() : null)
                 .nextSettingDate(sector.getNextSettingDate() != null ? sector.getNextSettingDate().toString() : null)
+                .problemCount(problemCount)
                 .settingList(settingList)
                 .build();
 

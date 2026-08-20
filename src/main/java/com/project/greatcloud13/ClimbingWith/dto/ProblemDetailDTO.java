@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ProblemDTO {
+public class ProblemDetailDTO {
 
     private Long id;
 
@@ -18,22 +18,26 @@ public class ProblemDTO {
 
     private String gymLevel;
 
-    private Integer clearUserCount;
-
-    private String description;
-
-    private Float evaluation;
-
     private Long levelId;
 
     private String colorCode;
 
     private Integer holdCount;
 
-    public static ProblemDTO from(Problem problem){
+    private String description;
+
+    private Float evaluation;
+
+    private Long myTryCount;
+
+    private Long clearCount;
+
+    private Integer myBestDropPoint;
+
+    public static ProblemDetailDTO from(Problem problem, long myTryCount, long clearCount, Integer myBestDropPoint){
         boolean gymLevelDeleted = problem.getGymLevel() == null;
 
-        return ProblemDTO.builder()
+        return ProblemDetailDTO.builder()
                 .id(problem.getId())
                 .settingId(problem.getSetting().getId())
                 .title(problem.getTitle())
@@ -41,10 +45,12 @@ public class ProblemDTO {
                 .levelId(gymLevelDeleted ? null : problem.getGymLevel().getId())
                 .gymLevel(gymLevelDeleted ? problem.getGymLevelName() : problem.getGymLevel().getLevelName())
                 .colorCode(gymLevelDeleted ? problem.getGymLevelColorCode() : problem.getGymLevel().getColorCode())
-                .clearUserCount(problem.getClearUserCount())
+                .holdCount(problem.getHoldCount())
                 .description(problem.getDescription())
                 .evaluation(problem.getEvaluation())
-                .holdCount(problem.getHoldCount())
+                .myTryCount(myTryCount)
+                .clearCount(clearCount)
+                .myBestDropPoint(myBestDropPoint)
                 .build();
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
@@ -24,6 +25,10 @@ public class Sector {
     @Column(name = "sector_name")
     private String sectorName;
 
+    @Column(name = "description")
+    private String description;
+
+    @Setter
     @Column(name = "setting_date")
     private LocalDate settingDate;
 
@@ -31,16 +36,19 @@ public class Sector {
     private LocalDate nextSettingDate;
 
     @Builder
-    public Sector(Gym gym, String sectorName, LocalDate settingDate, LocalDate nextSettingDate) {
+    public Sector(Gym gym, String sectorName, String description, LocalDate settingDate, LocalDate nextSettingDate) {
         this.gym = gym;
         this.sectorName = sectorName;
+        this.description = description;
         this.settingDate = settingDate;
         this.nextSettingDate = nextSettingDate;
     }
 
-    public void update(String sectorName, LocalDate settingDate, LocalDate nextSettingDate){
+    public void update(String sectorName, String description, LocalDate settingDate, LocalDate nextSettingDate){
         this.sectorName = sectorName;
+        this.description = description;
         this.settingDate = settingDate;
         this.nextSettingDate = nextSettingDate;
     }
+
 }
