@@ -26,9 +26,12 @@ vector:
     port: 6379
 
 jwt:
-  # TODO: [PRODUCTION] 환경변수로 변경 필요
+  # 테스트 환경 전용 고정값 (환경변수 의존 없이 격리 실행)
   secret: your-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
   expiration: 3600000  # 1시간
+
+cors:
+  allowed-origins: http://localhost:3000
 
 file:
   upload-dir: /home/ubuntu/upload_files/
