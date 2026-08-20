@@ -2,6 +2,7 @@ package com.project.greatcloud13.ClimbingWith.config;
 
 import com.project.greatcloud13.ClimbingWith.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,9 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Value("${cors.allowed-origins}")
+    private String[] allowedOrigins;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -88,11 +92,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 허용할 출처
-        // TODO: [PRODUCTION] 배포 시 실제 프론트엔드 도메인으로 변경 필요함
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:60869" // flutter 포트
-        ));
+        // 허용할 출처 (application.yaml의 cors.allowed-origins / CORS_ALLOWED_ORIGINS 환경변수로 설정)
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
 
         // 허용할 HTTP 메소드
         configuration.setAllowedMethods(Arrays.asList(
