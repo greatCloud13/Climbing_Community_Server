@@ -5,7 +5,6 @@ import com.project.greatcloud13.ClimbingWith.dto.*;
 import com.project.greatcloud13.ClimbingWith.entity.PostType;
 import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import com.project.greatcloud13.ClimbingWith.service.PostService;
-import com.project.greatcloud13.ClimbingWith.service.VectorService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
@@ -24,7 +23,6 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
-    private final VectorService vectorService;
 
     @Operation(
             summary = "신규 게시글 작성",
@@ -97,6 +95,9 @@ public class PostController {
     }
 
 
+    // EC2 배포 환경에 GPU가 없어 임베딩 기반 검색(RAG) 기능을 임시 비활성화.
+    // 재활성화 시 아래 주석을 해제하면 됨 (VectorService 의존성도 함께 복원 필요).
+    /*
     @GetMapping("/search")
     public ResponseEntity<List<PostSummaryDTO>> getPostSearchByRAG(@ModelAttribute PostSearchRequest request){
 
@@ -115,5 +116,6 @@ public class PostController {
 
         return ResponseEntity.ok(result);
     }
+    */
 
 }

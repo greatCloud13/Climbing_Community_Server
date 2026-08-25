@@ -1,5 +1,8 @@
 package com.project.greatcloud13.ClimbingWith.repository.impl;
 
+// EC2 배포 환경에 GPU가 없어 임베딩/검색 기능을 임시 비활성화.
+// 재활성화 시 아래 주석을 해제하면 됨.
+/*
 import com.project.greatcloud13.ClimbingWith.entity.PostType;
 import com.project.greatcloud13.ClimbingWith.repository.VectorRepository;
 import dev.langchain4j.data.embedding.Embedding;
@@ -146,4 +149,5 @@ public class VectorRepositoryImpl implements VectorRepository {
     }
 
 }
+*/
 

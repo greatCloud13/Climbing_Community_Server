@@ -62,13 +62,15 @@ public class PostService {
 
         postRepository.save(post);
 
-//      RabbitMQ 메시지 전달
-        PostMessage message = PostMessage.from(post);
-        rabbitTemplate.convertAndSend(
-                "post.embedding.exchange",
-                "post.embedding.key",
-                message
-        );
+//      EC2 배포 환경에 GPU가 없어 임베딩 기능을 임시 비활성화함에 따라
+//      임베딩 트리거용 RabbitMQ 메시지 발행도 함께 비활성화.
+//      재활성화 시 아래 주석을 해제하면 됨.
+//      PostMessage message = PostMessage.from(post);
+//      rabbitTemplate.convertAndSend(
+//              "post.embedding.exchange",
+//              "post.embedding.key",
+//              message
+//      );
 
         return PostResponseDTO.from(post);
     }
