@@ -25,6 +25,7 @@ public enum ErrorCode {
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "AU001", "이미 사용중인 아이디입니다."),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "AU002", "이미 사용중인 닉네임입니다."),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "AU003", "이미 사용중인 이메일입니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "AU004", "리프레시 토큰이 유효하지 않습니다."),
 
 //  ====================================USER ERROR CODE=================================
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다."),

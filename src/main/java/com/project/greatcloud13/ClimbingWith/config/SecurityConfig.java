@@ -2,6 +2,7 @@ package com.project.greatcloud13.ClimbingWith.config;
 
 import com.project.greatcloud13.ClimbingWith.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,9 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Value("${cors.allowed-origins}")
+    private String[] allowedOrigins;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -60,7 +64,9 @@ public class SecurityConfig {
                 )
                 //URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // 인증 관련 API는 모두 허용
+                        // 로그아웃은 인증된 사용자만 호출 가능 (아래 permitAll 규칙보다 먼저 매칭되어야 함)
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
+                        .requestMatchers("/api/auth/**").permitAll() // 그 외 인증 관련 API는 모두 허용
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll() //Swagger api 허용
                         .requestMatchers("/error", "/error/**").permitAll()
                         // 클라이밍장/섹터/레벨/문제/게시글/리뷰 열람(GET)은 비로그인 사용자도 허용
@@ -88,11 +94,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 허용할 출처
-        // TODO: [PRODUCTION] 배포 시 실제 프론트엔드 도메인으로 변경 필요함
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:60869" // flutter 포트
-        ));
+        // 허용할 출처 (application.yaml의 cors.allowed-origins / CORS_ALLOWED_ORIGINS 환경변수로 설정)
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
 
         // 허용할 HTTP 메소드
         configuration.setAllowedMethods(Arrays.asList(

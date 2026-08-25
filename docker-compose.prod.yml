@@ -68,6 +68,8 @@ services:
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?RABBITMQ_PASSWORD is required, see .env.example}
       VECTOR_REDIS_HOST: vector
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required, see .env.example}
+      # 프론트엔드 웹 도메인이 확정되기 전까지는 비워둘 수 있음 (미설정 시 브라우저 기반 클라이언트만 차단되며, 네이티브 앱 트래픽에는 영향 없음)
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
     networks:
       - climbing-network
     depends_on:

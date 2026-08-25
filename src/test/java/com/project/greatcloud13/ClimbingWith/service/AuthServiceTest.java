@@ -3,13 +3,16 @@ package com.project.greatcloud13.ClimbingWith.service;
 import com.project.greatcloud13.ClimbingWith.dto.LoginRequest;
 import com.project.greatcloud13.ClimbingWith.dto.LoginResponse;
 import com.project.greatcloud13.ClimbingWith.dto.SignUpRequest;
+import com.project.greatcloud13.ClimbingWith.dto.TokenResponse;
 import com.project.greatcloud13.ClimbingWith.entity.Gym;
 import com.project.greatcloud13.ClimbingWith.entity.Role;
 import com.project.greatcloud13.ClimbingWith.entity.User;
 import com.project.greatcloud13.ClimbingWith.exception.auth.DuplicateFieldException;
+import com.project.greatcloud13.ClimbingWith.exception.auth.InvalidRefreshTokenException;
 import com.project.greatcloud13.ClimbingWith.exception.user.UserNotFoundException;
 import com.project.greatcloud13.ClimbingWith.repository.UserRepository;
 import com.project.greatcloud13.ClimbingWith.security.JwtTokenProvider;
+import com.project.greatcloud13.ClimbingWith.security.RefreshTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,6 +52,7 @@ public class AuthServiceTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private AuthenticationManager authenticationManager;
     @Mock private JwtTokenProvider jwtTokenProvider;
+    @Mock private RefreshTokenService refreshTokenService;
 
 //   ========================= Mock Objects =========================
     private User mockMember;
@@ -62,6 +66,7 @@ public class AuthServiceTest {
     String password = "password1";
     String encodedPassword = "encoded_password";
     String token = "jwt.token.value";
+    String refreshToken = "jwt.refresh.token.value";
 
     @BeforeEach
     void setUp() {
@@ -167,7 +172,8 @@ public class AuthServiceTest {
             given(mockAuth.getName()).willReturn(username);
             given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .willReturn(mockAuth);
-            given(jwtTokenProvider.generateToken(username)).willReturn(token);
+            given(jwtTokenProvider.generateAccessToken(username)).willReturn(token);
+            given(jwtTokenProvider.generateRefreshToken(username)).willReturn(refreshToken);
             given(userRepository.findByUsername(username)).willReturn(Optional.of(mockMember));
 
             // [When]
@@ -175,10 +181,12 @@ public class AuthServiceTest {
 
             // [Then]
             assertThat(response.getToken()).isEqualTo(token);
+            assertThat(response.getRefreshToken()).isEqualTo(refreshToken);
             assertThat(response.getUsername()).isEqualTo(username);
             assertThat(response.getRole()).isEqualTo(Role.MEMBER.toString());
             assertThat(response.getManagedGymId()).isNull();
             assertThat(response.getNickname()).isEqualTo("닉네임1");
+            verify(refreshTokenService, times(1)).save(username, refreshToken);
         }
 
         @Test
@@ -190,7 +198,8 @@ public class AuthServiceTest {
             given(mockAuth.getName()).willReturn("manager1");
             given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .willReturn(mockAuth);
-            given(jwtTokenProvider.generateToken("manager1")).willReturn(token);
+            given(jwtTokenProvider.generateAccessToken("manager1")).willReturn(token);
+            given(jwtTokenProvider.generateRefreshToken("manager1")).willReturn(refreshToken);
             given(userRepository.findByUsername("manager1")).willReturn(Optional.of(mockManager));
 
             // [When]
@@ -210,12 +219,95 @@ public class AuthServiceTest {
             given(mockAuth.getName()).willReturn(username);
             given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .willReturn(mockAuth);
-            given(jwtTokenProvider.generateToken(username)).willReturn(token);
+            given(jwtTokenProvider.generateAccessToken(username)).willReturn(token);
+            given(jwtTokenProvider.generateRefreshToken(username)).willReturn(refreshToken);
             given(userRepository.findByUsername(username)).willReturn(Optional.empty());
 
             // [When] & [Then]
             assertThatThrownBy(() -> authService.login(request))
                     .isInstanceOf(UserNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("reissue() 메서드 테스트")
+    class ReissueTest {
+
+        String newToken = "jwt.new.token.value";
+        String newRefreshToken = "jwt.new.refresh.token.value";
+
+        @Test
+        @DisplayName("정상 재발급 성공 - 새 토큰 쌍 반환 및 Redis 값 회전")
+        void reissue_success() {
+            // [Given]
+            given(jwtTokenProvider.validateToken(refreshToken)).willReturn(true);
+            given(jwtTokenProvider.getTokenType(refreshToken)).willReturn(JwtTokenProvider.TOKEN_TYPE_REFRESH);
+            given(jwtTokenProvider.getUsernameFormToken(refreshToken)).willReturn(username);
+            given(refreshTokenService.matches(username, refreshToken)).willReturn(true);
+            given(jwtTokenProvider.generateAccessToken(username)).willReturn(newToken);
+            given(jwtTokenProvider.generateRefreshToken(username)).willReturn(newRefreshToken);
+
+            // [When]
+            TokenResponse response = authService.reissue(refreshToken);
+
+            // [Then]
+            assertThat(response.getToken()).isEqualTo(newToken);
+            assertThat(response.getRefreshToken()).isEqualTo(newRefreshToken);
+            verify(refreshTokenService, times(1)).save(username, newRefreshToken);
+        }
+
+        @Test
+        @DisplayName("만료/위조된 토큰 → InvalidRefreshTokenException")
+        void reissue_invalidToken() {
+            // [Given]
+            given(jwtTokenProvider.validateToken(refreshToken)).willReturn(false);
+
+            // [When] & [Then]
+            assertThatThrownBy(() -> authService.reissue(refreshToken))
+                    .isInstanceOf(InvalidRefreshTokenException.class);
+            verify(refreshTokenService, never()).save(any(), any());
+        }
+
+        @Test
+        @DisplayName("Access Token으로 재발급 시도 → InvalidRefreshTokenException")
+        void reissue_wrongTokenType() {
+            // [Given]
+            given(jwtTokenProvider.validateToken(token)).willReturn(true);
+            given(jwtTokenProvider.getTokenType(token)).willReturn(JwtTokenProvider.TOKEN_TYPE_ACCESS);
+
+            // [When] & [Then]
+            assertThatThrownBy(() -> authService.reissue(token))
+                    .isInstanceOf(InvalidRefreshTokenException.class);
+        }
+
+        @Test
+        @DisplayName("Redis에 저장된 값과 불일치(재사용 의심) → InvalidRefreshTokenException, 세션 무효화")
+        void reissue_tokenMismatch() {
+            // [Given]
+            given(jwtTokenProvider.validateToken(refreshToken)).willReturn(true);
+            given(jwtTokenProvider.getTokenType(refreshToken)).willReturn(JwtTokenProvider.TOKEN_TYPE_REFRESH);
+            given(jwtTokenProvider.getUsernameFormToken(refreshToken)).willReturn(username);
+            given(refreshTokenService.matches(username, refreshToken)).willReturn(false);
+
+            // [When] & [Then]
+            assertThatThrownBy(() -> authService.reissue(refreshToken))
+                    .isInstanceOf(InvalidRefreshTokenException.class);
+            verify(refreshTokenService, times(1)).delete(username);
+        }
+    }
+
+    @Nested
+    @DisplayName("logout() 메서드 테스트")
+    class LogoutTest {
+
+        @Test
+        @DisplayName("로그아웃 시 Refresh Token 삭제")
+        void logout_success() {
+            // [When]
+            authService.logout(username);
+
+            // [Then]
+            verify(refreshTokenService, times(1)).delete(username);
         }
     }
 
@@ -236,6 +328,7 @@ public class AuthServiceTest {
 
             // [Then]
             assertThat(mockMember.isActive()).isFalse();
+            verify(refreshTokenService, times(1)).delete(username);
         }
 
         @Test

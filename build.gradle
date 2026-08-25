@@ -36,6 +36,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
+//	Refresh Token 저장용 (기존 vector Redis 인스턴스 재사용)
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 //	QueryDSL
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 
