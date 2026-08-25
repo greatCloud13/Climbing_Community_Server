@@ -64,7 +64,9 @@ public class SecurityConfig {
                 )
                 //URL 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // 인증 관련 API는 모두 허용
+                        // 로그아웃은 인증된 사용자만 호출 가능 (아래 permitAll 규칙보다 먼저 매칭되어야 함)
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
+                        .requestMatchers("/api/auth/**").permitAll() // 그 외 인증 관련 API는 모두 허용
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll() //Swagger api 허용
                         .requestMatchers("/error", "/error/**").permitAll()
                         // 클라이밍장/섹터/레벨/문제/게시글/리뷰 열람(GET)은 비로그인 사용자도 허용

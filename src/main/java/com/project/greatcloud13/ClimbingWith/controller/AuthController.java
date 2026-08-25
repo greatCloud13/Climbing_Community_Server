@@ -3,11 +3,14 @@ package com.project.greatcloud13.ClimbingWith.controller;
 import com.project.greatcloud13.ClimbingWith.dto.AuthResponse;
 import com.project.greatcloud13.ClimbingWith.dto.LoginRequest;
 import com.project.greatcloud13.ClimbingWith.dto.LoginResponse;
+import com.project.greatcloud13.ClimbingWith.dto.ReissueRequest;
 import com.project.greatcloud13.ClimbingWith.dto.SignUpRequest;
+import com.project.greatcloud13.ClimbingWith.dto.TokenResponse;
 import com.project.greatcloud13.ClimbingWith.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +42,20 @@ public class AuthController {
         authService.withdraw(request);
 
         return ResponseEntity.ok(new AuthResponse("탈퇴가 완료되었습니다."));
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenResponse> reissue(@Valid @RequestBody ReissueRequest request){
+        TokenResponse result = authService.reissue(request.getRefreshToken());
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<AuthResponse> logout(Authentication authentication){
+        authService.logout(authentication.getName());
+
+        return ResponseEntity.ok(new AuthResponse("로그아웃되었습니다."));
     }
 
 }

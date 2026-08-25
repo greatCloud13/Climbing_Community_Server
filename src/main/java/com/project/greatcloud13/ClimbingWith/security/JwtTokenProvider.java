@@ -9,36 +9,51 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Component
 public class JwtTokenProvider {
 
+    public static final String TOKEN_TYPE_ACCESS = "access";
+    public static final String TOKEN_TYPE_REFRESH = "refresh";
+
+    private static final String CLAIM_TOKEN_TYPE = "type";
+
     private final SecretKey secretKey;
-    private final long expirationTime;
+    private final long accessExpirationTime;
+    private final long refreshExpirationTime;
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration}") long expirationTime){
+            @Value("${jwt.access-expiration}") long accessExpirationTime,
+            @Value("${jwt.refresh-expiration}") long refreshExpirationTime){
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
-        this.expirationTime = expirationTime;
+        this.accessExpirationTime = accessExpirationTime;
+        this.refreshExpirationTime = refreshExpirationTime;
     }
 
     /**
-     * JWT 토큰 생성
+     * Access Token 생성
      */
-    public String generateToken(String username){
-        log.info("JWT 토큰 생성 사용자: {}", username);
+    public String generateAccessToken(String username){
+        return generateToken(username, TOKEN_TYPE_ACCESS, accessExpirationTime);
+    }
+
+    /**
+     * Refresh Token 생성
+     */
+    public String generateRefreshToken(String username){
+        return generateToken(username, TOKEN_TYPE_REFRESH, refreshExpirationTime);
+    }
+
+    private String generateToken(String username, String tokenType, long expirationTime){
+        log.info("JWT {} 토큰 생성 사용자: {}", tokenType, username);
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime()+expirationTime);
-        Map<String, Objects> claims = new HashMap<>();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
 
         return Jwts.builder()
                 .subject(username)
-                .claims(claims)
+                .claim(CLAIM_TOKEN_TYPE, tokenType)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
@@ -49,13 +64,14 @@ public class JwtTokenProvider {
      * JWT 토큰에서 사용자명 추출
      */
     public String getUsernameFormToken(String token){
-        Claims claims = Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return parseClaims(token).getSubject();
+    }
 
-        return claims.getSubject();
+    /**
+     * JWT 토큰에서 토큰 종류(access/refresh) 추출
+     */
+    public String getTokenType(String token){
+        return parseClaims(token).get(CLAIM_TOKEN_TYPE, String.class);
     }
 
     /**
@@ -63,14 +79,19 @@ public class JwtTokenProvider {
      */
     public boolean validateToken(String token){
         try{
-            Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token);
+            parseClaims(token);
             return true;
         }catch (Exception e){
             log.error("JWT 토큰 검증 실패: {}", e.getMessage());
             return false;
         }
+    }
+
+    private Claims parseClaims(String token){
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
