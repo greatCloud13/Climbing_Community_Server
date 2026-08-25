@@ -1,5 +1,10 @@
 package com.project.greatcloud13.ClimbingWith.config;
 
+// EC2 배포 환경에 GPU가 없어 임베딩 기능을 임시 비활성화함에 따라,
+// 임베딩 파이프라인 전용이었던 RabbitMQ 설정도 함께 비활성화.
+// (RabbitMQ 브로커가 없어도 앱이 기동되도록 하기 위함)
+// 재활성화 시 아래 주석을 해제하면 됨.
+/*
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -85,3 +90,4 @@ public class RabbitMQConfig {
                 .build();
     }
 }
+*/

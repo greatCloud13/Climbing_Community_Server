@@ -1,5 +1,9 @@
 package com.project.greatcloud13.ClimbingWith.batch;
 
+// EC2 배포 환경에 GPU가 없어 임베딩 기능을 임시 비활성화함에 따라,
+// 임베딩 생성에 의존하는 기존 게시글 마이그레이션 기능도 함께 비활성화.
+// 재활성화 시 아래 주석을 해제하면 됨.
+/*
 import com.project.greatcloud13.ClimbingWith.dto.PostMessage;
 import com.project.greatcloud13.ClimbingWith.entity.Post;
 import com.project.greatcloud13.ClimbingWith.entity.User;
@@ -50,3 +54,4 @@ public class DataMigrationService {
         }
     }
 }
+*/

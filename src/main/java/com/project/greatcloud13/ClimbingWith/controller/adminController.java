@@ -1,5 +1,9 @@
 package com.project.greatcloud13.ClimbingWith.controller;
 
+// EC2 배포 환경에 GPU가 없어 임베딩 기능을 임시 비활성화함에 따라,
+// 임베딩 마이그레이션을 트리거하는 이 컨트롤러도 함께 비활성화.
+// 재활성화 시 아래 주석을 해제하면 됨.
+/*
 import com.project.greatcloud13.ClimbingWith.batch.DataMigrationService;
 import com.project.greatcloud13.ClimbingWith.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -26,3 +30,4 @@ public class adminController {
     }
 
 }
+*/
